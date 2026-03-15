@@ -1,953 +1,127 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>산지니 원정대 - 캠퍼스 미션 어드벤처</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <title>산지니 원정대</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --page-bg: #060912;
-      --page-surface: rgba(15, 20, 31, 0.74);
-      --page-border: rgba(255,255,255,0.08);
-      --page-text: #f5f7ff;
-      --page-muted: rgba(245,247,255,0.64);
-      --shadow: 0 24px 70px rgba(3,7,18,0.3);
-      --navy: #183a66;
-      --blue: #2b67b3;
-      --yellow: #ffd65a;
-      --cream: #fff8e7;
-      --red: #ff5d5d;
-    }
-    [data-theme="light"] {
-      --page-bg: #eef4ff;
-      --page-surface: rgba(255,255,255,0.86);
-      --page-border: rgba(0,0,0,0.08);
-      --page-text: #101728;
-      --page-muted: rgba(16,23,40,0.62);
-      --shadow: 0 24px 70px rgba(62,88,124,0.18);
-    }
-    html, body { min-height: 100%; }
-    body {
-      font-family: "Noto Sans KR", sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(101,149,255,0.18), transparent 35%),
-        linear-gradient(180deg, var(--page-bg), color-mix(in srgb, var(--page-bg) 90%, #10162a));
-      color: var(--page-text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    #starsCanvas {
-      position: fixed; inset: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 0; opacity: 0.72;
-    }
-    [data-theme="light"] #starsCanvas { opacity: 0.2; }
-    body > *:not(#starsCanvas) { position: relative; z-index: 1; }
-    .back-link {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 22px 24px 0; color: var(--page-muted); text-decoration: none;
-      font-size: 14px; font-weight: 700;
-    }
-    .back-link:hover { color: var(--page-text); }
-    .page {
-      max-width: 1120px; margin: 0 auto; padding: 12px 24px 42px;
-      display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 432px); gap: 28px;
-      align-items: start;
-    }
-    .copy {
-      background: var(--page-surface); border: 1px solid var(--page-border);
-      border-radius: 28px; padding: 28px; backdrop-filter: blur(18px); box-shadow: var(--shadow);
-    }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      color: var(--page-muted); font-size: 12px; font-weight: 800;
-      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px;
-    }
-    .eyebrow::before { content: ""; width: 28px; height: 1px; background: currentColor; }
-    .copy h1 {
-      font-family: "Space Grotesk", "Noto Sans KR", sans-serif;
-      font-size: clamp(2.3rem, 5vw, 4.4rem); line-height: 0.96; letter-spacing: -0.04em;
-      margin-bottom: 16px;
-    }
-    .copy p { color: var(--page-muted); font-size: 15px; line-height: 1.9; }
-    .copy-list { display: grid; gap: 12px; margin-top: 22px; }
-    .copy-item {
-      padding: 16px; border-radius: 18px;
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-    }
-    [data-theme="light"] .copy-item {
-      background: rgba(11,18,32,0.03); border-color: rgba(11,18,32,0.05);
-    }
-    .copy-item strong { display: block; margin-bottom: 4px; font-size: 14px; }
-    .copy-item span { color: var(--page-muted); font-size: 13px; line-height: 1.7; }
-    .theme-toggle {
-      margin-top: 22px; border: 1px solid var(--page-border); border-radius: 999px;
-      background: transparent; color: var(--page-text); cursor: pointer;
-      padding: 10px 16px; font-family: inherit; font-size: 13px; font-weight: 800;
-    }
-    .frame {
-      width: 100%; border-radius: 36px; padding: 10px;
-      background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.24);
-      backdrop-filter: blur(16px); box-shadow: var(--shadow);
-    }
-    .frame-inner {
-      position: relative; min-height: 780px; overflow: hidden; border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.62);
-      background: linear-gradient(180deg, #68bbff, #a6e1ff 36%, #f0fbff 100%);
-    }
-    .frame-inner::before {
-      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.28) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-    .shell-top {
-      position: relative; z-index: 2; margin: 14px 14px 0; padding: 14px 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      border-radius: 20px; background: rgba(255,255,255,0.24); color: #fff;
-      backdrop-filter: blur(12px);
-    }
-    .shell-top small {
-      display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.78); margin-bottom: 4px;
-    }
-    .shell-top strong { font-size: 14px; font-weight: 900; }
-    .streak-pill {
-      padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.84);
-      color: var(--blue); font-size: 12px; font-weight: 900;
-    }
-    #app { position: relative; z-index: 2; padding: 18px 14px 16px; min-height: 712px; }
-    .scene { display: flex; flex-direction: column; gap: 16px; min-height: 100%; }
-    .card {
-      border-radius: 28px; background: rgba(255,255,255,0.96);
-      border: 1px solid rgba(255,255,255,0.72); box-shadow: 0 16px 30px rgba(24,58,102,0.16);
-    }
-    .pill {
-      display: inline-flex; padding: 8px 14px; border-radius: 999px;
-      background: rgba(255,255,255,0.82); color: var(--blue); font-size: 12px; font-weight: 900;
-      box-shadow: 0 14px 24px rgba(24,58,102,0.12);
-    }
-    .info-card { padding: 18px; }
-    .info-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .info-head h2 { color: var(--navy); font-size: 22px; line-height: 1.1; margin-top: 4px; }
-    .info-head p { color: rgba(43,103,179,0.82); font-size: 13px; line-height: 1.7; margin-top: 10px; font-weight: 700; }
-    .progress {
-      min-width: 88px; padding: 10px 12px; border-radius: 18px; text-align: right;
-      background: #ebf7ff; color: var(--blue); font-size: 12px; font-weight: 900;
-    }
-    .progress strong { display: block; color: var(--navy); font-size: 18px; margin-top: 4px; }
-    .poster-screen {
-      position: relative; min-height: 684px; overflow: hidden; border-radius: 30px;
-      border: 1px solid rgba(255,255,255,0.72); cursor: pointer; isolation: isolate;
-      background: linear-gradient(180deg, #8dd4ff, #d4f2ff 40%, #f7fdff);
-      box-shadow: 0 22px 36px rgba(24,58,102,0.18);
-    }
-    .poster-screen:focus-visible {
-      outline: 3px solid rgba(255,255,255,0.92);
-      outline-offset: 3px;
-    }
-    .poster-screen img {
-      width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;
-    }
-    .poster-screen::before {
-      content: ""; position: absolute; inset: 0; pointer-events: none;
-      background:
-        radial-gradient(circle at 20% 8%, rgba(255,255,255,0.34), transparent 25%),
-        linear-gradient(180deg, rgba(5,19,50,0.04), rgba(5,19,50,0.16));
-      z-index: 1;
-    }
-    .poster-overlay {
-      position: absolute; inset: 0; z-index: 2; padding: 18px;
-      display: flex; flex-direction: column; justify-content: flex-start; gap: 12px;
-      pointer-events: none;
-    }
-    .poster-top {
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
-    }
-    .poster-tag {
-      display: inline-flex; align-items: center; padding: 8px 12px; border-radius: 999px;
-      background: rgba(255,255,255,0.84); color: var(--blue); font-size: 12px; font-weight: 900;
-      box-shadow: 0 14px 24px rgba(24,58,102,0.12);
-    }
-    .poster-hint {
-      align-self: flex-start; max-width: 240px; padding: 16px 18px; border-radius: 24px;
-      background: rgba(13,25,48,0.56); border: 1px solid rgba(255,255,255,0.18);
-      color: rgba(255,255,255,0.94); backdrop-filter: blur(14px);
-      box-shadow: 0 20px 30px rgba(9,18,35,0.22);
-    }
-    .poster-hint strong { display: block; font-size: 16px; margin-bottom: 6px; }
-    .poster-hint span { display: block; font-size: 12px; line-height: 1.7; color: rgba(255,255,255,0.78); }
-    .poster-hotspots {
-      position: absolute; inset: 0; z-index: 3;
-    }
-    .poster-hotspot {
-      position: absolute; transform: translate(-50%, -50%);
-      display: inline-flex; align-items: center; gap: 8px; min-height: 42px;
-      padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.46);
-      background: rgba(10,28,56,0.42); color: #fff; font-size: 13px; font-weight: 900;
-      font-family: inherit; cursor: pointer; backdrop-filter: blur(10px);
-      box-shadow: 0 12px 20px rgba(24,58,102,0.18);
-      transition: transform 0.18s ease, background 0.18s ease;
-    }
-    .poster-hotspot:hover { transform: translate(-50%, calc(-50% - 2px)); background: rgba(10,28,56,0.55); }
-    .poster-hotspot::before {
-      content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow);
-      box-shadow: 0 0 0 5px rgba(255,214,90,0.16);
-    }
-    .map-card { padding: 12px; }
-    .map-canvas {
-      position: relative; aspect-ratio: 9 / 14; overflow: hidden; border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.7);
-      background: linear-gradient(180deg, #d7f0ff, #f7fdff);
-    }
-    .map-canvas img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .map-canvas::after {
-      content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(24,58,102,0.1));
-    }
-    .marker {
-      position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column;
-      align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; z-index: 2;
-    }
-    .marker-core {
-      position: relative; width: 50px; height: 50px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--red); border: 3px solid #fff; color: #fff; font-size: 28px; font-weight: 900;
-      box-shadow: 0 12px 20px rgba(255,93,93,0.36);
-    }
-    .marker-core::before {
-      content: ""; position: absolute; inset: -2px; border-radius: inherit; z-index: -1;
-      background: rgba(255,93,93,0.45); animation: markerPulse 1.8s ease-out infinite;
-    }
-    .marker-label {
-      padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.95);
-      color: var(--navy); font-size: 12px; font-weight: 900; white-space: nowrap;
-      box-shadow: 0 10px 16px rgba(24,58,102,0.12);
-    }
-    .marker-done {
-      position: absolute; right: -2px; top: -2px; width: 18px; height: 18px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; background: var(--yellow);
-      color: var(--navy); font-size: 11px; font-weight: 900; border: 1px solid #fff;
-    }
-    .marker.disabled { pointer-events: none; opacity: 0.4; }
-    .map-dim {
-      position: absolute; inset: 0; z-index: 3;
-      background: rgba(7,17,37,0.3); backdrop-filter: blur(3px);
-    }
-    .tutorial-layer {
-      position: absolute; inset: 0; z-index: 4; padding: 16px 14px;
-      display: flex; flex-direction: column; justify-content: flex-end;
-    }
-    .tutorial-guide {
-      position: relative; min-height: 330px;
-    }
-    .tutorial-guide::before {
-      content: ""; position: absolute; right: 20px; bottom: 24px; width: 170px; height: 170px;
-      border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.4), transparent 70%);
-      filter: blur(14px);
-    }
-    .guide-bubble {
-      position: absolute; left: 0; top: 6px; z-index: 2; max-width: 226px;
-      padding: 16px 18px; border-radius: 24px 24px 24px 10px; background: rgba(255,255,255,0.98);
-      color: var(--navy); box-shadow: 0 18px 30px rgba(24,58,102,0.16);
-    }
-    .guide-bubble::after {
-      content: ""; position: absolute; left: 24px; bottom: -10px; width: 22px; height: 22px;
-      border-radius: 0 0 6px 0; transform: rotate(24deg); background: inherit;
-    }
-    .guide-label {
-      display: inline-flex; margin-bottom: 8px; padding: 6px 10px; border-radius: 999px;
-      background: #eaf6ff; color: var(--blue); font-size: 11px; letter-spacing: 0.08em; font-weight: 900;
-    }
-    .guide-text { font-size: 16px; line-height: 1.55; font-weight: 900; white-space: pre-line; }
-    .guide-figure {
-      position: absolute; right: -4px; bottom: 0; z-index: 1; width: min(100%, 220px);
-      filter: drop-shadow(0 18px 30px rgba(24,58,102,0.18));
-      animation: bob 4.2s ease-in-out infinite;
-    }
-    .guide-figure img { width: 100%; height: auto; display: block; }
-    .guide-stage.complete {
-      position: relative; min-height: 356px;
-    }
-    .guide-stage.complete::before {
-      content: ""; position: absolute; inset: 40px 14px auto; height: 220px;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.35), transparent 70%);
-      filter: blur(18px);
-    }
-    .guide-stage.complete .guide-bubble {
-      left: 10px; top: 0; max-width: 236px;
-      background: linear-gradient(180deg, #fff7df, #fff1b8);
-    }
-    .guide-stage.complete .guide-figure {
-      right: 50%; bottom: 0; width: min(100%, 282px);
-      transform: translateX(50%);
-      animation-duration: 3.1s;
-    }
-    .sparkle { position: absolute; color: #fff7be; font-size: 20px; animation: sparkle 2.1s ease-in-out infinite; }
-    .sparkle.one { right: 30px; top: 78px; z-index: 2; }
-    .sparkle.two { right: 58px; bottom: 114px; z-index: 2; animation-delay: -0.7s; }
-    .tutorial-actions {
-      position: absolute; left: 0; bottom: 12px; z-index: 3;
-      display: grid; gap: 10px; width: min(100%, 178px);
-    }
-    .dialogue-chip {
-      display: inline-flex; justify-content: center; padding: 8px 12px; border-radius: 999px;
-      background: rgba(255,255,255,0.88); color: var(--blue); font-size: 12px; font-weight: 900;
-      box-shadow: 0 12px 20px rgba(24,58,102,0.12);
-    }
-    .btn {
-      border: none; border-radius: 18px; min-height: 52px; padding: 14px 18px;
-      font-family: inherit; font-size: 15px; font-weight: 900; cursor: pointer;
-      transition: transform 0.18s ease, filter 0.18s ease;
-    }
-    .btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
-    .btn-primary { background: var(--yellow); color: var(--navy); box-shadow: 0 14px 24px rgba(255,214,90,0.34); }
-    .btn-secondary { background: #fff; color: var(--navy); border: 1px solid rgba(24,58,102,0.08); }
-    .tip-card {
-      padding: 16px 18px; border-radius: 26px; background: var(--navy); color: rgba(255,255,255,0.9);
-      box-shadow: 0 16px 30px rgba(24,58,102,0.16);
-    }
-    .tip-card strong { display: block; color: #a6d8ff; font-size: 12px; letter-spacing: 0.16em; margin-bottom: 8px; }
-    .tip-card p { font-size: 13px; line-height: 1.7; font-weight: 700; }
-    .quest-panel { position: absolute; inset: auto 0 0; z-index: 5; padding: 16px 14px 10px; }
-    .quest-card {
-      padding: 20px; border-radius: 30px 30px 24px 24px; background: rgba(255,255,255,0.98);
-      border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 -16px 30px rgba(24,58,102,0.18);
-    }
-    .quest-handle { width: 58px; height: 6px; margin: 0 auto 16px; border-radius: 999px; background: #d5edf9; }
-    .quest-badge {
-      display: inline-flex; padding: 7px 12px; border-radius: 999px;
-      background: #ecf7ff; color: var(--blue); font-size: 12px; font-weight: 900;
-    }
-    .quest-card h3 { color: var(--navy); font-size: 26px; line-height: 1.15; margin-top: 14px; }
-    .quest-card p { color: rgba(43,103,179,0.82); font-size: 14px; line-height: 1.75; margin-top: 12px; font-weight: 700; }
-    .quest-location {
-      margin-top: 16px; padding: 14px 16px; border-radius: 18px;
-      background: var(--cream); color: var(--navy); font-size: 14px; font-weight: 900;
-    }
-    .buttons { display: grid; gap: 10px; margin-top: 18px; }
-    .complete { position: relative; min-height: 676px; }
-    .confetti-zone { position: absolute; inset: 0 0 auto; height: 164px; overflow: hidden; pointer-events: none; }
-    .confetti { position: absolute; top: -6px; width: 10px; height: 18px; border-radius: 4px; animation: confetti 2.8s ease-in-out infinite; }
-    .complete-card { padding: 18px; text-align: center; }
-    .complete-card strong { display: block; color: rgba(43,103,179,0.72); font-size: 12px; letter-spacing: 0.16em; margin-bottom: 8px; }
-    .complete-card h4 { color: var(--navy); font-size: 22px; margin-bottom: 8px; }
-    .complete-card p { color: rgba(43,103,179,0.82); font-size: 14px; line-height: 1.7; font-weight: 700; }
-    .streak-card {
-      padding: 20px; border-radius: 28px; background: linear-gradient(180deg, #fff7df, #fff1b8);
-      border: 1px solid rgba(255,255,255,0.72); box-shadow: 0 16px 30px rgba(24,58,102,0.16);
-    }
-    .streak-chip {
-      display: inline-flex; padding: 8px 12px; border-radius: 999px;
-      background: rgba(255,255,255,0.78); color: var(--navy); font-size: 12px; font-weight: 900;
-    }
-    .streak-card h4 { color: var(--navy); font-size: 22px; margin-top: 16px; }
-    .streak-card p { color: rgba(43,103,179,0.84); font-size: 14px; line-height: 1.7; margin-top: 8px; font-weight: 700; }
-    .streak-value {
-      margin-top: 12px; padding: 12px 14px; border-radius: 18px;
-      background: rgba(255,255,255,0.66); color: var(--navy); font-size: 14px; font-weight: 900;
-    }
-    .toast {
-      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-      z-index: 20; padding: 12px 16px; border-radius: 999px; background: rgba(13,25,48,0.88);
-      color: #fff; font-size: 13px; font-weight: 900; white-space: nowrap;
-      box-shadow: 0 16px 28px rgba(9,18,35,0.24); animation: toastIn 0.22s ease;
-    }
-    .cursor { color: #ff6b63; animation: blink 0.9s step-end infinite; }
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    @keyframes sparkle {
-      0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
-      50% { transform: scale(1.2) rotate(12deg); opacity: 1; }
-    }
-    @keyframes markerPulse {
-      0% { transform: scale(1); opacity: 0.9; }
-      100% { transform: scale(1.75); opacity: 0; }
-    }
-    @keyframes confetti {
-      0% { transform: translateY(-30px) rotate(0deg); opacity: 0; }
-      14% { opacity: 1; }
-      100% { transform: translateY(190px) rotate(220deg); opacity: 0; }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    @keyframes toastIn {
-      from { transform: translate(-50%, -8px); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
-    }
-    @media (max-width: 960px) {
-      .page { grid-template-columns: 1fr; padding: 12px 16px 28px; }
-    }
-    @media (max-width: 480px) {
-      .back-link { padding: 18px 16px 0; }
-      .page { padding: 10px 12px 24px; }
-      .copy { padding: 20px; }
-      .frame { border-radius: 28px; padding: 8px; }
-      .frame-inner { min-height: 744px; border-radius: 24px; }
-      .shell-top { margin: 10px 10px 0; }
-      #app { padding: 14px 10px 12px; min-height: 690px; }
-      .poster-screen { min-height: 646px; }
-      .poster-hotspot { min-height: 38px; padding: 0 12px; font-size: 12px; }
-      .poster-hint { max-width: 220px; padding: 14px 16px; }
-      .guide-bubble { left: 4px; top: 8px; max-width: 206px; padding: 14px 16px; }
-      .guide-text { font-size: 15px; }
-      .guide-figure { width: min(100%, 194px); }
-      .tutorial-actions { width: min(100%, 164px); }
-      .guide-stage.complete { min-height: 336px; }
-      .guide-stage.complete .guide-figure { width: min(100%, 258px); }
-    }
+    *{box-sizing:border-box;margin:0;padding:0}html,body{min-height:100%}body{font-family:"Noto Sans KR",sans-serif;color:#f7fbff;background:radial-gradient(circle at top left,rgba(139,203,255,.28),transparent 28%),radial-gradient(circle at top right,rgba(255,215,95,.18),transparent 24%),linear-gradient(180deg,#081327 0%,#0d2142 38%,#132f57 100%);overflow-x:hidden}
+    .back-link{display:inline-flex;align-items:center;gap:8px;padding:22px 24px 0;color:rgba(247,251,255,.76);text-decoration:none;font-size:14px;font-weight:800}.back-link:hover{color:#fff}
+    .page{max-width:1180px;margin:0 auto;padding:14px 24px 42px;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,430px);gap:28px;align-items:center}
+    .copy{padding:30px;border-radius:32px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);box-shadow:0 34px 90px rgba(6,13,28,.3);backdrop-filter:blur(20px)}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}.eyebrow::before{content:"";width:30px;height:1px;background:currentColor}
+    .copy h1{margin-top:18px;font-family:"Do Hyeon",sans-serif;font-size:clamp(3rem,5vw,4.8rem);line-height:.92;letter-spacing:-.04em}
+    .copy p{margin-top:18px;color:rgba(247,251,255,.78);font-size:15px;line-height:1.9;font-weight:700}
+    .copy-grid{display:grid;gap:12px;margin-top:22px}.copy-card{padding:18px;border-radius:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}.copy-card strong{display:block;font-size:14px;margin-bottom:6px}.copy-card span{display:block;color:rgba(247,251,255,.74);font-size:13px;line-height:1.75;font-weight:700}
+    .copy-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}.metric{padding:16px 14px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);text-align:center}.metric small{display:block;font-size:11px;letter-spacing:.14em;color:rgba(247,251,255,.72);margin-bottom:8px;font-weight:900}.metric strong{font-size:20px;font-weight:900}
+    .frame{width:min(100%,25.2rem,calc((100vh - 2rem) * 390 / 844));justify-self:center;padding:10px;border-radius:38px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);box-shadow:0 34px 90px rgba(6,13,28,.3);backdrop-filter:blur(18px)}
+    .frame-inner{position:relative;aspect-ratio:390/844;border-radius:30px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,rgba(88,191,255,.98),rgba(178,231,255,.98) 36%,rgba(245,252,255,.99) 100%)}.frame-inner::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.34;background-image:linear-gradient(rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px);background-size:20px 20px}
+    .shell-top{position:relative;z-index:2;margin:14px 14px 0;padding:14px 16px;border-radius:22px;background:rgba(255,255,255,.22);display:flex;justify-content:space-between;gap:12px;align-items:center;backdrop-filter:blur(12px)}.shell-top small{display:block;font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.78);font-weight:900;margin-bottom:4px}.shell-top strong{font-size:14px;font-weight:900}.meta-group{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.meta-chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.84);color:#2f6fbc;font-size:12px;font-weight:900}
+    #app{position:relative;z-index:2;height:calc(100% - 88px);padding:12px 14px 14px}.layout{height:100%;display:flex;flex-direction:column;gap:12px}.screen{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:28px;border:1px solid rgba(255,255,255,.64);background:rgba(255,255,255,.14)}.scroll{height:100%;overflow-y:auto;padding:12px 12px 18px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}.scroll::-webkit-scrollbar{display:none}
+    .card{border-radius:28px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}.panel{padding:18px}.tag{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:#ebf7ff;color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.12em}.title{margin-top:12px;color:#183a66;font-size:22px;line-height:1.1;font-weight:900}.copy-text{margin-top:10px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.75;font-weight:700}
+    .hero{position:relative;min-height:258px;border-radius:30px;overflow:hidden;box-shadow:0 20px 40px rgba(24,58,102,.16)}.hero img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,22,48,.08),rgba(8,22,48,.18) 38%,rgba(8,22,48,.72))}.hero-body{position:absolute;inset:0;z-index:1;padding:18px;display:flex;flex-direction:column;justify-content:space-between}.hero-label{display:inline-flex;width:fit-content;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.14em}.hero-title{margin-top:6px;font-family:"Do Hyeon",sans-serif;font-size:38px;line-height:.96;letter-spacing:-.04em}.hero-copy{margin-top:10px;max-width:240px;color:rgba(255,255,255,.9);font-size:14px;line-height:1.7;font-weight:700}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mini-card{padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}.mini-card small{display:block;color:rgba(43,103,179,.7);font-size:11px;font-weight:900;letter-spacing:.16em;margin-bottom:8px}.mini-card strong{color:#183a66;font-size:26px;font-weight:900}.mini-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.7;font-weight:700}
+    .progress-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.pill-stat{padding:10px 12px;border-radius:20px;background:#ebf7ff;color:#2f6fbc;font-size:12px;font-weight:900;min-width:88px;text-align:right}.pill-stat strong{display:block;color:#183a66;font-size:18px;margin-top:4px}.xp-track{margin-top:16px;height:12px;border-radius:999px;background:#dbefff;overflow:hidden}.xp-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#4bb6ff,#ffd75f);transition:width .3s ease}
+    .feature{padding:18px;background:linear-gradient(180deg,#173862,#1f4a7e);color:#fff}.feature small{display:block;color:#a9dbff;font-size:11px;letter-spacing:.16em;font-weight:900;margin-bottom:10px}.feature h3{font-size:22px;line-height:1.15;font-weight:900}.feature p{margin-top:10px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.86);font-weight:700}.feature .loc{display:inline-flex;margin-top:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:900}
+    .map-stage{position:relative;aspect-ratio:9/14;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,#d6efff,#f6fdff)}.map-stage img{width:100%;height:100%;display:block;object-fit:cover}.map-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(24,58,102,.08))}
+    .marker{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;border:none;background:transparent;cursor:pointer;z-index:2}.marker-core{position:relative;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ff5e5e;border:3px solid #fff;color:#fff;font-size:28px;font-weight:900;box-shadow:0 12px 24px rgba(255,94,94,.36)}.marker-core::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:rgba(255,94,94,.44);z-index:-1;animation:markerPulse 1.8s ease-out infinite}.marker-label{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.95);color:#183a66;font-size:12px;font-weight:900;white-space:nowrap;box-shadow:0 10px 16px rgba(24,58,102,.12)}.marker.is-complete .marker-core{background:#2ab67a;box-shadow:0 12px 24px rgba(42,182,122,.26)}.marker.is-complete .marker-core::before{animation:none;opacity:0}.marker.is-disabled{pointer-events:none;opacity:.45}.check{position:absolute;right:-2px;top:-2px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffd75f;color:#183a66;font-size:11px;font-weight:900;border:1px solid #fff}
+    .timeline,.memory-grid{display:grid;gap:12px}.memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline-item,.memory-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}.timeline-item small{display:block;color:rgba(43,103,179,.72);font-size:11px;font-weight:900;margin-bottom:6px}.timeline-item strong{display:block;color:#183a66;font-size:16px;font-weight:900}.timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.72;font-weight:700}.memory-card::before{content:"";position:absolute;inset:0 0 auto;height:86px;background:linear-gradient(180deg,rgba(78,182,255,.2),transparent)}.memory-card>*{position:relative}.memory-card.is-locked{opacity:.62;background:rgba(255,255,255,.72)}.memory-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.memory-badge,.memory-state{padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900}.memory-badge{background:#ebf7ff;color:#2f6fbc}.memory-state{background:rgba(255,255,255,.86);color:#2f6fbc}.memory-state.done{background:rgba(255,215,95,.9);color:#183a66}.memory-card h3{margin-top:14px;color:#183a66;font-size:16px;line-height:1.3;font-weight:900}
+    .tabbar{padding:8px;border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 40px rgba(24,58,102,.16);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.tab{border:none;border-radius:18px;padding:10px 8px;background:transparent;color:rgba(43,103,179,.78);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .18s ease,color .18s ease,transform .18s ease}.tab:hover{transform:translateY(-1px)}.tab:disabled{opacity:.55;cursor:not-allowed;transform:none}.tab-chip{min-width:50px;padding:6px 8px;border-radius:999px;background:#edf8ff;color:#2f6fbc;font-size:10px;font-weight:900;letter-spacing:.1em}.tab.active{background:#2f6fbc;color:#fff;box-shadow:0 12px 24px rgba(43,103,179,.22)}.tab.active .tab-chip{background:rgba(255,255,255,.2);color:#fff}.tab-label{font-size:13px;font-weight:900}
+    .btn{border:none;border-radius:18px;min-height:52px;padding:14px 18px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;transition:transform .18s ease,filter .18s ease}.btn:hover{transform:translateY(-1px);filter:brightness(1.02)}.btn.primary{background:#ffd75f;color:#183a66;box-shadow:0 14px 24px rgba(255,215,95,.34)}.btn.secondary{background:#fff;color:#183a66;border:1px solid rgba(24,58,102,.1)}
+    .overlay{position:absolute;inset:0;z-index:10}.dim{position:absolute;inset:0;background:rgba(8,20,42,.34);backdrop-filter:blur(3px)}.tutorial,.quest-sheet-wrap{display:flex;padding:16px}.tutorial{flex-direction:column;justify-content:flex-end}.quest-sheet-wrap{align-items:flex-end;padding:16px 14px 12px}.celebration{padding:18px 16px;overflow-y:auto}
+    .character-stage{position:relative;min-height:320px}.character-stage::before{content:"";position:absolute;right:18px;bottom:30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.38),transparent 70%);filter:blur(14px)}.bubble{position:absolute;left:0;top:8px;z-index:2;width:min(100%,236px);padding:16px 18px;border-radius:26px 26px 26px 12px;background:rgba(255,255,255,.98);box-shadow:0 18px 34px rgba(24,58,102,.18)}.bubble.complete{background:linear-gradient(180deg,#fff7df,#fff0b7)}.bubble::after{content:"";position:absolute;left:26px;bottom:-10px;width:22px;height:22px;transform:rotate(24deg);border-radius:0 0 8px 0;background:inherit}.bubble small{display:inline-flex;margin-bottom:8px;padding:6px 10px;border-radius:999px;background:#ebf7ff;color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.08em}.bubble p{color:#183a66;font-size:17px;line-height:1.55;font-weight:900;white-space:pre-line}.cursor{color:#ff6b63;animation:blink .9s step-end infinite}.character{position:absolute;right:-4px;bottom:0;z-index:1;width:min(100%,220px);animation:bob 4.2s ease-in-out infinite;filter:drop-shadow(0 18px 30px rgba(24,58,102,.18))}.character.complete{right:50%;width:min(100%,282px);transform:translateX(50%);animation-duration:3.1s}.character img{width:100%;display:block}.spark{position:absolute;color:#fff6b7;font-size:20px;animation:sparkle 2.1s ease-in-out infinite;z-index:2}.spark.one{right:30px;top:74px}.spark.two{right:58px;bottom:114px;animation-delay:-.7s}.dialogue-actions{position:absolute;left:0;bottom:10px;z-index:3;display:grid;gap:10px;width:min(100%,184px)}.dialogue-chip{display:inline-flex;justify-content:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:12px;font-weight:900;box-shadow:0 12px 20px rgba(24,58,102,.12)}
+    .sheet{width:100%;padding:20px;border-radius:30px 30px 24px 24px;background:rgba(255,255,255,.98);border:1px solid rgba(255,255,255,.8);box-shadow:0 -16px 30px rgba(24,58,102,.18)}.sheet-handle{width:58px;height:6px;margin:0 auto 16px;border-radius:999px;background:#d5edf9}.sheet h3{margin-top:14px;color:#183a66;font-size:26px;line-height:1.15;font-weight:900}.sheet p{margin-top:12px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.78;font-weight:700}.sheet-meta{margin-top:16px;padding:14px 16px;border-radius:18px;background:#fff7df;color:#183a66;font-size:14px;line-height:1.7;font-weight:900}.stack{display:grid;gap:10px;margin-top:18px}
+    .celebration-stack{position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:14px}.confetti-zone{position:absolute;inset:0 0 auto;height:170px;overflow:hidden;pointer-events:none}.confetti{position:absolute;top:-8px;width:10px;height:18px;border-radius:4px;animation:confetti 2.8s ease-in-out infinite}.center-card{text-align:center;padding:18px}.center-card strong{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,215,95,.84);color:#183a66;font-size:11px;font-weight:900;letter-spacing:.14em}.center-card h4{margin-top:14px;color:#183a66;font-size:24px;line-height:1.2;font-weight:900}.center-card p{margin-top:10px;color:rgba(43,103,179,.82);font-size:14px;line-height:1.75;font-weight:700}
+    .xp-box{padding:18px;border-radius:26px;background:#eef9ff}.xp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.xp-head small{display:block;color:rgba(43,103,179,.7);font-size:11px;letter-spacing:.14em;font-weight:900;margin-bottom:8px}.xp-head strong{display:block;color:#183a66;font-size:30px;font-weight:900}.xp-level{padding:10px 12px;border-radius:20px;background:#fff;text-align:right;font-size:12px;color:#2f6fbc;font-weight:900;box-shadow:0 10px 18px rgba(24,58,102,.08)}.xp-level span{display:block;color:#183a66;font-size:18px;margin-top:4px}.xp-note{margin-top:12px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.75;font-weight:700}.level-up{margin-top:12px;padding:12px 14px;border-radius:20px;background:#183a66;color:#fff;font-size:13px;line-height:1.7;font-weight:900}
+    .streak-card{padding:18px;border-radius:28px;background:linear-gradient(180deg,#fff7df,#fff0b8);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}.streak-card small{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.8);color:#183a66;font-size:12px;font-weight:900}.streak-card h4{margin-top:14px;color:#183a66;font-size:22px;font-weight:900}.streak-card p{margin-top:8px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.72;font-weight:700}.streak-value{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.7);color:#183a66;font-size:14px;font-weight:900}
+    .all-clear{padding:18px;border-radius:28px;background:linear-gradient(180deg,#183a66,#24538d);color:#fff;box-shadow:0 20px 40px rgba(24,58,102,.16)}.all-clear small{display:block;color:#a6d8ff;font-size:11px;letter-spacing:.16em;font-weight:900;margin-bottom:10px}.all-clear h4{font-size:22px;line-height:1.2;font-weight:900}.all-clear p{margin-top:10px;color:rgba(255,255,255,.86);font-size:14px;line-height:1.75;font-weight:700}.empty{padding:18px;border-radius:24px;background:rgba(255,255,255,.82);border:1px dashed #c5e6fb;color:rgba(43,103,179,.82);font-size:14px;line-height:1.78;font-weight:700}.toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:20;padding:12px 16px;border-radius:999px;background:rgba(13,25,48,.9);color:#fff;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 16px 28px rgba(9,18,35,.24);animation:toastIn .22s ease}
+    @keyframes markerPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.75);opacity:0}}@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes sparkle{0%,100%{transform:scale(.8) rotate(0);opacity:.6}50%{transform:scale(1.2) rotate(12deg);opacity:1}}@keyframes confetti{0%{transform:translateY(-30px) rotate(0);opacity:0}14%{opacity:1}100%{transform:translateY(190px) rotate(220deg);opacity:0}}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes toastIn{from{transform:translate(-50%,-8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+    @media (max-width:980px){.page{grid-template-columns:1fr;padding:12px 16px 28px}.copy{order:2}.frame{order:1}}@media (max-width:520px){.back-link{padding:18px 16px 0}.page{padding:10px 12px 24px}.copy{padding:22px}.frame{width:100%;padding:8px;border-radius:30px}.frame-inner{border-radius:24px}.shell-top{margin:10px 10px 0}#app{padding:10px 10px 12px}.hero{min-height:236px}.bubble{width:min(100%,218px)}.character{width:min(100%,196px)}.character.complete{width:min(100%,256px)}}
   </style>
 </head>
 <body>
-  <canvas id="starsCanvas"></canvas>
   <a class="back-link" href="index.html">← 쇼케이스로 돌아가기</a>
   <div class="page">
     <section class="copy">
-      <div class="eyebrow">캠퍼스 퀘스트 데모</div>
+      <div class="eyebrow">App Style Showcase</div>
       <h1>산지니 원정대</h1>
-      <p>
-        포스터를 메인화면으로 두고, 빈 영역을 누르면 캠퍼스 지도로 자연스럽게 이어지는
-        인터랙티브 데모다. 지도 위 튜토리얼을 마치면 바로 퀘스트를 고르고 완료 보상까지 볼 수 있다.
-      </p>
-      <div class="copy-list">
-        <div class="copy-item">
-          <div><strong>포스터 랜딩 화면</strong><span>미션, 업적, 기록, 추억 메뉴를 올려둔 메인화면에서 탐험을 시작한다.</span></div>
-        </div>
-        <div class="copy-item">
-          <div><strong>지도 위 튜토리얼</strong><span>포스터 빈 영역을 누르면 지도가 어두워지고 산지니가 말풍선으로 안내를 이어간다.</span></div>
-        </div>
-        <div class="copy-item">
-          <div><strong>퀘스트와 연속 기록</strong><span>튜토리얼이 끝나면 마커를 눌러 미션을 진행하고 첫 완료 시 연속 기록 보상을 받는다.</span></div>
-        </div>
+      <p>설명형 데모가 아니라 실제 앱을 옮겨놓은 듯한 정적 쇼케이스로 다시 구성했다. 고정 폰 비율 안에서 홈, 지도, 기록, 추억 탭이 전환되고 첫 지도 진입에는 튜토리얼, 모든 퀘스트 완료에는 XP 축하 오버레이가 뜬다.</p>
+      <div class="copy-grid">
+        <div class="copy-card"><strong>고정 폰 비율</strong><span>화면이 바뀌어도 프레임 높이는 유지되고 내부 스크린과 오버레이만 전환된다.</span></div>
+        <div class="copy-card"><strong>홈 · 지도 · 기록 · 추억</strong><span>하단 탭 구조로 앱 정보구조를 그대로 드러내고 지도 탭은 첫 진입에만 튜토리얼을 보여준다.</span></div>
+        <div class="copy-card"><strong>퀘스트 보상과 성장</strong><span>모든 퀘스트 완료에 축하 오버레이가 뜨고 XP, 레벨, 연속 기록이 즉시 반영된다.</span></div>
       </div>
-      <button id="themeToggle" class="theme-toggle" type="button">라이트 배경으로 보기</button>
+      <div class="copy-metrics">
+        <div class="metric"><small>탭</small><strong>4</strong></div>
+        <div class="metric"><small>퀘스트</small><strong>3</strong></div>
+        <div class="metric"><small>기본 XP</small><strong>40</strong></div>
+      </div>
     </section>
     <section class="frame">
       <div class="frame-inner">
-        <div class="shell-top">
+        <header class="shell-top">
           <div>
             <small>산지니 원정대</small>
-            <strong id="frameTitle">메인 화면</strong>
+            <strong id="frameTitle">오늘의 홈</strong>
           </div>
-          <div id="frameStreak" class="streak-pill">연속 0일</div>
-        </div>
+          <div class="meta-group">
+            <div id="frameLevel" class="meta-chip">레벨 1</div>
+            <div id="frameStreak" class="meta-chip">연속 0일</div>
+          </div>
+        </header>
         <div id="app"></div>
       </div>
     </section>
   </div>
   <script>
-    const dialogues = [
-      "안녕!\n산지니 원정대에 온 걸 환영해!",
-      "오늘도 캠퍼스에\n새로운 모험이 기다리고 있어!",
-      "오늘의 퀘스트를 확인해볼까?"
+    const tutorialDialogues=["안녕!\n산지니 원정대에 온 걸 환영해!","오늘도 캠퍼스에\n새로운 모험이 기다리고 있어!","오늘의 퀘스트를 확인해볼까?"];
+    const tabMeta={home:{label:"홈",chip:"오늘",title:"오늘의 홈"},map:{label:"지도",chip:"미션",title:"탐험 지도"},record:{label:"기록",chip:"로그",title:"활동 기록"},memory:{label:"추억",chip:"보관",title:"추억 보관함"}};
+    const quests=[
+      {id:"library-explore",title:"도서관 탐험",description:"오늘 도서관에 가서 공부 인증을 남기고 조용한 집중 시간을 완성해 보자.",locationLabel:"도서관",category:"학업",xpReward:40,memoryTitle:"조용한 오후의 도서관",memoryDescription:"책 냄새와 함께 오늘의 집중 시간을 기록했다.",top:"37%",left:"32%"},
+      {id:"student-center-lunch",title:"학생회관 점심 미션",description:"학생회관에서 오늘의 메뉴를 먹고 잠깐 쉬어 가며 캠퍼스 리듬을 채워 보자.",locationLabel:"학생회관",category:"휴식",xpReward:40,memoryTitle:"학생회관에서 보낸 점심",memoryDescription:"바쁜 하루 속에서도 캠퍼스의 여유를 챙긴 한 장면.",top:"66%",left:"51%"},
+      {id:"geumjeongsan-walk",title:"금정산 산책",description:"금정산 쪽으로 걸어가며 캠퍼스 바깥 풍경과 공기를 천천히 느껴 보자.",locationLabel:"금정산",category:"탐험",xpReward:40,memoryTitle:"금정산으로 이어지는 길",memoryDescription:"캠퍼스의 끝에서 새로운 풍경을 발견한 탐험 기록.",top:"26%",left:"72%"}
     ];
-
-    const quests = [
-      { id: "library", title: "도서관 탐험", description: "오늘 도서관에 가서 공부 인증을 해보자!", locationLabel: "도서관", top: "36%", left: "31%" },
-      { id: "student-center", title: "학생회관 점심 미션", description: "학생회관에서 오늘의 메뉴를 먹고 잠깐 쉬어가자!", locationLabel: "학생회관", top: "66%", left: "51%" },
-      { id: "mountain", title: "금정산 산책", description: "금정산 쪽으로 걸어가며 캠퍼스 바깥 풍경도 느껴보자!", locationLabel: "금정산", top: "26%", left: "72%" }
-    ];
-
-    const posterMenus = [
-      { id: "mission", label: "미션", top: "88.5%", left: "17.5%" },
-      { id: "achievement", label: "업적", top: "88.5%", left: "39.5%" },
-      { id: "record", label: "기록", top: "88.5%", left: "61.5%" },
-      { id: "memory", label: "추억", top: "88.5%", left: "83.5%" }
-    ];
-
-    const state = {
-      currentState: "landing",
-      activeDialogueIndex: 0,
-      selectedQuestId: null,
-      streakCount: 0,
-      completedToday: false,
-      completedQuestIds: [],
-      showStreakCard: false,
-      visibleDialogue: "",
-      isTyping: false,
-      hasSeenTutorial: false,
-      toastMessage: null
-    };
-
-    const app = document.getElementById("app");
-    const frameTitle = document.getElementById("frameTitle");
-    const frameStreak = document.getElementById("frameStreak");
-    const themeToggle = document.getElementById("themeToggle");
-    let typingTimer = null;
-    let toastTimer = null;
-
-    function questById(id) {
-      return quests.find((quest) => quest.id === id) || null;
-    }
-
-    function setFrameMeta() {
-      frameTitle.textContent =
-        state.currentState === "landing" ? "메인 화면" :
-        state.currentState === "tutorial" ? "튜토리얼" :
-        state.currentState === "map" ? "탐험 지도" :
-        state.currentState === "quest" ? "퀘스트" : "완료";
-      frameStreak.textContent = `연속 ${state.streakCount}일`;
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
-    }
-
-    function renderToast() {
-      return state.toastMessage ? `<div class="toast">${escapeHtml(state.toastMessage)}</div>` : "";
-    }
-
-    function renderGuide(options) {
-      const layout = options.layout || "tutorial";
-      const text = options.text || "";
-      const textHtml = `${escapeHtml(text)}${options.showCursor ? '<span class="cursor">|</span>' : ""}`;
-      return `
-        <div class="guide-stage ${layout}">
-          <div class="guide-bubble">
-            <div class="guide-label">산지니</div>
-            <div class="guide-text">${textHtml}</div>
-          </div>
-          <div class="guide-figure">
-            <img src="main_character.png" alt="산지니 캐릭터" />
-          </div>
-          <span class="sparkle one">✦</span>
-          <span class="sparkle two">✦</span>
-        </div>
-      `;
-    }
-
-    function renderLanding() {
-      return `
-        <section class="scene">
-          <div
-            class="poster-screen"
-            data-action="poster-enter"
-            role="button"
-            tabindex="0"
-            aria-label="산지니 원정대 포스터를 눌러 탐험 시작"
-          >
-            <img src="sanjini-poster.png" alt="산지니 원정대 메인 포스터" />
-            <div class="poster-overlay">
-              <div class="poster-top">
-                <div class="pill">포스터 메인 화면</div>
-                <div class="poster-tag">탐험 시작</div>
-              </div>
-              <div class="poster-hint">
-                <strong>포스터 빈 영역을 눌러 탐험 시작</strong>
-                <span>메뉴 버튼은 아직 준비 중이고, 포스터를 누르면 지도 튜토리얼이 열린다.</span>
-              </div>
-            </div>
-            <div class="poster-hotspots">
-              ${posterMenus.map((menu) => `
-                <button
-                  class="poster-hotspot"
-                  type="button"
-                  data-action="poster-menu"
-                  data-id="${menu.id}"
-                  style="top:${menu.top};left:${menu.left};"
-                >${menu.label}</button>
-              `).join("")}
-            </div>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderMarkers(disabled) {
-      return quests.map((quest) => `
-        <button
-          class="marker ${disabled ? "disabled" : ""}"
-          type="button"
-          ${disabled ? "disabled" : `data-action="select-quest" data-id="${quest.id}"`}
-          style="top:${quest.top};left:${quest.left};"
-          aria-label="${quest.locationLabel} 퀘스트 열기"
-        >
-          <span class="marker-core">!</span>
-          ${state.completedQuestIds.includes(quest.id) ? '<span class="marker-done">✓</span>' : ""}
-          <span class="marker-label">${quest.locationLabel}</span>
-        </button>
-      `).join("");
-    }
-
-    function renderQuestPanel() {
-      const quest = questById(state.selectedQuestId);
-      if (!quest) return "";
-      return `
-        <div class="quest-panel">
-          <div class="quest-card">
-            <div class="quest-handle"></div>
-            <div class="quest-badge">${quest.locationLabel}</div>
-            <h3>${quest.title}</h3>
-            <p>${quest.description}</p>
-            <div class="quest-location">오늘의 위치: ${quest.locationLabel}</div>
-            <div class="buttons">
-              <button class="btn btn-primary" type="button" data-action="complete-quest">퀘스트 완료</button>
-              <button class="btn btn-secondary" type="button" data-action="back-map">지도로 돌아가기</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderTutorialOverlay() {
-      return `
-        <div class="map-dim"></div>
-        <div class="tutorial-layer">
-          <div class="tutorial-guide">
-            ${renderGuide({
-              layout: "tutorial",
-              text: state.visibleDialogue,
-              showCursor: state.isTyping
-            })}
-            <div class="tutorial-actions">
-              <div class="dialogue-chip">대화 ${state.activeDialogueIndex + 1} / ${dialogues.length}</div>
-              <button class="btn btn-primary" type="button" data-action="tutorial-next">
-                ${state.activeDialogueIndex === dialogues.length - 1 ? "퀘스트 시작" : "다음"}
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderMap(options = {}) {
-      const showPanel = Boolean(options.showPanel);
-      const showMarkers = options.showMarkers !== false;
-      const overlay = options.overlay || "";
-      const heading = options.heading || "오늘의 탐험 지도";
-      const description = options.description || "빨간 마커를 눌러 오늘의 캠퍼스 미션을 골라보자.";
-      const badge = options.badge || "탐험 지도";
-      const progressLabel = options.progressLabel || "진행 현황";
-      const progressValue = options.progressValue || `${state.completedQuestIds.length} / ${quests.length}`;
-      const tipText = options.tipText || "도서관, 학생회관, 금정산 중 한 곳을 눌러 퀘스트를 시작할 수 있어.";
-
-      return `
-        <section class="scene">
-          <div class="card info-card">
-            <div class="info-head">
-              <div>
-                <div class="pill">${badge}</div>
-                <h2>${heading}</h2>
-                <p>${description}</p>
-              </div>
-              <div class="progress">${progressLabel}<strong>${progressValue}</strong></div>
-            </div>
-          </div>
-          <div class="card map-card">
-            <div class="map-canvas">
-              <img src="campus-map.png" alt="캠퍼스 지도" />
-              ${renderMarkers(!showMarkers)}
-              ${showPanel ? renderQuestPanel() : ""}
-              ${overlay}
-            </div>
-          </div>
-          <div class="tip-card">
-            <strong>${showMarkers ? "탐험 팁" : "튜토리얼 안내"}</strong>
-            <p>${tipText}</p>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderTutorial() {
-      return renderMap({
-        showMarkers: false,
-        overlay: renderTutorialOverlay(),
-        badge: "튜토리얼",
-        heading: "산지니가 탐험 지도를 소개하는 중",
-        description: "말풍선을 끝까지 넘기면 퀘스트 마커가 활성화되고 바로 탐험을 시작할 수 있다.",
-        progressLabel: "대화",
-        progressValue: `${state.activeDialogueIndex + 1} / ${dialogues.length}`,
-        tipText: "안내가 끝날 때까지 지도가 잠깐 어두워져 있고, 마지막 대사 이후에 퀘스트를 진행할 수 있다."
-      });
-    }
-
-    function renderComplete() {
-      const quest = questById(state.selectedQuestId);
-      const confetti = [
-        { left: "10%", delay: "0s", color: "#ffd65a" },
-        { left: "24%", delay: "0.4s", color: "#93d3ff" },
-        { left: "38%", delay: "0.8s", color: "#ff8a80" },
-        { left: "54%", delay: "0.2s", color: "#ffd65a" },
-        { left: "67%", delay: "0.7s", color: "#79cbff" },
-        { left: "81%", delay: "0.3s", color: "#ff6b63" }
-      ];
-      return `
-        <section class="scene complete">
-          <div class="confetti-zone">
-            ${confetti.map((item) => `
-              <span class="confetti" style="left:${item.left};background:${item.color};animation-delay:${item.delay};"></span>
-            `).join("")}
-          </div>
-          ${renderGuide({
-            layout: "complete",
-            text: "와! 퀘스트를 완료했어!\n정말 대단해!"
-          })}
-          <div class="card complete-card">
-            <strong>미션 완료</strong>
-            <h4>${quest ? `${quest.locationLabel} 미션 성공!` : "퀘스트 성공!"}</h4>
-            <p>산지니가 다음 탐험도 기다리고 있어. 지도로 돌아가 다른 장소도 확인해 보자.</p>
-          </div>
-          ${state.showStreakCard ? `
-            <div class="streak-card">
-              <div class="streak-chip">연속 기록 달성!</div>
-              <h4>오늘도 모험 성공!</h4>
-              <p>연속 기록을 이어가고 있어!</p>
-              <div class="streak-value">연속 ${state.streakCount}일 달성</div>
-            </div>
-          ` : ""}
-          <div class="buttons">
-            <button class="btn btn-primary" type="button" data-action="back-map">지도로 돌아가기</button>
-          </div>
-        </section>
-      `;
-    }
-
-    function render() {
-      setFrameMeta();
-      const sceneMarkup =
-        state.currentState === "landing" ? renderLanding() :
-        state.currentState === "tutorial" ? renderTutorial() :
-        state.currentState === "map" ? renderMap() :
-        state.currentState === "quest" ? renderMap({ showPanel: true }) :
-        renderComplete();
-      app.innerHTML = `${renderToast()}${sceneMarkup}`;
-      bind();
-    }
-
-    function bind() {
-      const posterSurface = app.querySelector('[data-action="poster-enter"]');
-      if (posterSurface) {
-        posterSurface.onclick = (event) => {
-          if (event.target.closest('[data-action="poster-menu"]')) return;
-          handlePosterEnter();
-        };
-        posterSurface.onkeydown = (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            handlePosterEnter();
-          }
-        };
-      }
-
-      app.querySelectorAll('[data-action="poster-menu"]').forEach((button) => {
-        button.onclick = (event) => {
-          event.stopPropagation();
-          showToast("준비 중인 메뉴예요");
-        };
-      });
-
-      const tutorialButton = app.querySelector('[data-action="tutorial-next"]');
-      if (tutorialButton) tutorialButton.onclick = handleTutorialAction;
-
-      app.querySelectorAll('[data-action="select-quest"]').forEach((button) => {
-        button.onclick = () => {
-          state.selectedQuestId = button.dataset.id;
-          state.currentState = "quest";
-          render();
-        };
-      });
-
-      const completeButton = app.querySelector('[data-action="complete-quest"]');
-      if (completeButton) completeButton.onclick = handleQuestComplete;
-
-      app.querySelectorAll('[data-action="back-map"]').forEach((button) => {
-        button.onclick = () => {
-          clearTyping();
-          state.currentState = "map";
-          state.selectedQuestId = null;
-          state.showStreakCard = false;
-          render();
-        };
-      });
-    }
-
-    function clearTyping() {
-      if (typingTimer) {
-        window.clearInterval(typingTimer);
-        typingTimer = null;
-      }
-    }
-
-    function clearToastTimer() {
-      if (toastTimer) {
-        window.clearTimeout(toastTimer);
-        toastTimer = null;
-      }
-    }
-
-    function showToast(message) {
-      clearToastTimer();
-      state.toastMessage = message;
-      render();
-      toastTimer = window.setTimeout(() => {
-        state.toastMessage = null;
-        toastTimer = null;
-        render();
-      }, 1500);
-    }
-
-    function revealDialogue() {
-      clearTyping();
-      state.visibleDialogue = dialogues[state.activeDialogueIndex];
-      state.isTyping = false;
-      render();
-    }
-
-    function startTyping(text) {
-      clearTyping();
-      state.visibleDialogue = "";
-      state.isTyping = true;
-      render();
-      let index = 0;
-      typingTimer = window.setInterval(() => {
-        index += 1;
-        state.visibleDialogue = text.slice(0, index);
-        render();
-        if (index >= text.length) {
-          clearTyping();
-          state.isTyping = false;
-          render();
-        }
-      }, 28);
-    }
-
-    function handlePosterEnter() {
-      clearTyping();
-      clearToastTimer();
-      state.toastMessage = null;
-      state.selectedQuestId = null;
-      state.showStreakCard = false;
-      if (!state.hasSeenTutorial) {
-        state.currentState = "tutorial";
-        state.activeDialogueIndex = 0;
-        startTyping(dialogues[0]);
-        return;
-      }
-      state.currentState = "map";
-      render();
-    }
-
-    function handleTutorialAction() {
-      if (state.isTyping) {
-        revealDialogue();
-        return;
-      }
-      if (state.activeDialogueIndex < dialogues.length - 1) {
-        state.activeDialogueIndex += 1;
-        startTyping(dialogues[state.activeDialogueIndex]);
-        return;
-      }
-      clearTyping();
-      state.hasSeenTutorial = true;
-      state.visibleDialogue = "";
-      state.isTyping = false;
-      state.currentState = "map";
-      render();
-    }
-
-    function handleQuestComplete() {
-      if (!state.selectedQuestId) return;
-      const first = !state.completedToday;
-      if (!state.completedQuestIds.includes(state.selectedQuestId)) {
-        state.completedQuestIds = [...state.completedQuestIds, state.selectedQuestId];
-      }
-      if (first) {
-        state.streakCount += 1;
-        state.completedToday = true;
-      }
-      state.showStreakCard = first;
-      state.currentState = "questComplete";
-      render();
-    }
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("sanjini-theme", theme);
-      themeToggle.textContent = theme === "dark" ? "라이트 배경으로 보기" : "다크 배경으로 보기";
-    }
-
-    themeToggle.onclick = () => {
-      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      applyTheme(next);
-    };
-
-    applyTheme(localStorage.getItem("sanjini-theme") || "dark");
-    render();
-  </script>
-  <script>
-    (function() {
-      const canvas = document.getElementById("starsCanvas");
-      const ctx = canvas.getContext("2d");
-      let width = 0;
-      let height = 0;
-      const stars = [];
-      const colors = [[200,220,255],[255,240,230],[255,210,180],[180,200,255],[255,255,255]];
-
-      function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        width = canvas.offsetWidth * dpr;
-        height = canvas.offsetHeight * dpr;
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      resize();
-      window.addEventListener("resize", resize);
-
-      [{ count: 240, maxR: 1 }, { count: 90, maxR: 2 }, { count: 40, maxR: 3.5 }].forEach((layer) => {
-        for (let i = 0; i < layer.count; i += 1) {
-          stars.push({
-            x: Math.random(),
-            y: Math.random(),
-            r: Math.random() * layer.maxR + 0.3,
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.004 + Math.random() * 0.012,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            bright: 0.45 + Math.random() * 0.55,
-            min: 0.14 + Math.random() * 0.22
-          });
-        }
-      });
-
-      let frame = 0;
-      function draw() {
-        frame += 1;
-        ctx.clearRect(0, 0, width, height);
-        stars.forEach((star) => {
-          const sx = star.x * width;
-          const sy = star.y * height;
-          const twinkle = Math.sin(frame * star.speed + star.phase);
-          const alpha = star.min + (star.bright - star.min) * (0.5 + twinkle * 0.5);
-          const [r, g, b] = star.color;
-          if (star.r > 1.5) {
-            const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, star.r * 5);
-            glow.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.22})`);
-            glow.addColorStop(1, "transparent");
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(sx, sy, star.r * 5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          ctx.beginPath();
-          ctx.arc(sx, sy, star.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-          ctx.fill();
-        });
-        requestAnimationFrame(draw);
-      }
-
-      draw();
-    })();
+    const state={currentTab:"home",overlay:null,selectedQuestId:null,activeDialogueIndex:0,xpTotal:0,streakCount:0,completedToday:false,completedQuestIds:[],hasSeenTutorial:false,toast:null,visibleDialogue:"",isTyping:false,celebration:null,animatedXp:0};
+    const app=document.getElementById("app"),frameTitle=document.getElementById("frameTitle"),frameLevel=document.getElementById("frameLevel"),frameStreak=document.getElementById("frameStreak");
+    let typingTimer=null,toastTimer=null,xpTimer=null;
+    const getLevel=(xp)=>Math.floor(xp/100)+1;
+    const xpIntoLevel=(xp)=>xp%100;
+    const questById=(id)=>quests.find((quest)=>quest.id===id)||null;
+    const escapeHtml=(text)=>String(text).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    function clearTyping(){if(typingTimer){window.clearInterval(typingTimer);typingTimer=null}}
+    function clearToast(){if(toastTimer){window.clearTimeout(toastTimer);toastTimer=null}}
+    function clearXp(){if(xpTimer){window.clearInterval(xpTimer);xpTimer=null}}
+    function showToast(message){clearToast();state.toast=message;render();toastTimer=window.setTimeout(()=>{state.toast=null;toastTimer=null;render()},1500)}
+    function setFrameMeta(){const title=state.overlay==="tutorial"?"튜토리얼":state.overlay==="quest"?"퀘스트":state.overlay==="celebration"?"미션 성공":tabMeta[state.currentTab].title;frameTitle.textContent=title;frameLevel.textContent=`레벨 ${getLevel(state.xpTotal)}`;frameStreak.textContent=`연속 ${state.streakCount}일`}
+    function renderToast(){return state.toast?`<div class="toast">${escapeHtml(state.toast)}</div>`:""}
+    function renderTabs(){const disabled=state.overlay!==null;return `<nav class="tabbar">${Object.entries(tabMeta).map(([id,tab])=>`<button class="tab ${state.currentTab===id?"active":""}" type="button" data-action="tab" data-tab="${id}" ${disabled?"disabled":""}><span class="tab-chip">${tab.chip}</span><span class="tab-label">${tab.label}</span></button>`).join("")}</nav>`}
+    function renderHome(){const completeCount=state.completedQuestIds.length;const featured=quests.find((quest)=>!state.completedQuestIds.includes(quest.id))||quests[quests.length-1];const progress=Math.max(xpIntoLevel(state.xpTotal),6);return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 캠퍼스 RPG</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">캠퍼스 활동을 미션처럼 기록하고 오늘의 탐험을 작은 성취로 쌓아 가는 앱.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>오늘의 캠퍼스 미션을 한 칸씩 채우는 중.</p></article><article class="mini-card"><small>연속 기록</small><strong>${state.streakCount}일</strong><p>매일의 캠퍼스 활동이 개인용 RPG 로그처럼 이어진다.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100-xpIntoLevel(state.xpTotal)} XP 남았어.</p></section><section class="card feature"><small>오늘의 추천 미션</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">위치: ${escapeHtml(featured.locationLabel)}</div></section></div>`}
+    function renderMarkers(locked){return quests.map((quest)=>{const done=state.completedQuestIds.includes(quest.id);const disabled=locked||done;return `<button class="marker ${done?"is-complete":""} ${disabled?"is-disabled":""}" type="button" data-action="${disabled?"":"quest"}" data-id="${quest.id}" style="top:${quest.top};left:${quest.left};" ${disabled?"disabled":""}><span class="marker-core">${done?"✓":"!"}</span>${done?'<span class="check">✓</span>':""}<span class="marker-label">${escapeHtml(quest.locationLabel)}</span></button>`}).join("")}
+    function renderMap(){const completeCount=state.completedQuestIds.length;return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">탐험 지도</div><div class="title">오늘의 캠퍼스 미션</div><p class="copy-text">빨간 마커를 눌러 오늘의 캠퍼스 활동을 미션처럼 시작해 보자.</p></div><div class="pill-stat">오늘 진행<strong>${completeCount} / ${quests.length}</strong></div></div></section><section class="card panel"><div class="map-stage"><img src="campus-map.png" alt="캠퍼스 지도" />${renderMarkers(state.overlay==="tutorial")}</div></section><section class="card panel"><div class="tag">${completeCount===quests.length?"오늘의 상태":"탐험 팁"}</div><div class="title" style="font-size:20px;">${completeCount===quests.length?"오늘의 미션을 모두 완료했어":"도서관, 학생회관, 금정산 중 한 곳을 눌러보자"}</div><p class="copy-text">${completeCount===quests.length?"모든 장소가 기록과 추억 탭에 반영되었고 지도에서는 완료 상태로 남아 있어.":"첫 지도 진입 튜토리얼 이후에는 완료하지 않은 퀘스트만 선택할 수 있어."}</p></section></div>`}
+    function renderRecord(){const items=state.completedQuestIds.map((id)=>questById(id)).filter(Boolean);return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 캠퍼스 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션에 획득한 누적 경험치.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">기록 타임라인</div><div class="title">오늘의 활동 로그</div></div><div class="pill-stat">연속 기록<strong>${state.streakCount}일</strong></div></div><div class="timeline" style="margin-top:14px;">${items.length?items.map((quest,index)=>`<article class="timeline-item"><small>완료 기록 ${index+1}</small><strong>${escapeHtml(quest.title)}</strong><p>${escapeHtml(quest.locationLabel)}에서 활동을 완료했고 XP +${quest.xpReward}를 획득했다.</p></article>`).join(""):'<div class="empty">아직 오늘의 로그가 비어 있어. 지도 탭으로 이동해 첫 번째 미션을 완료하면 기록이 타임라인처럼 쌓이기 시작한다.</div>'}</div></section></div>`}
+    function renderMemory(){return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관함</div><div class="title">캠퍼스 스크랩</div><p class="copy-text">완료한 미션은 추억 카드로 남고 아직 가지 못한 장소는 잠긴 상태로 기다린다.</p></section><section class="memory-grid">${quests.map((quest)=>{const done=state.completedQuestIds.includes(quest.id);return `<article class="memory-card ${done?"":"is-locked"}"><div class="memory-top"><div class="memory-badge">${escapeHtml(quest.locationLabel)}</div><div class="memory-state ${done?"done":""}">${done?"보관 완료":"잠금"}</div></div><h3>${escapeHtml(quest.memoryTitle)}</h3><p>${done?escapeHtml(quest.memoryDescription):"아직 이 장소의 추억은 비어 있어. 오늘의 미션을 완료하면 이 카드가 열릴 거야."}</p></article>`}).join("")}</section></div>`}
+    function renderCharacter({label,text,typing,complete}){return `<div class="character-stage"><div class="bubble ${complete?"complete":""}"><small>${label}</small><p>${text}${typing?'<span class="cursor">|</span>':""}</p></div><div class="character ${complete?"complete":""}"><img src="main_character.png" alt="산지니 캐릭터" /></div><span class="spark one">✦</span><span class="spark two">✦</span></div>`}
+    function renderTutorial(){return `<div class="overlay tutorial"><div class="dim"></div>${renderCharacter({label:"산지니 가이드",text:escapeHtml(state.visibleDialogue),typing:state.isTyping,complete:false})}<div class="dialogue-actions"><div class="dialogue-chip">대화 ${state.activeDialogueIndex+1} / ${tutorialDialogues.length}</div><button class="btn primary" type="button" data-action="tutorial-next">${state.activeDialogueIndex===tutorialDialogues.length-1?"퀘스트 시작":"다음"}</button></div></div>`}
+    function renderQuestOverlay(){const quest=questById(state.selectedQuestId);if(!quest){return""}return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="tag">${escapeHtml(quest.locationLabel)}</div><h3>${escapeHtml(quest.title)}</h3><p>${escapeHtml(quest.description)}</p><div class="sheet-meta">오늘의 위치: ${escapeHtml(quest.locationLabel)}<br />보상 XP: +${quest.xpReward}</div><div class="stack"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`}
+    function renderCelebration(){const payload=state.celebration;const quest=payload?questById(payload.questId):null;if(!payload||!quest){return""}const pieces=[{left:"8%",delay:"0s",color:"#ffd65a"},{left:"23%",delay:"0.35s",color:"#8cd7ff"},{left:"39%",delay:"0.75s",color:"#ff9287"},{left:"55%",delay:"0.2s",color:"#ffd65a"},{left:"72%",delay:"0.55s",color:"#7bcfff"},{left:"86%",delay:"0.15s",color:"#ff6b63"}];const level=getLevel(state.animatedXp);const finalLevel=getLevel(payload.nextXp);const leveledUp=getLevel(payload.previousXp)!==finalLevel;const progress=Math.max(xpIntoLevel(state.animatedXp),6);return `<div class="overlay celebration"><div class="dim"></div><div class="celebration-stack"><div class="confetti-zone">${pieces.map((piece)=>`<span class="confetti" style="left:${piece.left};background:${piece.color};animation-delay:${piece.delay};"></span>`).join("")}</div>${renderCharacter({label:"미션 성공",text:"와! 퀘스트를 완료했어!\n정말 대단해!",typing:false,complete:true})}<section class="card center-card"><strong>미션 성공</strong><h4>${escapeHtml(quest.locationLabel)} 미션을 완수했어!</h4><p>산지니가 오늘의 탐험이 정말 좋았다고 말하고 있어.</p></section><section class="card xp-box"><div class="xp-head"><div><small>경험치 보상</small><strong>+${payload.xpEarned} XP</strong></div><div class="xp-level">현재 레벨<span>${level}</span></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="xp-note">누적 XP ${state.animatedXp} · 다음 레벨까지 ${100-xpIntoLevel(state.animatedXp)} XP</p>${leveledUp?`<div class="level-up">레벨 업! 이제 레벨 ${finalLevel} 탐험가야.</div>`:""}</section>${payload.isFirstToday?`<section class="streak-card"><small>연속 기록 달성</small><h4>오늘도 모험 성공!</h4><p>연속 기록을 이어가고 있어. 오늘의 첫 퀘스트 보상으로 streak도 함께 반영됐어.</p><div class="streak-value">연속 ${payload.streakCountAfter}일 달성</div></section>`:""}${payload.completedAllToday?`<section class="all-clear"><small>오늘의 미션 전부 성공</small><h4>세 개의 캠퍼스 미션을 모두 완료했어.</h4><p>오늘 하루의 활동이 기록과 추억 탭에 모두 남았어. 이제 너만의 캠퍼스 RPG 로그가 한 페이지 더 쌓였어.</p></section>`:""}<button class="btn secondary" type="button" data-action="close-celebration">지도 화면으로 돌아가기</button></div></div>`}
+    function renderOverlay(){if(state.overlay==="tutorial"){return renderTutorial()}if(state.overlay==="quest"){return renderQuestOverlay()}if(state.overlay==="celebration"){return renderCelebration()}return""}
+    function renderCurrent(){if(state.currentTab==="home"){return renderHome()}if(state.currentTab==="map"){return renderMap()}if(state.currentTab==="record"){return renderRecord()}return renderMemory()}
+    function render(){setFrameMeta();app.innerHTML=`<div class="layout"><div class="screen">${renderToast()}${renderCurrent()}${renderOverlay()}</div>${renderTabs()}</div>`;bind()}
+    function startTyping(text){clearTyping();state.visibleDialogue="";state.isTyping=true;render();let index=0;typingTimer=window.setInterval(()=>{index+=1;state.visibleDialogue=text.slice(0,index);render();if(index>=text.length){clearTyping();state.isTyping=false;render()}},24)}
+    function revealDialogue(){clearTyping();state.visibleDialogue=tutorialDialogues[state.activeDialogueIndex];state.isTyping=false;render()}
+    function openMap(){state.currentTab="map";state.selectedQuestId=null;if(!state.hasSeenTutorial){state.activeDialogueIndex=0;state.overlay="tutorial";startTyping(tutorialDialogues[0]);return}state.overlay=null;render()}
+    function changeTab(nextTab){if(state.overlay){return}if(nextTab==="map"){openMap();return}state.currentTab=nextTab;state.selectedQuestId=null;render()}
+    function advanceTutorial(){if(state.isTyping){revealDialogue();return}if(state.activeDialogueIndex<tutorialDialogues.length-1){state.activeDialogueIndex+=1;startTyping(tutorialDialogues[state.activeDialogueIndex]);return}clearTyping();state.hasSeenTutorial=true;state.visibleDialogue="";state.isTyping=false;state.overlay=null;render()}
+    function selectQuest(id){if(!id||state.completedQuestIds.includes(id)){return}state.selectedQuestId=id;state.overlay="quest";render()}
+    function closeOverlay(){state.overlay=null;state.selectedQuestId=null;render()}
+    function animateXp(previousXp,nextXp){clearXp();state.animatedXp=previousXp;render();const distance=nextXp-previousXp;const steps=24;const stepValue=distance/steps;let currentStep=0;xpTimer=window.setInterval(()=>{currentStep+=1;if(currentStep>=steps){state.animatedXp=nextXp;clearXp();render();return}state.animatedXp=Math.round(previousXp+stepValue*currentStep);render()},28)}
+    function completeQuest(){const quest=questById(state.selectedQuestId);if(!quest||state.completedQuestIds.includes(quest.id)){return}const previousXp=state.xpTotal;const nextXp=previousXp+quest.xpReward;const nextIds=[...state.completedQuestIds,quest.id];const isFirstToday=!state.completedToday;const nextStreak=isFirstToday?state.streakCount+1:state.streakCount;state.completedQuestIds=nextIds;state.xpTotal=nextXp;state.completedToday=true;if(isFirstToday){state.streakCount=nextStreak}state.celebration={questId:quest.id,xpEarned:quest.xpReward,previousXp,nextXp,isFirstToday,completedAllToday:nextIds.length===quests.length,streakCountAfter:nextStreak};state.selectedQuestId=null;state.overlay="celebration";animateXp(previousXp,nextXp)}
+    function closeCelebration(){clearXp();state.animatedXp=state.xpTotal;state.overlay=null;state.celebration=null;state.currentTab="map";render()}
+    function bind(){app.querySelectorAll('[data-action="tab"]').forEach((button)=>{button.onclick=()=>changeTab(button.dataset.tab)});const mapButton=app.querySelector('[data-action="open-map"]');if(mapButton){mapButton.onclick=openMap}app.querySelectorAll('[data-action="quest"]').forEach((button)=>{button.onclick=()=>selectQuest(button.dataset.id)});const tutorialButton=app.querySelector('[data-action="tutorial-next"]');if(tutorialButton){tutorialButton.onclick=advanceTutorial}const completeButton=app.querySelector('[data-action="complete"]');if(completeButton){completeButton.onclick=completeQuest}const closeButton=app.querySelector('[data-action="close"]');if(closeButton){closeButton.onclick=closeOverlay}const closeCelebrationButton=app.querySelector('[data-action="close-celebration"]');if(closeCelebrationButton){closeCelebrationButton.onclick=closeCelebration}}
+    state.animatedXp=state.xpTotal;render();
   </script>
 </body>
 </html>
