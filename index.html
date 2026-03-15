@@ -625,164 +625,275 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
 }
 <span class="cm">// &#x1F680; 완성!</span>`,
         run: (canvas, ctx, w, h) => {
-          const stars = []; const COUNT = 500;
-          let cx = w/2, cy = h/2;
-          let shakeX = 0, shakeY = 0, shakePow = 0;
-          let flashAlpha = 0;
+          // ── GAME STATE ──
+          const stars = []; const COUNT = 400;
           const asteroids = [];
-          let nextAsteroid = 120; // frames until next asteroid
+          let shipX = w/2, shipY = h * 0.82;
+          let targetX = shipX;
+          let shakePow = 0, flashAlpha = 0;
+          let hp = 3;
+          let distance = 0; const totalDist = 2000; // frames to reach Earth
+          let gameOver = false, arrived = false;
+          let nextAsteroid = 60;
+          let dodged = 0;
+          let invincible = 0; // invincibility frames after hit
 
           for (let i = 0; i < COUNT; i++) {
-            stars.push({ x: (Math.random()-0.5)*w*2, y: (Math.random()-0.5)*h*2, z: Math.random()*w, pz: 0 });
+            stars.push({ x: Math.random()*w, y: Math.random()*h, speed: Math.random()*3+1, size: Math.random()*1.5+0.5 });
           }
+
+          // mouse/touch → ship X
           canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
-            cx = (e.clientX - rect.left) * (w / rect.width);
-            cy = (e.clientY - rect.top) * (h / rect.height);
+            targetX = (e.clientX - rect.left) * (w / rect.width);
           });
           canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const rect = canvas.getBoundingClientRect(); const t = e.touches[0];
-            cx = (t.clientX - rect.left) * (w / rect.width);
-            cy = (t.clientY - rect.top) * (h / rect.height);
+            const rect = canvas.getBoundingClientRect();
+            targetX = (e.touches[0].clientX - rect.left) * (w / rect.width);
           }, { passive: false });
-          ctx.fillStyle = '#00000a'; ctx.fillRect(0,0,w,h);
 
           function spawnAsteroid() {
+            const size = Math.random()*18+12;
             asteroids.push({
-              x: (Math.random()-0.5)*w*0.5,
-              y: (Math.random()-0.5)*h*0.5,
-              z: w * 1.2,
-              size: Math.random()*20+15,
+              x: Math.random() * (w-100) + 50,
+              y: -50,
+              speed: Math.random()*3+2.5,
+              size,
               hue: Math.random()*40+10,
-              rot: Math.random()*Math.PI*2,
-              rotSpeed: (Math.random()-0.5)*0.08,
-              hit: false
+              rot: 0,
+              rotSpeed: (Math.random()-0.5)*0.06,
+              verts: []
             });
+            const a = asteroids[asteroids.length-1];
+            const nv = 7;
+            for (let v = 0; v < nv; v++) {
+              a.verts.push(0.6 + Math.random()*0.4);
+            }
           }
 
-          function warp() {
-            // shake decay
-            shakePow *= 0.9;
-            shakeX = (Math.random()-0.5) * shakePow;
-            shakeY = (Math.random()-0.5) * shakePow;
-            flashAlpha *= 0.85;
+          function drawShip(x, y) {
+            ctx.save(); ctx.translate(x, y);
+            // engine glow
+            const eg = ctx.createRadialGradient(0, 18, 0, 0, 18, 20);
+            eg.addColorStop(0, 'rgba(124,92,255,0.6)');
+            eg.addColorStop(1, 'transparent');
+            ctx.fillStyle = eg; ctx.fillRect(-20, 8, 40, 30);
+            // body
+            ctx.beginPath();
+            ctx.moveTo(0, -18); ctx.lineTo(-14, 14); ctx.lineTo(-6, 10);
+            ctx.lineTo(0, 16); ctx.lineTo(6, 10); ctx.lineTo(14, 14); ctx.closePath();
+            ctx.fillStyle = invincible > 0 && Math.floor(invincible/3)%2 ? 'rgba(255,255,255,0.3)' : '#c8b8ff';
+            ctx.fill();
+            ctx.strokeStyle = '#7c5cff'; ctx.lineWidth = 1.2; ctx.stroke();
+            // cockpit
+            ctx.beginPath(); ctx.arc(0, -4, 4, 0, Math.PI*2);
+            ctx.fillStyle = '#00d4aa'; ctx.fill();
+            ctx.restore();
+          }
+
+          function drawMinimap() {
+            const mx = w - 70, my = 15, mw = 55, mh = 140;
+            // bg
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(mx, my, mw, mh, 8); ctx.fill(); ctx.stroke();
+            // label
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '8px Space Grotesk, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('MAP', mx + mw/2, my + 12);
+            // track line
+            const trackX = mx + mw/2;
+            const trackTop = my + 22, trackBot = my + mh - 18;
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.setLineDash([2,3]);
+            ctx.beginPath(); ctx.moveTo(trackX, trackTop); ctx.lineTo(trackX, trackBot); ctx.stroke();
+            ctx.setLineDash([]);
+            // Earth (top)
+            ctx.fillStyle = '#4488ff';
+            ctx.beginPath(); ctx.arc(trackX, trackTop, 6, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#33bb55';
+            ctx.beginPath(); ctx.arc(trackX-2, trackTop-1, 3, 0.3, 1.8); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = '7px sans-serif';
+            ctx.fillText('Earth', trackX, trackTop - 9);
+            // ship position on track
+            const progress = Math.min(distance / totalDist, 1);
+            const shipMapY = trackBot - (trackBot - trackTop) * progress;
+            ctx.fillStyle = '#c8b8ff';
+            ctx.beginPath();
+            ctx.moveTo(trackX, shipMapY - 4);
+            ctx.lineTo(trackX - 3, shipMapY + 3);
+            ctx.lineTo(trackX + 3, shipMapY + 3);
+            ctx.closePath(); ctx.fill();
+            // start label
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillText('Start', trackX, trackBot + 10);
+            // percentage
+            ctx.fillStyle = '#00d4aa';
+            ctx.font = 'bold 9px Space Grotesk, sans-serif';
+            ctx.fillText(Math.floor(progress*100)+'%', trackX, my + mh - 4);
+          }
+
+          function drawHUD() {
+            // HP
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '11px Space Grotesk, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('HP', 16, 30);
+            for (let i = 0; i < 3; i++) {
+              ctx.fillStyle = i < hp ? '#ff5577' : 'rgba(255,255,255,0.1)';
+              ctx.fillRect(38 + i*18, 20, 14, 14);
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+              ctx.strokeRect(38 + i*18, 20, 14, 14);
+            }
+            // dodged count
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '10px Space Grotesk, sans-serif';
+            ctx.fillText('DODGED: ' + dodged, 16, 52);
+          }
+
+          function drawEndScreen(text, sub) {
+            ctx.fillStyle = 'rgba(0,0,10,0.85)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 28px Space Grotesk, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, w/2, h/2 - 10);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '14px Noto Sans KR, sans-serif';
+            ctx.fillText(sub, w/2, h/2 + 20);
+          }
+
+          ctx.fillStyle = '#00000a'; ctx.fillRect(0,0,w,h);
+
+          function gameLoop() {
+            if (gameOver) return;
+
+            // shake
+            shakePow *= 0.88;
+            const sx = (Math.random()-0.5)*shakePow;
+            const sy = (Math.random()-0.5)*shakePow;
+            flashAlpha *= 0.82;
+            if (invincible > 0) invincible--;
 
             ctx.save();
-            ctx.translate(shakeX, shakeY);
-            ctx.fillStyle = 'rgba(0,0,10,0.15)'; ctx.fillRect(-10,-10,w+20,h+20);
+            ctx.translate(sx, sy);
 
-            // stars
+            // bg
+            ctx.fillStyle = 'rgba(0,0,10,0.25)'; ctx.fillRect(-10,-10,w+20,h+20);
+
+            // stars (scrolling down = flying forward)
             stars.forEach(s => {
-              s.pz = s.z;
-              s.z -= 10;
-              if (s.z <= 0) { s.x = (Math.random()-0.5)*w*2; s.y = (Math.random()-0.5)*h*2; s.z = w; s.pz = w; }
-              const sx = (s.x / s.z) * (w*0.5) + cx;
-              const sy = (s.y / s.z) * (h*0.5) + cy;
-              const px = (s.x / s.pz) * (w*0.5) + cx;
-              const py = (s.y / s.pz) * (h*0.5) + cy;
-              const brightness = 1 - s.z / w;
-              const r = brightness * 2.5;
-              ctx.strokeStyle = `rgba(180,160,255,${brightness*0.4})`;
-              ctx.lineWidth = r * 0.5;
-              ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy); ctx.stroke();
-              ctx.globalAlpha = brightness;
-              ctx.fillStyle = `hsl(${220 + brightness*60},80%,${60+brightness*30}%)`;
-              ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
+              s.y += s.speed;
+              if (s.y > h) { s.y = 0; s.x = Math.random()*w; }
+              ctx.globalAlpha = 0.5 + s.speed/4;
+              ctx.fillStyle = '#fff';
+              ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
             });
             ctx.globalAlpha = 1;
 
-            // asteroids
+            // ship movement (smooth follow)
+            shipX += (targetX - shipX) * 0.12;
+            shipX = Math.max(20, Math.min(w-20, shipX));
+
+            // spawn asteroids
+            distance++;
             nextAsteroid--;
+            // more asteroids as you progress
+            const spawnRate = Math.max(25, 70 - Math.floor(distance/totalDist * 50));
             if (nextAsteroid <= 0) {
               spawnAsteroid();
-              nextAsteroid = Math.floor(Math.random()*180)+90;
+              nextAsteroid = Math.floor(Math.random()*spawnRate) + spawnRate/2;
             }
 
+            // update & draw asteroids
             for (let i = asteroids.length-1; i >= 0; i--) {
               const a = asteroids[i];
-              a.z -= 14;
+              a.y += a.speed;
               a.rot += a.rotSpeed;
+              // off screen
+              if (a.y > h + 50) { dodged++; asteroids.splice(i, 1); continue; }
 
-              if (a.z <= 0) { asteroids.splice(i, 1); continue; }
-
-              const ax = (a.x / a.z) * (w*0.5) + cx;
-              const ay = (a.y / a.z) * (h*0.5) + cy;
-              const scale = (1 - a.z / (w*1.2));
-              const drawSize = a.size * scale * 8;
-
-              // hit detection: asteroid close + near screen center = hit
-              if (a.z < 60 && !a.hit) {
-                const distToCenter = Math.hypot(ax - w/2, ay - h/2);
-                if (distToCenter < 80) {
-                  // HIT! couldn't dodge
-                  a.hit = true;
+              // collision with ship
+              if (invincible <= 0) {
+                const dist = Math.hypot(a.x - shipX, a.y - shipY);
+                if (dist < a.size + 12) {
+                  hp--;
                   shakePow = 30;
                   flashAlpha = 0.7;
-                } else {
-                  // DODGED! asteroid flies past
-                  a.hit = true; // mark so it doesn't re-check
-                  // no shake/flash = safe
+                  invincible = 60; // 1 second invincibility
+                  asteroids.splice(i, 1);
+                  if (hp <= 0) {
+                    gameOver = true;
+                    drawEndScreen('GAME OVER', '운석에 파괴되었습니다... 회피: ' + dodged + '개');
+                    ctx.restore();
+                    return;
+                  }
+                  continue;
                 }
               }
 
-              if (a.hit) { asteroids.splice(i, 1); continue; }
-
-              // draw asteroid (irregular rock shape)
+              // draw asteroid
               ctx.save();
-              ctx.translate(ax, ay);
+              ctx.translate(a.x, a.y);
               ctx.rotate(a.rot);
-              ctx.globalAlpha = Math.min(scale * 2, 1);
-
               // glow
-              const glow = ctx.createRadialGradient(0,0,0,0,0,drawSize*1.5);
-              glow.addColorStop(0, `hsla(${a.hue},60%,50%,0.15)`);
+              ctx.globalAlpha = 0.15;
+              const glow = ctx.createRadialGradient(0,0,0,0,0,a.size*2);
+              glow.addColorStop(0, `hsla(${a.hue},60%,50%,0.4)`);
               glow.addColorStop(1, 'transparent');
               ctx.fillStyle = glow;
-              ctx.fillRect(-drawSize*1.5,-drawSize*1.5,drawSize*3,drawSize*3);
-
-              // rock body
+              ctx.fillRect(-a.size*2,-a.size*2,a.size*4,a.size*4);
+              ctx.globalAlpha = 1;
+              // rock
               ctx.beginPath();
-              const verts = 7;
-              for (let v = 0; v < verts; v++) {
-                const angle = (v / verts) * Math.PI * 2;
-                const rr = drawSize * (0.7 + Math.sin(v*3.7)*0.3);
+              for (let v = 0; v < a.verts.length; v++) {
+                const angle = (v / a.verts.length) * Math.PI * 2;
+                const rr = a.size * a.verts[v];
                 const vx = Math.cos(angle) * rr;
                 const vy = Math.sin(angle) * rr;
                 v === 0 ? ctx.moveTo(vx, vy) : ctx.lineTo(vx, vy);
               }
               ctx.closePath();
-              ctx.fillStyle = `hsl(${a.hue},30%,25%)`;
-              ctx.fill();
-              ctx.strokeStyle = `hsl(${a.hue},40%,45%)`;
-              ctx.lineWidth = 1.5;
-              ctx.stroke();
-
+              ctx.fillStyle = `hsl(${a.hue},30%,25%)`; ctx.fill();
+              ctx.strokeStyle = `hsl(${a.hue},40%,45%)`; ctx.lineWidth = 1.5; ctx.stroke();
               // craters
-              for (let c = 0; c < 3; c++) {
+              for (let c = 0; c < 2; c++) {
                 ctx.beginPath();
-                ctx.arc(
-                  (Math.sin(c*4.1))*drawSize*0.3,
-                  (Math.cos(c*3.3))*drawSize*0.3,
-                  drawSize*0.12, 0, Math.PI*2
-                );
-                ctx.fillStyle = `hsl(${a.hue},20%,15%)`;
-                ctx.fill();
+                ctx.arc(Math.sin(c*4)*a.size*0.25, Math.cos(c*3)*a.size*0.25, a.size*0.12, 0, Math.PI*2);
+                ctx.fillStyle = `hsl(${a.hue},20%,15%)`; ctx.fill();
               }
-
               ctx.restore();
             }
 
-            // flash on impact
+            // draw ship
+            drawShip(shipX, shipY);
+
+            // flash
             if (flashAlpha > 0.01) {
               ctx.fillStyle = `rgba(255,100,50,${flashAlpha})`;
               ctx.fillRect(0, 0, w, h);
             }
 
             ctx.restore();
-            requestAnimationFrame(warp);
+
+            // HUD (no shake)
+            drawMinimap();
+            drawHUD();
+
+            // check arrival
+            if (distance >= totalDist) {
+              gameOver = true; arrived = true;
+              drawEndScreen('EARTH REACHED!', '지구에 도착했습니다! 회피: ' + dodged + '개');
+              return;
+            }
+
+            requestAnimationFrame(gameLoop);
           }
-          warp();
+          gameLoop();
         }
       }
     ];
