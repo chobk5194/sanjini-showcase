@@ -506,6 +506,303 @@ canvas#stockChart {
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.error { border-color: var(--red); }
 .toast.info { border-color: var(--purple); }
+
+/* ===== Mobile Responsive: 768px ===== */
+@media (max-width: 768px) {
+  /* Header stacks vertically */
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px 16px;
+    gap: 12px;
+  }
+  .logo {
+    justify-content: center;
+  }
+
+  /* Search full width */
+  .search-wrapper {
+    width: 100%;
+  }
+  .search-box {
+    width: 100%;
+  }
+
+  /* Autocomplete full width on mobile */
+  .autocomplete {
+    left: 0;
+    right: 0;
+    max-height: 240px;
+  }
+
+  /* Back link */
+  .back-link {
+    padding: 12px 16px 0;
+    font-size: 13px;
+  }
+
+  /* Description text block */
+  div[style*="padding:0 32px"] {
+    padding: 0 16px 12px !important;
+  }
+  div[style*="padding:0 32px"] p {
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+  }
+
+  /* Main grid: single column */
+  .main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px 20px;
+  }
+
+  /* Chart container fits mobile */
+  .chart-container {
+    padding: 16px;
+  }
+  canvas#stockChart {
+    height: 280px;
+  }
+
+  /* Chart header */
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .stock-name {
+    font-size: 22px;
+  }
+  .stock-price {
+    font-size: 26px;
+  }
+  .chart-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* AI result panel below chart */
+  #aiResultBelow div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  #aiResultBelow span[style*="font-size:20px"] {
+    font-size: 18px !important;
+  }
+
+  /* Analysis panel stacks properly */
+  .analysis-panel {
+    max-height: none;
+    overflow-y: visible;
+    gap: 14px;
+  }
+
+  /* Cards */
+  .card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .card-title {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Price info grid */
+  .price-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .price-item {
+    padding: 10px;
+  }
+  .price-item .value {
+    font-size: 14px;
+  }
+  .price-item .label {
+    font-size: 10px;
+  }
+
+  /* Indicator rows */
+  .indicator-row {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+
+  /* Signal bar & labels */
+  .signal-bar {
+    margin: 12px 0 6px;
+  }
+  .signal-labels {
+    font-size: 9px;
+  }
+  .signal-text {
+    font-size: 24px;
+  }
+
+  /* Prediction card */
+  .prediction-card {
+    padding: 16px;
+  }
+  .pred-direction {
+    font-size: 28px;
+  }
+  .pred-prob {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .prob-item .prob-val {
+    font-size: 17px;
+  }
+
+  /* Training section */
+  .training-section {
+    padding: 0 16px 20px;
+  }
+  .training-bar {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+  .training-header {
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Placeholder */
+  .placeholder {
+    height: 260px;
+  }
+  .placeholder p {
+    font-size: 13px;
+  }
+
+  /* Toast */
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
+
+/* ===== Very small screens: 400px ===== */
+@media (max-width: 400px) {
+  header {
+    padding: 10px 12px 12px;
+  }
+  .logo h1 {
+    font-size: 22px;
+  }
+  .logo span {
+    font-size: 11px;
+  }
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+    border-radius: 8px;
+  }
+
+  .search-box {
+    padding: 6px 10px;
+  }
+  .search-box input {
+    font-size: 13px;
+  }
+  .search-box button {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .back-link {
+    padding: 10px 12px 0;
+    font-size: 12px;
+  }
+
+  .main-grid {
+    padding: 0 12px 16px;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .chart-container {
+    padding: 12px;
+  }
+  canvas#stockChart {
+    height: 220px;
+  }
+
+  .stock-name {
+    font-size: 18px;
+  }
+  .stock-price {
+    font-size: 22px;
+  }
+  .stock-change {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  /* AI result panel: stack single column on very small */
+  #aiResultBelow div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  #aiResultBelow span[style*="font-size:20px"] {
+    font-size: 16px !important;
+  }
+
+  .price-info {
+    grid-template-columns: 1fr;
+  }
+  .price-item .value {
+    font-size: 13px;
+  }
+
+  .signal-text {
+    font-size: 20px;
+  }
+  .signal-labels {
+    font-size: 8px;
+  }
+
+  .pred-direction {
+    font-size: 24px;
+  }
+  .pred-prob {
+    gap: 12px;
+  }
+  .prob-item .prob-val {
+    font-size: 15px;
+  }
+
+  .training-section {
+    padding: 0 12px 16px;
+  }
+  .training-bar {
+    padding: 12px;
+  }
+  .training-header {
+    font-size: 12px;
+  }
+
+  .placeholder {
+    height: 200px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .indicator-row {
+    font-size: 11px;
+  }
+}
 </style>
 </head>
 <body>
