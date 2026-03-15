@@ -511,6 +511,7 @@ canvas#stockChart {
     <div class="chart-header" id="chartHeader" style="display:none;">
       <div>
         <span class="stock-name" id="stockName">종목명</span>
+        <span style="color:var(--text-muted);font-size:13px;margin-left:6px;" id="stockCode"></span>
         <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;">
           <span class="stock-price" id="stockPrice">$0.00</span>
           <span class="stock-change" id="stockChange">0%</span>
@@ -798,36 +799,58 @@ async function searchStock() {
 
   const displayName = stock.name;
   const ticker = stock.ticker;
-  showToast(`${displayName} 데이터를 불러오는 중...`, 'info');
+  const stockCode = stock.code;
+  showToast(`${displayName}(${stockCode}) 데이터를 불러오는 중...`, 'info');
 
-  let timeSeries = null;
-  try {
-    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(ticker)}&apikey=demo&outputsize=compact`;
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json['Time Series (Daily)']) {
-      timeSeries = json['Time Series (Daily)'];
-    } else {
-      throw new Error(json['Note'] || json['Error Message'] || 'API 오류');
+  let records = null;
+
+  // Yahoo Finance API via CORS proxies
+  const proxies = [
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  ];
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`;
+
+  for (const makeProxy of proxies) {
+    try {
+      const res = await fetch(makeProxy(yahooUrl));
+      const json = await res.json();
+      const result = json.chart?.result?.[0];
+      if (!result) throw new Error('No data');
+      const timestamps = result.timestamp;
+      const quote = result.indicators.quote[0];
+      records = timestamps.map((t, i) => {
+        const d = new Date(t * 1000);
+        return {
+          date: d.toISOString().slice(0, 10),
+          open: Math.round(quote.open[i] || 0),
+          high: Math.round(quote.high[i] || 0),
+          low: Math.round(quote.low[i] || 0),
+          close: Math.round(quote.close[i] || 0),
+          volume: quote.volume[i] || 0,
+        };
+      }).filter(r => r.close > 0);
+      showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
+      break;
+    } catch (err) {
+      console.warn('Yahoo API 시도 실패:', err.message);
     }
-  } catch (err) {
-    console.warn('API 실패, 샘플 데이터 사용:', err.message);
-    timeSeries = SAMPLE_DATA;
-    showToast('API 제한으로 샘플 데이터를 사용합니다', 'error');
   }
 
-  if (!timeSeries) { showToast('데이터를 불러올 수 없습니다', 'error'); return; }
-
-  // Parse data (oldest first)
-  const dates = Object.keys(timeSeries).sort();
-  const records = dates.map(d => ({
-    date: d,
-    open: parseFloat(timeSeries[d]['1. open']),
-    high: parseFloat(timeSeries[d]['2. high']),
-    low: parseFloat(timeSeries[d]['3. low']),
-    close: parseFloat(timeSeries[d]['4. close']),
-    volume: parseInt(timeSeries[d]['5. volume']),
-  }));
+  // Fallback to sample data
+  if (!records || records.length < 30) {
+    console.warn('API 실패, 샘플 데이터 사용');
+    const dates = Object.keys(SAMPLE_DATA).sort();
+    records = dates.map(d => ({
+      date: d,
+      open: parseFloat(SAMPLE_DATA[d]['1. open']),
+      high: parseFloat(SAMPLE_DATA[d]['2. high']),
+      low: parseFloat(SAMPLE_DATA[d]['3. low']),
+      close: parseFloat(SAMPLE_DATA[d]['4. close']),
+      volume: parseInt(SAMPLE_DATA[d]['5. volume']),
+    }));
+    showToast('API 제한으로 샘플 데이터를 사용합니다', 'error');
+  }
 
   currentData = { ticker: displayName, records };
   predictedPrices = null;
@@ -845,6 +868,7 @@ async function searchStock() {
   document.getElementById('analysisPH').style.display = 'none';
 
   document.getElementById('stockName').textContent = displayName;
+  document.getElementById('stockCode').textContent = stockCode;
 
   // Run AI
   await runAI(records, indicators);
