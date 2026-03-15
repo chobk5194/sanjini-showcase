@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg-top: #86ccff;
+  --bg-bottom: #edf8ff;
+  --text-main: #183a66;
+  --text-soft: #52709a;
+  --card-shadow: 0 20px 45px rgba(24, 58, 102, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(255, 250, 200, 0.6), transparent 35%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text-main);
+  font-family: var(--font-body), "Noto Sans KR", sans-serif;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.85), transparent 25%),
+    radial-gradient(circle at 80% 12%, rgba(255, 230, 145, 0.55), transparent 22%),
+    linear-gradient(180deg, rgba(95, 177, 255, 0.9), rgba(232, 248, 255, 0.95));
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+@keyframes character-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.72;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18) rotate(18deg);
+  }
+}
+
+@keyframes confetti-drift {
+  0% {
+    transform: translateY(-12px) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(36px) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-cloud {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), "Do Hyeon", sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .shadow-game {
+    box-shadow: var(--card-shadow);
+  }
+
+  .shadow-panel {
+    box-shadow: 0 16px 30px rgba(24, 58, 102, 0.12);
+  }
+
+  .bg-soft-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}

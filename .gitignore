@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+dist
+coverage
+*.log
+
+vibe-study-showcase/
+KakaoTalk_*.png
+main_character.png
+sanjini-poster.png
