@@ -852,6 +852,30 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
       }
     ];
 
+    // typing effect for code
+    let typingTimer = null;
+    function typeCode(html, callback) {
+      if (typingTimer) clearInterval(typingTimer);
+      const codeEl = document.getElementById('demoCode');
+      // split by newlines, preserving HTML tags per line
+      const lines = html.split('\n');
+      let lineIdx = 0;
+      codeEl.innerHTML = '<span class="cursor-blink"></span>';
+      typingTimer = setInterval(() => {
+        if (lineIdx >= lines.length) {
+          clearInterval(typingTimer);
+          typingTimer = null;
+          codeEl.innerHTML = html + '<span class="cursor-blink"></span>';
+          if (callback) callback();
+          return;
+        }
+        const soFar = lines.slice(0, lineIdx + 1).join('\n');
+        codeEl.innerHTML = soFar + '<span class="cursor-blink"></span>';
+        codeEl.parentElement && (codeEl.closest('.demo-code').scrollTop = codeEl.closest('.demo-code').scrollHeight);
+        lineIdx++;
+      }, 60);
+    }
+
     // demo interaction
     let currentRun = null;
     document.getElementById('demoPrompts').addEventListener('click', (e) => {
@@ -867,21 +891,22 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
       setTimeout(() => {
         const dots = msgs.querySelector('.typing-dots');
         if (dots) dots.parentElement.innerHTML = demo.reply;
-        document.getElementById('demoCode').innerHTML = demo.codeText + '<span class="cursor-blink"></span>';
-        const wrap = document.getElementById('demoLiveWrap');
-        wrap.classList.add('active');
-        document.getElementById('liveTitle').textContent = demo.title;
-        document.getElementById('liveHint').textContent = demo.hint;
-        const canvas = document.getElementById('liveCanvas');
-        const container = document.getElementById('demoLiveCanvas');
-        canvas.width = container.clientWidth * 2;
-        canvas.height = container.clientHeight * 2;
-        const ctx = canvas.getContext('2d');
-        if (currentRun) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        currentRun = demo.run;
-        demo.run(canvas, ctx, canvas.width, canvas.height);
+        typeCode(demo.codeText, () => {
+          const wrap = document.getElementById('demoLiveWrap');
+          wrap.classList.add('active');
+          document.getElementById('liveTitle').textContent = demo.title;
+          document.getElementById('liveHint').textContent = demo.hint;
+          const canvas = document.getElementById('liveCanvas');
+          const container = document.getElementById('demoLiveCanvas');
+          canvas.width = container.clientWidth * 2;
+          canvas.height = container.clientHeight * 2;
+          const ctx = canvas.getContext('2d');
+          if (currentRun) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+          currentRun = demo.run;
+          demo.run(canvas, ctx, canvas.width, canvas.height);
+        });
         msgs.scrollTop = msgs.scrollHeight;
       }, 1200);
     });
