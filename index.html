@@ -247,6 +247,127 @@
     footer p { color: var(--text-muted); font-size: 0.8rem; }
     footer a { color: var(--accent); text-decoration: none; }
 
+    /* ── DEMO ── */
+    .demo-section {
+      padding: 6rem 2rem; max-width: 1100px; margin: 0 auto;
+    }
+    .demo-container {
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: 0 0 80px rgba(124,92,255,0.08);
+    }
+    .demo-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.8rem 1.2rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .demo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .demo-dot:nth-child(1) { background: #ff5f57; }
+    .demo-dot:nth-child(2) { background: #ffbd2e; }
+    .demo-dot:nth-child(3) { background: #28c840; }
+    .demo-header span {
+      margin-left: 0.6rem; font-size: 0.75rem; color: var(--text-muted);
+      font-family: 'Space Grotesk', monospace;
+    }
+    .demo-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 420px;
+    }
+    @media (max-width: 768px) {
+      .demo-body { grid-template-columns: 1fr; }
+    }
+    .demo-chat {
+      padding: 1.5rem; display: flex; flex-direction: column;
+      border-right: 1px solid var(--border);
+    }
+    .demo-messages {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+      gap: 0.8rem; margin-bottom: 1rem; padding-right: 0.5rem;
+    }
+    .demo-messages::-webkit-scrollbar { width: 4px; }
+    .demo-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .msg {
+      max-width: 85%; padding: 0.7rem 1rem; border-radius: 14px;
+      font-size: 0.85rem; line-height: 1.5;
+      animation: msgIn 0.3s ease;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--accent); color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-ai {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.06); color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-ai .typing-dots span {
+      display: inline-block; width: 6px; height: 6px;
+      background: var(--text-muted); border-radius: 50%;
+      margin-right: 3px;
+      animation: blink 1.2s infinite;
+    }
+    .msg-ai .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .msg-ai .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 60%, 100% { opacity: 0.2; }
+      30% { opacity: 1; }
+    }
+    .demo-prompts {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .demo-prompt-btn {
+      padding: 0.45rem 0.9rem; border-radius: 100px;
+      background: rgba(124,92,255,0.1); border: 1px solid rgba(124,92,255,0.25);
+      color: var(--accent); font-size: 0.75rem; cursor: pointer;
+      transition: all 0.3s; white-space: nowrap;
+    }
+    .demo-prompt-btn:hover {
+      background: rgba(124,92,255,0.2); transform: translateY(-1px);
+    }
+    .demo-prompt-btn.used {
+      opacity: 0.3; pointer-events: none;
+    }
+    .demo-code {
+      padding: 1.5rem; overflow: auto;
+      background: rgba(0,0,0,0.4);
+    }
+    .demo-code pre {
+      font-family: 'Space Grotesk', 'Courier New', monospace;
+      font-size: 0.78rem; line-height: 1.7; color: var(--text-muted);
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .demo-code .line {
+      opacity: 0; animation: lineIn 0.06s ease forwards;
+    }
+    @keyframes lineIn {
+      to { opacity: 1; }
+    }
+    .demo-code .kw { color: #c792ea; }
+    .demo-code .fn { color: #82aaff; }
+    .demo-code .str { color: #c3e88d; }
+    .demo-code .cm { color: #546e7a; }
+    .demo-code .tag { color: #f07178; }
+    .demo-code .attr { color: #ffcb6b; }
+    .demo-code .num { color: #f78c6c; }
+    .cursor-blink {
+      display: inline-block; width: 8px; height: 15px;
+      background: var(--accent); margin-left: 2px;
+      animation: cursorBlink 0.8s step-end infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+
     /* ── ANIMATIONS ── */
     .fade-up {
       opacity: 0; transform: translateY(30px);
@@ -306,6 +427,36 @@
       <span class="marquee-item">VIBE CODING</span>
     </div>
   </div>
+
+  <!-- DEMO -->
+  <section class="demo-section" id="demo">
+    <p class="section-label fade-up">Try it</p>
+    <h2 class="section-title fade-up">바이브 코딩을 체험해보세요</h2>
+    <p class="section-desc fade-up">프롬프트를 고르면 AI가 코드를 생성합니다. 이게 바이브코딩입니다.</p>
+    <div class="demo-container fade-up">
+      <div class="demo-header">
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <span>vibe-coding-studio</span>
+      </div>
+      <div class="demo-body">
+        <div class="demo-chat">
+          <div class="demo-messages" id="demoMessages">
+            <div class="msg msg-ai">안녕하세요! 무엇을 만들어볼까요? 아래에서 골라보세요.</div>
+          </div>
+          <div class="demo-prompts" id="demoPrompts">
+            <button class="demo-prompt-btn" data-idx="0">투두리스트 만들어줘</button>
+            <button class="demo-prompt-btn" data-idx="1">다크모드 토글 만들어줘</button>
+            <button class="demo-prompt-btn" data-idx="2">카운트다운 타이머 만들어줘</button>
+          </div>
+        </div>
+        <div class="demo-code">
+          <pre id="demoCode"><span class="cm">// 프롬프트를 선택하면 여기에 코드가 생성됩니다</span><span class="cursor-blink"></span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ABOUT -->
   <section id="about">
@@ -476,6 +627,195 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ── DEMO LOGIC ──
+    const demos = [
+      {
+        reply: "좋아요! 할 일을 추가하고 완료 체크할 수 있는 투두리스트를 만들게요.",
+        code: [
+          { t: 'cm', v: '// Todo List App' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'const' },{ t: '', v: ' input = document.querySelector(' },{ t: 'str', v: "'#todo-input'" },{ t: '', v: ');' },
+          { t: 'kw', v: 'const' },{ t: '', v: ' list = document.querySelector(' },{ t: 'str', v: "'#todo-list'" },{ t: '', v: ');' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'function' },{ t: 'fn', v: ' addTodo' },{ t: '', v: '() {' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' text = input.value.trim();' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'if' },{ t: '', v: ' (!text) ' },{ t: 'kw', v: 'return' },{ t: '', v: ';' },
+          { t: '', v: '' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' li = document.createElement(' },{ t: 'str', v: "'li'" },{ t: '', v: ');' },
+          { t: '', v: '  li.innerHTML = `' },
+          { t: 'tag', v: '    <span>' },{ t: '', v: '${text}' },{ t: 'tag', v: '</span>' },
+          { t: 'tag', v: '    <button' },{ t: 'attr', v: ' onclick' },{ t: '', v: '="this.parentElement.remove()">' },
+          { t: '', v: '      삭제' },
+          { t: 'tag', v: '    </button>' },
+          { t: '', v: '  `;' },
+          { t: '', v: '' },
+          { t: '', v: '  li.addEventListener(' },{ t: 'str', v: "'click'" },{ t: '', v: ', () => {' },
+          { t: '', v: '    li.classList.toggle(' },{ t: 'str', v: "'done'" },{ t: '', v: ');' },
+          { t: '', v: '  });' },
+          { t: '', v: '' },
+          { t: '', v: '  list.appendChild(li);' },
+          { t: '', v: '  input.value = ' },{ t: 'str', v: "''" },{ t: '', v: ';' },
+          { t: '', v: '}' },
+          { t: '', v: '' },
+          { t: 'cm', v: '// ✅ 완성! 할 일 추가 & 완료 체크 & 삭제 기능' },
+        ]
+      },
+      {
+        reply: "다크모드 토글이요! CSS 변수를 활용해서 부드럽게 전환되게 만들게요.",
+        code: [
+          { t: 'cm', v: '// Dark Mode Toggle' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'const' },{ t: '', v: ' toggle = document.querySelector(' },{ t: 'str', v: "'#theme-btn'" },{ t: '', v: ');' },
+          { t: 'kw', v: 'const' },{ t: '', v: ' root = document.documentElement;' },
+          { t: 'kw', v: 'let' },{ t: '', v: ' isDark = ' },{ t: 'kw', v: 'true' },{ t: '', v: ';' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'const' },{ t: '', v: ' themes = {' },
+          { t: '', v: '  dark:  { ' },{ t: 'attr', v: 'bg' },{ t: '', v: ': ' },{ t: 'str', v: "'#0a0a0a'" },{ t: '', v: ', ' },{ t: 'attr', v: 'text' },{ t: '', v: ': ' },{ t: 'str', v: "'#ffffff'" },{ t: '', v: ' },' },
+          { t: '', v: '  light: { ' },{ t: 'attr', v: 'bg' },{ t: '', v: ': ' },{ t: 'str', v: "'#ffffff'" },{ t: '', v: ', ' },{ t: 'attr', v: 'text' },{ t: '', v: ': ' },{ t: 'str', v: "'#0a0a0a'" },{ t: '', v: ' },' },
+          { t: '', v: '};' },
+          { t: '', v: '' },
+          { t: '', v: 'toggle.addEventListener(' },{ t: 'str', v: "'click'" },{ t: '', v: ', () => {' },
+          { t: '', v: '  isDark = !isDark;' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' t = isDark ? themes.dark : themes.light;' },
+          { t: '', v: '' },
+          { t: '', v: '  root.style.setProperty(' },{ t: 'str', v: "'--bg'" },{ t: '', v: ', t.bg);' },
+          { t: '', v: '  root.style.setProperty(' },{ t: 'str', v: "'--text'" },{ t: '', v: ', t.text);' },
+          { t: '', v: '' },
+          { t: '', v: '  toggle.textContent = isDark ? ' },{ t: 'str', v: "'🌙'" },{ t: '', v: ' : ' },{ t: 'str', v: "'☀️'" },{ t: '', v: ';' },
+          { t: '', v: '});' },
+          { t: '', v: '' },
+          { t: 'cm', v: '// 🌗 완성! 클릭하면 다크/라이트 부드럽게 전환' },
+        ]
+      },
+      {
+        reply: "카운트다운 타이머! 시간 설정하고 시작하면 초 단위로 줄어드는 타이머를 만들게요.",
+        code: [
+          { t: 'cm', v: '// Countdown Timer' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'let' },{ t: '', v: ' remaining = ' },{ t: 'num', v: '0' },{ t: '', v: ';' },
+          { t: 'kw', v: 'let' },{ t: '', v: ' timer = ' },{ t: 'kw', v: 'null' },{ t: '', v: ';' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'function' },{ t: 'fn', v: ' startTimer' },{ t: '', v: '(seconds) {' },
+          { t: '', v: '  remaining = seconds;' },
+          { t: '', v: '  updateDisplay();' },
+          { t: '', v: '' },
+          { t: '', v: '  timer = setInterval(() => {' },
+          { t: '', v: '    remaining--;' },
+          { t: '', v: '    updateDisplay();' },
+          { t: '', v: '' },
+          { t: '', v: '    ' },{ t: 'kw', v: 'if' },{ t: '', v: ' (remaining <= ' },{ t: 'num', v: '0' },{ t: '', v: ') {' },
+          { t: '', v: '      clearInterval(timer);' },
+          { t: '', v: '      display.classList.add(' },{ t: 'str', v: "'shake'" },{ t: '', v: ');' },
+          { t: '', v: '      ' },{ t: 'kw', v: 'new' },{ t: '', v: ' Audio(' },{ t: 'str', v: "'alarm.mp3'" },{ t: '', v: ').play();' },
+          { t: '', v: '    }' },
+          { t: '', v: '  }, ' },{ t: 'num', v: '1000' },{ t: '', v: ');' },
+          { t: '', v: '}' },
+          { t: '', v: '' },
+          { t: 'kw', v: 'function' },{ t: 'fn', v: ' updateDisplay' },{ t: '', v: '() {' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' m = Math.floor(remaining / ' },{ t: 'num', v: '60' },{ t: '', v: ');' },
+          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' s = remaining % ' },{ t: 'num', v: '60' },{ t: '', v: ';' },
+          { t: '', v: '  display.textContent =' },
+          { t: '', v: '    `${String(m).padStart(' },{ t: 'num', v: '2' },{ t: '', v: ',' },{ t: 'str', v: "'0'" },{ t: '', v: ')}:${String(s).padStart(' },{ t: 'num', v: '2' },{ t: '', v: ',' },{ t: 'str', v: "'0'" },{ t: '', v: ')}`;' },
+          { t: '', v: '}' },
+          { t: '', v: '' },
+          { t: 'cm', v: '// ⏱️ 완성! 시작/정지/리셋 카운트다운 타이머' },
+        ]
+      }
+    ];
+
+    let demoRunning = false;
+    const messagesEl = document.getElementById('demoMessages');
+    const codeEl = document.getElementById('demoCode');
+
+    document.getElementById('demoPrompts').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.demo-prompt-btn');
+      if (!btn || demoRunning) return;
+      demoRunning = true;
+      btn.classList.add('used');
+
+      const idx = parseInt(btn.dataset.idx);
+      const demo = demos[idx];
+
+      // user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'msg msg-user';
+      userMsg.textContent = btn.textContent;
+      messagesEl.appendChild(userMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      // typing indicator
+      const typingMsg = document.createElement('div');
+      typingMsg.className = 'msg msg-ai';
+      typingMsg.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+      messagesEl.appendChild(typingMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      await sleep(1200);
+
+      // ai reply
+      typingMsg.innerHTML = demo.reply;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      await sleep(600);
+
+      // generate code with typing effect
+      codeEl.innerHTML = '';
+      let currentLine = '';
+
+      for (let i = 0; i < demo.code.length; i++) {
+        const token = demo.code[i];
+        if (token.v === '' && token.t === '') {
+          // empty line
+          codeEl.innerHTML += '\n';
+          await sleep(30);
+          continue;
+        }
+        const chars = token.v;
+        for (let j = 0; j < chars.length; j++) {
+          // remove old cursor
+          const oldCursor = codeEl.querySelector('.cursor-blink');
+          if (oldCursor) oldCursor.remove();
+
+          if (token.t) {
+            const span = document.createElement('span');
+            span.className = token.t;
+            span.textContent = chars[j];
+            codeEl.appendChild(span);
+          } else {
+            codeEl.appendChild(document.createTextNode(chars[j]));
+          }
+
+          // add cursor
+          const cursor = document.createElement('span');
+          cursor.className = 'cursor-blink';
+          codeEl.appendChild(cursor);
+
+          codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
+          await sleep(18);
+        }
+
+        // check if next token is a new line (empty string)
+        if (i + 1 < demo.code.length && demo.code[i+1].v === '' && demo.code[i+1].t === '') {
+          continue; // let the empty line handler add newline
+        }
+        // if next token exists and is on same conceptual line, don't add newline
+        // We add newline after certain tokens to make code readable
+        const next = demo.code[i+1];
+        if (!next || (next.t === '' && next.v === '') ||
+            (token.v.endsWith(';') || token.v.endsWith('{') || token.v.endsWith('}') ||
+             token.v.endsWith('`;') || token.v.endsWith(',') || token.t === 'cm' ||
+             token.v.endsWith('>') || token.v.endsWith('`'))) {
+          if (next && !(next.t === '' && next.v === '')) {
+            codeEl.appendChild(document.createTextNode('\n'));
+          }
+        }
+      }
+
+      demoRunning = false;
+    });
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
   </script>
 
 </body>
