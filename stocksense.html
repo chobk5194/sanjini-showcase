@@ -701,12 +701,16 @@ canvas#stockChart {
     font-size: 13px;
   }
 
-  /* Toast - 모바일: 우측 하단 */
+  /* Toast - 모바일: 하단 중앙 */
   .toast {
-    right: 16px;
-    left: auto;
+    right: auto;
+    left: 50%;
     bottom: 16px;
-    max-width: 300px;
+    transform: translateX(-50%) translateY(100px);
+    max-width: calc(100vw - 32px);
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
   }
 }
 
