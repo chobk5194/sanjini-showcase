@@ -783,80 +783,328 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
         }
       },
       {
-        reply: "우주 워프 터널입니다! 별들 사이를 날아가보세요.",
-        title: "Space Warp",
-        hint: "마우스를 움직여 방향을 바꿔보세요",
-        codeText: `<span class="cm">// Space Warp Tunnel</span>
-<span class="kw">const</span> stars = [];
-<span class="kw">const</span> NUM = <span class="num">300</span>;
+        reply: "우주 미니게임! 운석을 피하며 지구까지 도착하세요!",
+        title: "Space Dodge",
+        hint: "마우스로 우주선 조종 | 운석을 피하세요!",
+        codeText: `<span class="cm">// Space Dodge - 우주 미니게임</span>
+<span class="kw">let</span> shipX = w/<span class="num">2</span>, hp = <span class="num">3</span>, distance = <span class="num">0</span>;
+<span class="kw">const</span> totalDist = <span class="num">2000</span>;
+<span class="kw">const</span> asteroids = [];
 
-<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < NUM; i++) {
-  stars.<span class="fn">push</span>({
-    x: Math.<span class="fn">random</span>() * w - w/<span class="num">2</span>,
-    y: Math.<span class="fn">random</span>() * h - h/<span class="num">2</span>,
-    z: Math.<span class="fn">random</span>() * <span class="num">1000</span>,
+<span class="cm">// 마우스로 우주선 조종</span>
+canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
+  targetX = e.offsetX;
+});
+
+<span class="cm">// 운석 생성 (갈수록 빨라짐)</span>
+<span class="kw">function</span> <span class="fn">spawnAsteroid</span>() {
+  asteroids.<span class="fn">push</span>({
+    x: Math.<span class="fn">random</span>() * w,
+    y: <span class="num">-50</span>,
+    speed: Math.<span class="fn">random</span>()*<span class="num">3</span> + <span class="num">2.5</span>,
+    size: Math.<span class="fn">random</span>()*<span class="num">18</span> + <span class="num">12</span>,
   });
 }
 
-<span class="kw">function</span> <span class="fn">warp</span>() {
-  ctx.<span class="fn">fillStyle</span> = <span class="str">'rgba(13,13,26,0.2)'</span>;
-  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
-  ctx.<span class="fn">save</span>();
-  ctx.<span class="fn">translate</span>(w/<span class="num">2</span>, h/<span class="num">2</span>);
+<span class="cm">// 충돌 판정</span>
+<span class="kw">const</span> dist = Math.<span class="fn">hypot</span>(a.x - shipX, a.y - shipY);
+<span class="kw">if</span> (dist < a.size + <span class="num">12</span>) {
+  hp--;
+  <span class="fn">shakeScreen</span>();
+  <span class="kw">if</span> (hp <= <span class="num">0</span>) <span class="fn">gameOver</span>();
+}
 
-  stars.<span class="fn">forEach</span>(s => {
-    s.z -= <span class="num">8</span>;
-    <span class="kw">if</span> (s.z <= <span class="num">0</span>) s.z = <span class="num">1000</span>;
-    <span class="kw">const</span> sx = s.x / s.z * <span class="num">400</span>;
-    <span class="kw">const</span> sy = s.y / s.z * <span class="num">400</span>;
-    <span class="kw">const</span> r = (<span class="num">1</span> - s.z/<span class="num">1000</span>) * <span class="num">3</span>;
-    ctx.<span class="fn">beginPath</span>();
-    ctx.<span class="fn">arc</span>(sx, sy, r, <span class="num">0</span>, Math.PI*<span class="num">2</span>);
-    ctx.<span class="fn">fillStyle</span> = \`rgba(200,220,255,\${1-s.z/1000})\`;
-    ctx.<span class="fn">fill</span>();
-  });
-  ctx.<span class="fn">restore</span>();
-  <span class="fn">requestAnimationFrame</span>(warp);
+<span class="cm">// 미니맵: 지구까지 진행도</span>
+<span class="kw">const</span> progress = distance / totalDist;
+<span class="fn">drawMinimap</span>(progress);
+
+<span class="cm">// 지구 도착 = 클리어!</span>
+<span class="kw">if</span> (distance >= totalDist) {
+  <span class="fn">showVictory</span>(<span class="str">'EARTH REACHED!'</span>);
 }
 <span class="cm">// &#x1F680; 완성!</span>`,
         run: (canvas, ctx, w, h) => {
-          const stars = []; const NUM = 300;
-          let cx = w/2, cy = h/2;
-          for (let i = 0; i < NUM; i++) stars.push({ x: Math.random()*2000-1000, y: Math.random()*2000-1000, z: Math.random()*1000 });
+          const stars = []; const COUNT = 400;
+          const asteroids = [];
+          let shipX = w/2, shipY = h * 0.82, targetX = shipX;
+          let shakePow = 0, flashAlpha = 0;
+          let hp = 3, distance = 0, dodged = 0;
+          const totalDist = 2400;
+          let gameOver = false;
+          let nextAsteroid = 60, invincible = 0;
+
+          const bhStart = totalDist * 0.4, bhEnd = totalDist * 0.65;
+          let bhWarning = 0;
+          let bhActive = false, bhAngle = 0;
+          let bhX = w/2, bhY = h*0.3;
+
+          let earthSize = 0, earthPhase = 0;
+
+          for (let i = 0; i < COUNT; i++)
+            stars.push({ x: Math.random()*w, y: Math.random()*h, speed: Math.random()*3+1, size: Math.random()*1.5+0.5 });
+
           canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            cx = (e.clientX - rect.left) * (w / rect.width);
-            cy = (e.clientY - rect.top) * (h / rect.height);
+            const r = canvas.getBoundingClientRect();
+            targetX = (e.clientX - r.left) * (w / r.width);
           });
           canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const rect = canvas.getBoundingClientRect(); const t = e.touches[0];
-            cx = (t.clientX - rect.left) * (w / rect.width);
-            cy = (t.clientY - rect.top) * (h / rect.height);
+            const r = canvas.getBoundingClientRect();
+            targetX = (e.touches[0].clientX - r.left) * (w / r.width);
           }, { passive: false });
-          ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
-          function warp() {
-            ctx.fillStyle = 'rgba(13,13,26,0.15)'; ctx.fillRect(0,0,w,h);
-            ctx.save(); ctx.translate(cx, cy);
-            stars.forEach(s => {
-              s.z -= 10;
-              if (s.z <= 0) { s.x = Math.random()*2000-1000; s.y = Math.random()*2000-1000; s.z = 1000; }
-              const sx = s.x / s.z * 400;
-              const sy = s.y / s.z * 400;
-              const pz = s.z + 10;
-              const px = s.x / pz * 400;
-              const py = s.y / pz * 400;
-              const alpha = 1 - s.z / 1000;
-              ctx.strokeStyle = `rgba(200,220,255,${alpha})`;
-              ctx.lineWidth = (1 - s.z/1000) * 2;
-              ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy); ctx.stroke();
-              ctx.beginPath(); ctx.arc(sx, sy, (1-s.z/1000)*2, 0, Math.PI*2);
-              ctx.fillStyle = `rgba(200,220,255,${alpha})`; ctx.fill();
-            });
-            ctx.restore();
-            requestAnimationFrame(warp);
+
+          function spawnAsteroid() {
+            const size = Math.random()*18+12;
+            const a = { x: Math.random()*(w-100)+50, y: -50, speed: Math.random()*3+2.5, size, hue: Math.random()*40+10, rot: 0, rotSpeed: (Math.random()-0.5)*0.06, verts: [] };
+            for (let v = 0; v < 7; v++) a.verts.push(0.6+Math.random()*0.4);
+            asteroids.push(a);
           }
-          warp();
+
+          function drawShip(x, y) {
+            ctx.save(); ctx.translate(x, y);
+            const eg = ctx.createRadialGradient(0,18,0,0,18,20);
+            eg.addColorStop(0,'rgba(124,92,255,0.6)'); eg.addColorStop(1,'transparent');
+            ctx.fillStyle = eg; ctx.fillRect(-20,8,40,30);
+            ctx.beginPath();
+            ctx.moveTo(0,-18); ctx.lineTo(-14,14); ctx.lineTo(-6,10);
+            ctx.lineTo(0,16); ctx.lineTo(6,10); ctx.lineTo(14,14); ctx.closePath();
+            ctx.fillStyle = invincible>0 && Math.floor(invincible/3)%2 ? 'rgba(255,255,255,0.3)' : '#c8b8ff';
+            ctx.fill(); ctx.strokeStyle='#7c5cff'; ctx.lineWidth=1.2; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0,-4,4,0,Math.PI*2);
+            ctx.fillStyle='#00d4aa'; ctx.fill();
+            ctx.restore();
+          }
+
+          function drawEarth(x, y, size) {
+            ctx.save(); ctx.translate(x, y);
+            const atm = ctx.createRadialGradient(0,0,size*0.8,0,0,size*1.6);
+            atm.addColorStop(0,'rgba(100,180,255,0.15)'); atm.addColorStop(1,'transparent');
+            ctx.fillStyle = atm; ctx.beginPath(); ctx.arc(0,0,size*1.6,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2);
+            const ocean = ctx.createRadialGradient(-size*0.3,-size*0.3,0,0,0,size);
+            ocean.addColorStop(0,'#5599dd'); ocean.addColorStop(1,'#2255aa');
+            ctx.fillStyle = ocean; ctx.fill();
+            ctx.fillStyle = '#44aa55';
+            ctx.beginPath(); ctx.ellipse(-size*0.15,-size*0.2,size*0.35,size*0.25,0.3,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(size*0.2,size*0.25,size*0.2,size*0.3,-0.4,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#55bb66';
+            ctx.beginPath(); ctx.ellipse(-size*0.3,size*0.15,size*0.12,size*0.1,0.5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.ellipse(0,-size*0.85,size*0.3,size*0.1,0,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0,size*0.88,size*0.25,size*0.08,0,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.beginPath(); ctx.ellipse(size*0.1,-size*0.1,size*0.4,size*0.08,0.8,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(-size*0.2,size*0.4,size*0.3,size*0.06,-0.3,0,Math.PI*2); ctx.fill();
+            const spec = ctx.createRadialGradient(-size*0.3,-size*0.35,0,-size*0.2,-size*0.2,size*0.7);
+            spec.addColorStop(0,'rgba(255,255,255,0.2)'); spec.addColorStop(1,'transparent');
+            ctx.fillStyle = spec; ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fill();
+            ctx.restore();
+          }
+
+          function drawBlackhole(x, y, size) {
+            ctx.save(); ctx.translate(x, y);
+            bhAngle += 0.02;
+            for (let r = 0; r < 4; r++) {
+              ctx.beginPath();
+              const radius = size*(1.2+r*0.3);
+              ctx.ellipse(0,0,radius,radius*0.3,bhAngle+r*0.5,0,Math.PI*2);
+              ctx.strokeStyle = `hsla(${280+r*20},80%,${50+r*10}%,${0.3-r*0.05})`;
+              ctx.lineWidth = 3-r*0.5; ctx.stroke();
+            }
+            const bhGrad = ctx.createRadialGradient(0,0,0,0,0,size);
+            bhGrad.addColorStop(0,'#000'); bhGrad.addColorStop(0.7,'rgba(20,0,40,0.9)');
+            bhGrad.addColorStop(1,'transparent');
+            ctx.fillStyle = bhGrad; ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0,0,size*0.8,0,Math.PI*2);
+            ctx.strokeStyle = 'rgba(180,100,255,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+          }
+
+          function drawWarning(alpha) {
+            ctx.save();
+            ctx.fillStyle = `rgba(255,0,0,${alpha*0.08})`;
+            ctx.fillRect(0,0,w,h);
+            ctx.font = 'bold 24px Space Grotesk, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = `rgba(255,50,50,${alpha})`;
+            ctx.fillText('⚠ WARNING ⚠', w/2, h/2 - 20);
+            ctx.font = '13px Noto Sans KR, sans-serif';
+            ctx.fillStyle = `rgba(255,150,150,${alpha*0.8})`;
+            ctx.fillText('블랙홀 접근 감지!', w/2, h/2 + 8);
+            ctx.strokeStyle = `rgba(255,0,0,${alpha*0.5})`;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(2,2,w-4,h-4);
+            ctx.restore();
+          }
+
+          function drawMinimap() {
+            const mx = w-70, my = 15, mw = 55, mh = 140;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(mx,my,mw,mh,8); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '8px Space Grotesk, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('MAP', mx+mw/2, my+12);
+            const trackX = mx+mw/2, trackTop = my+22, trackBot = my+mh-18;
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.setLineDash([2,3]);
+            ctx.beginPath(); ctx.moveTo(trackX,trackTop); ctx.lineTo(trackX,trackBot); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#4488ff'; ctx.beginPath(); ctx.arc(trackX,trackTop,6,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#33bb55'; ctx.beginPath(); ctx.arc(trackX-2,trackTop-1,3,0.3,1.8); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '7px sans-serif'; ctx.fillText('Earth',trackX,trackTop-9);
+            const bhMapTop = trackBot-(trackBot-trackTop)*(bhEnd/totalDist);
+            const bhMapBot = trackBot-(trackBot-trackTop)*(bhStart/totalDist);
+            ctx.fillStyle = 'rgba(150,50,255,0.15)'; ctx.fillRect(mx+4,bhMapTop,mw-8,bhMapBot-bhMapTop);
+            ctx.fillStyle = 'rgba(150,50,255,0.5)'; ctx.font = '6px sans-serif'; ctx.fillText('BH',trackX,(bhMapTop+bhMapBot)/2+2);
+            const progress = Math.min(distance/totalDist,1);
+            const shipMapY = trackBot-(trackBot-trackTop)*progress;
+            ctx.fillStyle = '#c8b8ff'; ctx.beginPath();
+            ctx.moveTo(trackX,shipMapY-4); ctx.lineTo(trackX-3,shipMapY+3); ctx.lineTo(trackX+3,shipMapY+3); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillText('Start',trackX,trackBot+10);
+            ctx.fillStyle = '#00d4aa'; ctx.font = 'bold 9px Space Grotesk, sans-serif'; ctx.fillText(Math.floor(progress*100)+'%',trackX,my+mh-4);
+          }
+
+          function drawHUD() {
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px Space Grotesk, sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText('HP',16,30);
+            for (let i = 0; i < 3; i++) {
+              ctx.fillStyle = i<hp ? '#ff5577' : 'rgba(255,255,255,0.1)'; ctx.fillRect(38+i*18,20,14,14);
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.strokeRect(38+i*18,20,14,14);
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '10px Space Grotesk, sans-serif';
+            ctx.fillText('DODGED: '+dodged, 16, 52);
+          }
+
+          ctx.fillStyle = '#00000a'; ctx.fillRect(0,0,w,h);
+
+          function gameLoop() {
+            if (gameOver) return;
+            shakePow *= 0.88; flashAlpha *= 0.82;
+            if (invincible > 0) invincible--;
+            const sx = (Math.random()-0.5)*shakePow, sy = (Math.random()-0.5)*shakePow;
+            ctx.save(); ctx.translate(sx, sy);
+            ctx.fillStyle = 'rgba(0,0,10,0.25)'; ctx.fillRect(-10,-10,w+20,h+20);
+
+            const inBH = distance >= bhStart && distance < bhEnd;
+            stars.forEach(s => {
+              s.y += s.speed * (inBH ? 0.5 : 1);
+              if (s.y > h) { s.y = 0; s.x = Math.random()*w; }
+              ctx.globalAlpha = 0.5+s.speed/4;
+              let drawX = s.x, drawY = s.y;
+              if (inBH) {
+                const dx = s.x-bhX, dy = s.y-bhY;
+                const d = Math.hypot(dx,dy)+1;
+                const pull = 2000/(d*d)*5;
+                drawX -= dx/d*pull; drawY -= dy/d*pull;
+              }
+              ctx.fillStyle = inBH ? `hsl(${280+Math.random()*40},60%,70%)` : '#fff';
+              ctx.beginPath(); ctx.arc(drawX,drawY,s.size,0,Math.PI*2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            const shipSpeed = inBH ? 0.04 : 0.12;
+            shipX += (targetX - shipX) * shipSpeed;
+            if (inBH) { shipX += (bhX - shipX) * 0.025; }
+            shipX = Math.max(20, Math.min(w-20, shipX));
+
+            distance++;
+
+            const warnStart = bhStart - 120;
+            if (distance >= warnStart && distance < bhStart) {
+              bhWarning = Math.sin((distance-warnStart)/120*Math.PI);
+            } else { bhWarning = 0; }
+
+            nextAsteroid--;
+            let spawnRate;
+            if (inBH) { spawnRate = 12; }
+            else { spawnRate = Math.max(25, 70 - Math.floor(distance/totalDist*50)); }
+            if (nextAsteroid <= 0) { spawnAsteroid(); nextAsteroid = Math.floor(Math.random()*spawnRate)+spawnRate/2; }
+            if (inBH) {
+              asteroids.forEach(a => {
+                const dx = bhX-a.x, dy = bhY-a.y;
+                const d = Math.hypot(dx,dy)+1;
+                a.x += dx/d*1.5; a.y += dy/d*0.5;
+              });
+            }
+
+            if (inBH) { drawBlackhole(bhX, bhY, 45 + Math.sin(distance*0.02)*5); }
+
+            for (let i = asteroids.length-1; i >= 0; i--) {
+              const a = asteroids[i];
+              a.y += a.speed; a.rot += a.rotSpeed;
+              if (a.y > h+50) { dodged++; asteroids.splice(i,1); continue; }
+              if (a.x < -50 || a.x > w+50) { asteroids.splice(i,1); continue; }
+              if (invincible <= 0) {
+                const dist = Math.hypot(a.x-shipX, a.y-shipY);
+                if (dist < a.size+12) {
+                  hp--; shakePow=30; flashAlpha=0.7; invincible=60;
+                  asteroids.splice(i,1);
+                  if (hp<=0) {
+                    gameOver=true; ctx.restore();
+                    ctx.fillStyle='rgba(0,0,10,0.85)'; ctx.fillRect(0,0,w,h);
+                    ctx.fillStyle='#ff4444'; ctx.font='bold 28px Space Grotesk, sans-serif'; ctx.textAlign='center';
+                    ctx.fillText('GAME OVER',w/2,h/2-10);
+                    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='14px Noto Sans KR, sans-serif';
+                    ctx.fillText('운석에 파괴되었습니다... 회피: '+dodged+'개',w/2,h/2+20);
+                    return;
+                  }
+                  continue;
+                }
+              }
+              ctx.save(); ctx.translate(a.x,a.y); ctx.rotate(a.rot);
+              ctx.globalAlpha=0.15;
+              const glow = ctx.createRadialGradient(0,0,0,0,0,a.size*2);
+              glow.addColorStop(0,`hsla(${a.hue},60%,50%,0.4)`); glow.addColorStop(1,'transparent');
+              ctx.fillStyle=glow; ctx.fillRect(-a.size*2,-a.size*2,a.size*4,a.size*4);
+              ctx.globalAlpha=1;
+              ctx.beginPath();
+              for (let v=0;v<a.verts.length;v++) {
+                const angle=(v/a.verts.length)*Math.PI*2, rr=a.size*a.verts[v];
+                v===0?ctx.moveTo(Math.cos(angle)*rr,Math.sin(angle)*rr):ctx.lineTo(Math.cos(angle)*rr,Math.sin(angle)*rr);
+              }
+              ctx.closePath(); ctx.fillStyle=`hsl(${a.hue},30%,25%)`; ctx.fill();
+              ctx.strokeStyle=`hsl(${a.hue},40%,45%)`; ctx.lineWidth=1.5; ctx.stroke();
+              ctx.restore();
+            }
+
+            const earthStart = totalDist * 0.85;
+            if (distance >= earthStart) {
+              earthPhase = (distance - earthStart) / (totalDist - earthStart);
+              earthSize = earthPhase * 120;
+              drawEarth(w/2, -60 + earthPhase * (h*0.35+60), earthSize);
+            }
+
+            drawShip(shipX, shipY);
+            if (bhWarning > 0) drawWarning(bhWarning);
+            if (inBH) {
+              const vig = ctx.createRadialGradient(bhX,bhY,50,bhX,bhY,w*0.8);
+              vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(30,0,60,0.4)');
+              ctx.fillStyle=vig; ctx.fillRect(0,0,w,h);
+            }
+            if (flashAlpha>0.01) { ctx.fillStyle=`rgba(255,100,50,${flashAlpha})`; ctx.fillRect(0,0,w,h); }
+            ctx.restore();
+            drawMinimap(); drawHUD();
+
+            if (distance >= totalDist) {
+              gameOver = true;
+              let arrFrame = 0;
+              function arrivalAnim() {
+                arrFrame++;
+                ctx.fillStyle = `rgba(0,0,10,${Math.min(arrFrame/60,0.85)})`; ctx.fillRect(0,0,w,h);
+                const eSize = 80 + arrFrame*1.5;
+                drawEarth(w/2, h/2 - 20, Math.min(eSize, 140));
+                ctx.globalAlpha = Math.min(arrFrame/30, 1);
+                ctx.fillStyle='#fff'; ctx.font='bold 26px Space Grotesk, sans-serif'; ctx.textAlign='center';
+                ctx.fillText('EARTH REACHED!', w/2, h/2 + Math.min(eSize,140) + 30);
+                ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='13px Noto Sans KR, sans-serif';
+                ctx.fillText('지구에 무사히 도착했습니다!  회피: '+dodged+'개', w/2, h/2 + Math.min(eSize,140) + 55);
+                ctx.globalAlpha = 1;
+                if (arrFrame < 90) requestAnimationFrame(arrivalAnim);
+              }
+              arrivalAnim();
+              return;
+            }
+
+            requestAnimationFrame(gameLoop);
+          }
+          gameLoop();
         }
       }
     ];
