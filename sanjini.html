@@ -67,9 +67,22 @@
     .feature h3{font-size:22px;line-height:1.15;font-weight:900}
     .feature p{margin-top:10px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.86);font-weight:700}
     .feature .loc{display:inline-flex;margin-top:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:900}
+    .map-shell{height:100%;padding:10px}
     .map-stage{position:relative;aspect-ratio:9/14;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,#d6efff,#f6fdff)}
+    .map-stage.full{height:100%;aspect-ratio:auto;border-radius:30px;box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .map-stage img{width:100%;height:100%;display:block;object-fit:cover}
     .map-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(24,58,102,.08))}
+    .map-stage.full::after{background:linear-gradient(180deg,rgba(10,27,57,.12),rgba(10,27,57,.02) 30%,rgba(24,58,102,.12))}
+    .map-hud{position:absolute;top:14px;left:14px;right:14px;z-index:3;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;pointer-events:none}
+    .map-hud-main{max-width:210px;padding:14px 16px 16px;border-radius:24px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.88);box-shadow:0 16px 28px rgba(24,58,102,.14);backdrop-filter:blur(12px)}
+    .map-hud-main small{display:block;color:#2f6fbc;font-size:11px;letter-spacing:.14em;font-weight:900}
+    .map-hud-main strong{display:block;margin-top:8px;color:#183a66;font-size:24px;line-height:1;font-weight:900}
+    .map-hud-main p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12px;line-height:1.6;font-weight:800}
+    .map-hud-stats{display:grid;gap:8px}
+    .map-stat{min-width:92px;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.82);box-shadow:0 14px 24px rgba(24,58,102,.12);text-align:right}
+    .map-stat span{display:block;color:#2f6fbc;font-size:10px;letter-spacing:.12em;font-weight:900}
+    .map-stat strong{display:block;margin-top:4px;color:#183a66;font-size:18px;font-weight:900}
+    .map-stat.accent{background:rgba(255,244,204,.94)}
     .marker{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;border:none;background:transparent;cursor:pointer;z-index:2}
     .marker-core{position:relative;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ff5e5e;border:3px solid #fff;color:#fff;font-size:28px;font-weight:900;box-shadow:0 12px 24px rgba(255,94,94,.36)}
     .marker-core::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:rgba(255,94,94,.44);z-index:-1;animation:markerPulse 1.8s ease-out infinite}
@@ -217,6 +230,13 @@
       .xp-head{align-items:center}
       .xp-head strong{font-size:28px}
       .stage-card h4,.streak-card h4,.all-clear h4{font-size:21px}
+      .map-shell{padding:8px}
+      .map-hud{top:12px;left:12px;right:12px;gap:8px}
+      .map-hud-main{max-width:180px;padding:12px 14px 14px}
+      .map-hud-main strong{font-size:21px}
+      .map-hud-main p{font-size:11px}
+      .map-stat{min-width:78px;padding:8px 10px}
+      .map-stat strong{font-size:16px}
     }
   </style>
 </head>
@@ -382,7 +402,7 @@
 
     function renderMap() {
       const completeCount = state.completedQuestIds.length;
-      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">탐험 지도</div><div class="title">오늘의 캠퍼스 미션</div><p class="copy-text">빨간 마커를 눌러 오늘의 캠퍼스 활동을 미션처럼 시작해 보자.</p></div><div class="pill-stat">오늘 진행<strong>${completeCount} / ${quests.length}</strong></div></div></section><section class="card panel"><div class="map-stage"><img src="campus-map.png" alt="캠퍼스 지도" />${renderMarkers(state.overlay === "tutorial")}</div></section><section class="card panel"><div class="tag">${completeCount === quests.length ? "오늘의 상태" : "탐험 팁"}</div><div class="title" style="font-size:20px;">${completeCount === quests.length ? "오늘의 미션을 모두 완료했어" : "도서관, 학생회관, 금정산 중 한 곳을 눌러보자"}</div><p class="copy-text">${completeCount === quests.length ? "모든 장소가 기록과 추억 탭에 반영되었고 지도에서는 완료 상태로 남아 있어." : "첫 지도 진입 튜토리얼 이후에는 완료하지 않은 퀘스트만 선택할 수 있어."}</p></section></div>`;
+      return `<div class="map-shell"><section class="map-stage full"><img src="campus-map.png" alt="캠퍼스 지도" /><div class="map-hud"><div class="map-hud-main"><small>산지니 원정대</small><strong>탐험 지도</strong><p>${completeCount === quests.length ? "오늘의 세 장소를 모두 완주했어." : "빨간 마커를 눌러 오늘의 퀘스트를 선택해."}</p></div><div class="map-hud-stats"><div class="map-stat"><span>레벨</span><strong>${getLevel(state.xpTotal)}</strong></div><div class="map-stat"><span>연속</span><strong>${state.streakCount}일</strong></div><div class="map-stat accent"><span>진행</span><strong>${completeCount}/${quests.length}</strong></div></div></div>${renderMarkers(state.overlay === "tutorial")}</section></div>`;
     }
 
     function renderRecord() {
