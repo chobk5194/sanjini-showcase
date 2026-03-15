@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockSense - AI 주식 예측</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --border: #1e1e24;
+  --border-hover: #2a2a32;
+  --purple: #7c5cff;
+  --purple-dim: rgba(124,92,255,0.15);
+  --purple-glow: rgba(124,92,255,0.3);
+  --mint: #00d4aa;
+  --mint-dim: rgba(0,212,170,0.15);
+  --red: #ff4d6a;
+  --red-dim: rgba(255,77,106,0.15);
+  --orange: #ff9f43;
+  --orange-dim: rgba(255,159,67,0.15);
+  --text: #e4e4e7;
+  --text-dim: #71717a;
+  --text-muted: #52525b;
+}
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f2;
+  --border: #e0e0e5;
+  --border-hover: #d0d0d5;
+  --purple-dim: rgba(124,92,255,0.08);
+  --purple-glow: rgba(124,92,255,0.15);
+  --mint-dim: rgba(0,212,170,0.08);
+  --red-dim: rgba(255,77,106,0.08);
+  --orange-dim: rgba(255,159,67,0.08);
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --text-muted: #999;
+}
+
+body {
+  font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 20px 32px 0;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--purple); }
+
+header {
+  padding: 16px 32px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--purple), var(--mint));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.logo h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--purple), var(--mint));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo span {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.theme-toggle {
+  border-radius: 999px; border: 2px solid var(--border, #333);
+  background: var(--bg-card); cursor: pointer; padding: 8px 16px;
+  font-size: 14px; font-weight: 600; transition: all 0.2s; color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-family: inherit; white-space: nowrap; flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--mint); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+.search-wrapper {
+  width: 400px;
+  max-width: 100%;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-box:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-dim);
+}
+
+.search-box svg { flex-shrink: 0; color: var(--text-dim); }
+
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+}
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box button {
+  background: var(--purple);
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: background 0.2s, transform 0.1s;
+}
+.search-box button:hover { background: #6a4de6; }
+.search-box button:active { transform: scale(0.97); }
+
+.search-wrapper { position: relative; }
+.autocomplete {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 9999;
+  display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.autocomplete.show { display: block; }
+.ac-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.selected { background: var(--purple-dim); }
+.ac-name { color: var(--text); font-size: 14px; font-weight: 500; }
+.ac-name mark { background: none; color: var(--purple); font-weight: 700; }
+.ac-code { color: var(--text-muted); font-size: 12px; font-family: 'Space Grotesk', monospace; }
+.ac-price { color: var(--text-dim); font-size: 12px; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  padding: 0 32px 24px;
+  min-height: 0;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-container {
+  position: relative;
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stock-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stock-price {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.stock-change {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+.stock-change.up { color: var(--mint); background: var(--mint-dim); }
+.stock-change.down { color: var(--red); background: var(--red-dim); }
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-line {
+  width: 24px;
+  height: 2px;
+  border-radius: 1px;
+}
+.legend-line.actual { background: var(--mint); }
+.legend-line.predicted { background: var(--purple); border-top: 2px dashed var(--purple); height: 0; }
+.legend-line.ma5 { background: #ff9f43; }
+.legend-line.ma20 { background: #3b82f6; }
+.legend-line.ma60 { background: #f43f5e; }
+
+canvas#stockChart {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+}
+
+/* Right Panel */
+.analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(400px + 100px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.price-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.price-item {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 12px;
+}
+.price-item .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.price-item .value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.indicator-row:last-child { border-bottom: none; }
+.indicator-label { color: var(--text-dim); }
+.indicator-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+}
+
+.signal-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.prediction-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.pred-direction {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.pred-prob {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.prob-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.prob-item .prob-label { color: var(--text-dim); font-size: 12px; }
+.prob-item .prob-val { font-family: 'Space Grotesk'; font-weight: 700; font-size: 20px; }
+
+.overall-signal {
+  text-align: center;
+  padding: 20px;
+}
+
+.signal-text {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.signal-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 16px 0 8px;
+  gap: 2px;
+}
+.signal-bar div {
+  flex: 1;
+  border-radius: 3px;
+  opacity: 0.25;
+  transition: opacity 0.3s;
+}
+.signal-bar div.active { opacity: 1; }
+.signal-bar .sb-strong-sell { background: #dc2626; }
+.signal-bar .sb-sell { background: #f97316; }
+.signal-bar .sb-neutral { background: #eab308; }
+.signal-bar .sb-buy { background: #22c55e; }
+.signal-bar .sb-strong-buy { background: #06b6d4; }
+
+.signal-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Training bar */
+.training-section {
+  padding: 0 32px 32px;
+}
+
+.training-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: none;
+}
+.training-bar.active { display: block; }
+
+.training-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.training-status {
+  color: var(--purple);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--purple-dim);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.training-epoch { color: var(--text-dim); font-size: 13px; font-family: 'Space Grotesk'; }
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--mint));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.training-loss {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk';
+}
+
+/* Placeholder */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+.placeholder svg { opacity: 0.3; }
+.placeholder p { font-size: 14px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  header { padding: 16px 16px 20px; }
+  .main-grid { padding: 0 16px 24px; }
+  .training-section { padding: 0 16px 24px; }
+  .back-link { padding: 16px 16px 0; }
+  .search-box { width: 100%; }
+  .analysis-panel { max-height: none; }
+}
+
+/* scrollbar */
+.analysis-panel::-webkit-scrollbar { width: 4px; }
+.analysis-panel::-webkit-scrollbar-track { background: transparent; }
+.analysis-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  left: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 99999;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 360px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: var(--red); }
+.toast.info { border-color: var(--purple); }
+
+/* ===== Mobile Responsive: 768px ===== */
+@media (max-width: 768px) {
+  /* Header stacks vertically */
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px 16px;
+    gap: 12px;
+  }
+  .logo {
+    justify-content: center;
+  }
+
+  /* Search full width */
+  .search-wrapper {
+    width: 100%;
+  }
+  .search-box {
+    width: 100%;
+  }
+
+  /* Autocomplete on mobile: 밀려나게 */
+  .autocomplete {
+    position: static;
+    margin-top: 4px;
+    max-height: 50vh;
+    z-index: auto;
+  }
+
+  /* Back link */
+  .back-link {
+    padding: 12px 16px 0;
+    font-size: 13px;
+  }
+
+  /* Description text block */
+  div[style*="padding:0 32px"] {
+    padding: 0 16px 12px !important;
+  }
+  div[style*="padding:0 32px"] p {
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+  }
+
+  /* Main grid: single column */
+  .main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px 20px;
+  }
+
+  /* Chart container fits mobile */
+  .chart-container {
+    padding: 16px;
+  }
+  canvas#stockChart {
+    height: 280px;
+  }
+
+  /* Chart header */
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .stock-name {
+    font-size: 22px;
+  }
+  .stock-price {
+    font-size: 26px;
+  }
+  .chart-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* AI result panel below chart */
+  #aiResultBelow div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  #aiResultBelow span[style*="font-size:20px"] {
+    font-size: 18px !important;
+  }
+
+  /* Analysis panel stacks properly */
+  .analysis-panel {
+    max-height: none;
+    overflow-y: visible;
+    gap: 14px;
+  }
+
+  /* Cards */
+  .card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .card-title {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Price info grid */
+  .price-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .price-item {
+    padding: 10px;
+  }
+  .price-item .value {
+    font-size: 14px;
+  }
+  .price-item .label {
+    font-size: 10px;
+  }
+
+  /* Indicator rows */
+  .indicator-row {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+
+  /* Signal bar & labels */
+  .signal-bar {
+    margin: 12px 0 6px;
+  }
+  .signal-labels {
+    font-size: 9px;
+  }
+  .signal-text {
+    font-size: 24px;
+  }
+
+  /* Prediction card */
+  .prediction-card {
+    padding: 16px;
+  }
+  .pred-direction {
+    font-size: 28px;
+  }
+  .pred-prob {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .prob-item .prob-val {
+    font-size: 17px;
+  }
+
+  /* Training section */
+  .training-section {
+    padding: 0 16px 20px;
+  }
+  .training-bar {
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
+  .training-header {
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Placeholder */
+  .placeholder {
+    height: 260px;
+  }
+  .placeholder p {
+    font-size: 13px;
+  }
+
+  /* Toast - 모바일: 하단 중앙 */
+  .toast {
+    right: auto;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%) translateY(100px);
+    max-width: calc(100vw - 32px);
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ===== Very small screens: 400px ===== */
+@media (max-width: 400px) {
+  header {
+    padding: 10px 12px 12px;
+  }
+  .logo h1 {
+    font-size: 22px;
+  }
+  .logo span {
+    font-size: 11px;
+  }
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+    border-radius: 8px;
+  }
+
+  .search-box {
+    padding: 6px 10px;
+  }
+  .search-box input {
+    font-size: 13px;
+  }
+  .search-box button {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .back-link {
+    padding: 10px 12px 0;
+    font-size: 12px;
+  }
+
+  .main-grid {
+    padding: 0 12px 16px;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .chart-container {
+    padding: 12px;
+  }
+  canvas#stockChart {
+    height: 220px;
+  }
+
+  .stock-name {
+    font-size: 18px;
+  }
+  .stock-price {
+    font-size: 22px;
+  }
+  .stock-change {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  /* AI result panel: stack single column on very small */
+  #aiResultBelow div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  #aiResultBelow span[style*="font-size:20px"] {
+    font-size: 16px !important;
+  }
+
+  .price-info {
+    grid-template-columns: 1fr;
+  }
+  .price-item .value {
+    font-size: 13px;
+  }
+
+  .signal-text {
+    font-size: 20px;
+  }
+  .signal-labels {
+    font-size: 8px;
+  }
+
+  .pred-direction {
+    font-size: 24px;
+  }
+  .pred-prob {
+    gap: 12px;
+  }
+  .prob-item .prob-val {
+    font-size: 15px;
+  }
+
+  .training-section {
+    padding: 0 12px 16px;
+  }
+  .training-bar {
+    padding: 12px;
+  }
+  .training-header {
+    font-size: 12px;
+  }
+
+  .placeholder {
+    height: 200px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .indicator-row {
+    font-size: 11px;
+  }
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+#starsCanvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+body > *:not(#starsCanvas):not(.toast) { position: relative; z-index: 1; }
+[data-theme="light"] #starsCanvas { opacity: 0.15; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+<a href="index.html" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+  돌아가기
+</a>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    <div>
+      <h1>StockSense</h1>
+      <span>AI 기반 주식 분석 &amp; 예측</span>
+    </div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="다크/라이트 모드 전환">🌙 다크 모드</button>
+  <div class="search-wrapper">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="tickerInput" placeholder="종목 검색 (예: 삼성전자, SK하이닉스)" spellcheck="false" autocomplete="off">
+      <button onclick="searchStock()">분석</button>
+    </div>
+    <div class="autocomplete" id="autocomplete"></div>
+  </div>
+</header>
+
+<div style="padding:0 32px 16px;max-width:900px;">
+  <p style="color:var(--text-dim);font-size:14px;line-height:1.8;">
+    KOSPI 상장 종목을 한글로 검색하면 과거 주가 데이터를 불러와 차트에 표시합니다.<br>
+    RSI, MACD, 이동평균선, 볼린저밴드 등 <span style="color:var(--mint)">기술적 지표를 자동 분석</span>하고,
+    <span style="color:var(--purple)">TensorFlow.js 신경망</span>이 브라우저에서 직접 학습하여 향후 5일간의 주가를 예측합니다.<br>
+    기술적 분석 점수와 AI 예측을 결합해 <strong>강력매수 ~ 강력매도</strong> 종합 시그널을 제공합니다.<br>
+    <span style="color:var(--orange);font-size:12px;">* PC 환경에서의 사용을 추천합니다.</span>
+  </p>
+</div>
+
+<div class="main-grid">
+  <!-- Chart -->
+  <div class="card chart-container">
+    <div class="chart-header" id="chartHeader" style="display:none;">
+      <div>
+        <span class="stock-name" id="stockName">종목명</span>
+        <span style="color:var(--text-muted);font-size:13px;margin-left:6px;" id="stockCode"></span>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;">
+          <span class="stock-price" id="stockPrice">$0.00</span>
+          <span class="stock-change" id="stockChange">0%</span>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span><span class="legend-line actual"></span> 실제 가격</span>
+        <span><span class="legend-line predicted"></span> AI 예측</span>
+        <span><span class="legend-line ma5"></span> MA5</span>
+        <span><span class="legend-line ma20"></span> MA20</span>
+      </div>
+    </div>
+    <canvas id="stockChart"></canvas>
+    <!-- AI 예측 결과 (차트 아래) -->
+    <div id="aiResultBelow" style="display:none; padding:20px 0 0; margin-top:20px; border-top:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);"></div>
+        <span style="font-weight:600;font-size:15px;">AI 예측 결과</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:auto;">TensorFlow.js Dense Network</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">예측 방향</div>
+          <div id="aiDir" style="font-size:18px;font-weight:700;">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">상승 확률</div>
+          <div id="aiUpProb" style="font-size:18px;font-weight:700;color:var(--mint);">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">하락 확률</div>
+          <div id="aiDownProb" style="font-size:18px;font-weight:700;color:var(--red);">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">5일 후 예측가</div>
+          <div id="aiPredPrice" style="font-size:18px;font-weight:700;">-</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;color:var(--text-dim);">종합 시그널:</span>
+        <span id="aiSignalText" style="font-size:20px;font-weight:800;letter-spacing:1px;">-</span>
+      </div>
+      <div id="aiSignalBar" style="display:flex;gap:4px;margin-top:10px;height:6px;">
+        <div style="flex:1;border-radius:3px;background:#dc2626;opacity:0.2;" data-level="0"></div>
+        <div style="flex:1;border-radius:3px;background:#f97316;opacity:0.2;" data-level="1"></div>
+        <div style="flex:1;border-radius:3px;background:#eab308;opacity:0.2;" data-level="2"></div>
+        <div style="flex:1;border-radius:3px;background:#22c55e;opacity:0.2;" data-level="3"></div>
+        <div style="flex:1;border-radius:3px;background:#06b6d4;opacity:0.2;" data-level="4"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px;">
+        <span>강력매도</span><span>매도</span><span>중립</span><span>매수</span><span>강력매수</span>
+      </div>
+    </div>
+    <div class="placeholder" id="chartPlaceholder">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <p>종목을 검색하면 차트와 AI 분석 결과가 표시됩니다</p>
+      <p style="font-size:12px;color:var(--text-muted)">예: 삼성전자, SK하이닉스, 카카오, 네이버, 현대차</p>
+    </div>
+  </div>
+
+  <!-- Analysis Panel -->
+  <div class="analysis-panel" id="analysisPanel">
+    <!-- Price Info -->
+    <div class="card" id="priceCard" style="display:none;">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        가격 정보
+      </div>
+      <div class="price-info">
+        <div class="price-item"><div class="label">시가</div><div class="value" id="pOpen">-</div></div>
+        <div class="price-item"><div class="label">고가</div><div class="value" id="pHigh" style="color:var(--red)">-</div></div>
+        <div class="price-item"><div class="label">저가</div><div class="value" id="pLow" style="color:var(--mint)">-</div></div>
+        <div class="price-item"><div class="label">거래량</div><div class="value" id="pVol">-</div></div>
+      </div>
+    </div>
+
+    <!-- Technical Indicators -->
+    <div class="card" id="techCard" style="display:none;">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M21 21H4.6c-.56 0-.84 0-1.054-.109a1 1 0 0 1-.437-.437C3 20.24 3 19.96 3 19.4V3"/><path d="m7 14 4-4 4 4 6-6"/></svg>
+        기술적 지표
+      </div>
+      <div id="techIndicators">
+        <div class="indicator-row"><span class="indicator-label">RSI (14)</span><span class="indicator-value" id="indRSI">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MACD</span><span class="indicator-value" id="indMACD">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MACD Signal</span><span class="indicator-value" id="indMACDSig">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 5일</span><span class="indicator-value" id="indMA5">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 20일</span><span class="indicator-value" id="indMA20">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 60일</span><span class="indicator-value" id="indMA60">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">볼린저 상단</span><span class="indicator-value" id="indBBU">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">볼린저 하단</span><span class="indicator-value" id="indBBL">-</span></div>
+      </div>
+    </div>
+
+    <!-- AI Prediction -->
+    <div class="card prediction-card" id="predCard" style="display:none;">
+      <div class="card-title" style="justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93L12 22"/><path d="M8 6a4 4 0 0 1 8 0"/><path d="M17 12.5c1.77.54 3 1.84 3 3.5 0 2.49-3.58 4-8 4s-8-1.51-8-4c0-1.66 1.23-2.96 3-3.5"/></svg>
+        AI 예측 결과
+      </div>
+      <div class="pred-direction" id="predDirection">-</div>
+      <div class="pred-prob">
+        <div class="prob-item"><span class="prob-label">상승 확률</span><span class="prob-val" id="predUp" style="color:var(--mint)">-</span></div>
+        <div class="prob-item"><span class="prob-label">하락 확률</span><span class="prob-val" id="predDown" style="color:var(--red)">-</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text-dim);">
+        5일 후 예측가: <span id="predPrice" style="font-weight:700;color:var(--text);font-family:'Space Grotesk'">-</span>
+      </div>
+    </div>
+
+    <!-- Overall Signal -->
+    <div class="card overall-signal" id="signalCard" style="display:none;">
+      <div class="card-title" style="justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        종합 시그널
+      </div>
+      <div class="signal-text" id="signalText">-</div>
+      <div class="signal-bar" id="signalBar">
+        <div class="sb-strong-sell"></div>
+        <div class="sb-sell"></div>
+        <div class="sb-neutral"></div>
+        <div class="sb-buy"></div>
+        <div class="sb-strong-buy"></div>
+      </div>
+      <div class="signal-labels">
+        <span>강력 매도</span><span>매도</span><span>중립</span><span>매수</span><span>강력 매수</span>
+      </div>
+    </div>
+
+    <!-- AI 분석 리포트 (종합 시그널 아래) -->
+    <div class="card" id="signalExplain" style="display:none;">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        AI 분석 리포트
+      </div>
+      <div id="signalExplainText" style="font-size:12.5px;color:var(--text-dim);line-height:1.9;font-family:'Noto Sans KR',sans-serif;white-space:pre-wrap;"></div>
+      <span id="signalTypingCursor" style="display:inline-block;width:6px;height:13px;background:var(--text-dim);margin-left:2px;animation:cursorBlink 0.8s step-end infinite;vertical-align:text-bottom;"></span>
+    </div>
+
+    <!-- Placeholder for analysis -->
+    <div class="card" id="analysisPH" style="display:flex;align-items:center;justify-content:center;min-height:200px;">
+      <div style="text-align:center;color:var(--text-muted);">
+        <p style="font-size:14px;">종목을 검색하여 분석을 시작하세요</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Training Progress -->
+<div class="training-section">
+  <div class="training-bar" id="trainingBar">
+    <div class="training-header">
+      <div class="training-status">
+        <div class="spinner"></div>
+        <span id="trainingStatusText">AI 모델 학습 중...</span>
+      </div>
+      <span class="training-epoch" id="trainingEpoch">에포크 0/50</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="training-loss" id="trainingLoss">Loss: -</div>
+  </div>
+</div>
+
+
+<script>
+// ── 테마 토글 ──
+function updateToggleBtn(theme) {
+  document.getElementById('themeToggle').textContent = theme === 'light' ? '🌙 다크 모드' : '☀️ 라이트 모드';
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateToggleBtn(next);
+}
+(function() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+  updateToggleBtn(saved);
+})();
+
+// ── KOSPI 종목 매핑 ──
+const KOSPI_STOCKS = {
+  // 시총 상위 1~20
+  '삼성전자': { ticker: '005930.KS', code: '005930' },
+  'SK하이닉스': { ticker: '000660.KS', code: '000660' },
+  '하이닉스': { ticker: '000660.KS', code: '000660' },
+  'LG에너지솔루션': { ticker: '373220.KS', code: '373220' },
+  'LG엔솔': { ticker: '373220.KS', code: '373220' },
+  '삼성바이오로직스': { ticker: '207940.KS', code: '207940' },
+  '삼성바이오': { ticker: '207940.KS', code: '207940' },
+  '현대차': { ticker: '005380.KS', code: '005380' },
+  '현대자동차': { ticker: '005380.KS', code: '005380' },
+  '기아': { ticker: '000270.KS', code: '000270' },
+  '셀트리온': { ticker: '068270.KS', code: '068270' },
+  'KB금융': { ticker: '105560.KS', code: '105560' },
+  '신한지주': { ticker: '055550.KS', code: '055550' },
+  '포스코홀딩스': { ticker: '005490.KS', code: '005490' },
+  '포스코': { ticker: '005490.KS', code: '005490' },
+  'NAVER': { ticker: '035420.KS', code: '035420' },
+  '네이버': { ticker: '035420.KS', code: '035420' },
+  '삼성SDI': { ticker: '006400.KS', code: '006400' },
+  '한화에어로스페이스': { ticker: '012450.KS', code: '012450' },
+  '한화에어로': { ticker: '012450.KS', code: '012450' },
+  '현대모비스': { ticker: '012330.KS', code: '012330' },
+  // 시총 상위 21~40
+  'LG화학': { ticker: '051910.KS', code: '051910' },
+  '카카오': { ticker: '035720.KS', code: '035720' },
+  '삼성물산': { ticker: '028260.KS', code: '028260' },
+  '하나금융지주': { ticker: '086790.KS', code: '086790' },
+  '메리츠금융지주': { ticker: '138040.KS', code: '138040' },
+  '메리츠': { ticker: '138040.KS', code: '138040' },
+  'HD한국조선해양': { ticker: '009540.KS', code: '009540' },
+  'HD현대중공업': { ticker: '329180.KS', code: '329180' },
+  '삼성전기': { ticker: '009150.KS', code: '009150' },
+  'SK이노베이션': { ticker: '096770.KS', code: '096770' },
+  'SK텔레콤': { ticker: '017670.KS', code: '017670' },
+  'LG전자': { ticker: '066570.KS', code: '066570' },
+  'KT': { ticker: '030200.KS', code: '030200' },
+  'KT&G': { ticker: '033780.KS', code: '033780' },
+  '크래프톤': { ticker: '259960.KS', code: '259960' },
+  '삼성생명': { ticker: '032830.KS', code: '032830' },
+  '삼성화재': { ticker: '000810.KS', code: '000810' },
+  'SK': { ticker: '034730.KS', code: '034730' },
+  'LG': { ticker: '003550.KS', code: '003550' },
+  'HD현대': { ticker: '267250.KS', code: '267250' },
+  // 시총 상위 41~60
+  '우리금융지주': { ticker: '316140.KS', code: '316140' },
+  '우리금융': { ticker: '316140.KS', code: '316140' },
+  '두산에너빌리티': { ticker: '034020.KS', code: '034020' },
+  '한국전력': { ticker: '015760.KS', code: '015760' },
+  '한전': { ticker: '015760.KS', code: '015760' },
+  '카카오뱅크': { ticker: '323410.KS', code: '323410' },
+  '카카오페이': { ticker: '377300.KS', code: '377300' },
+  '한화오션': { ticker: '042660.KS', code: '042660' },
+  '엔씨소프트': { ticker: '036570.KS', code: '036570' },
+  'SK바이오팜': { ticker: '326030.KS', code: '326030' },
+  'HLB': { ticker: '028300.KS', code: '028300' },
+  'S-Oil': { ticker: '010950.KS', code: '010950' },
+  '에스오일': { ticker: '010950.KS', code: '010950' },
+  '한미반도체': { ticker: '042700.KS', code: '042700' },
+  '한미반': { ticker: '042700.KS', code: '042700' },
+  'DB손해보험': { ticker: '005830.KS', code: '005830' },
+  '고려아연': { ticker: '010130.KS', code: '010130' },
+  '한화솔루션': { ticker: '009830.KS', code: '009830' },
+  '기업은행': { ticker: '024110.KS', code: '024110' },
+  'IBK': { ticker: '024110.KS', code: '024110' },
+  // 시총 상위 61~80
+  'LG이노텍': { ticker: '011070.KS', code: '011070' },
+  'SK스퀘어': { ticker: '402340.KS', code: '402340' },
+  '대한항공': { ticker: '003490.KS', code: '003490' },
+  '삼성엔지니어링': { ticker: '028050.KS', code: '028050' },
+  'HD현대일렉트릭': { ticker: '267260.KS', code: '267260' },
+  '현대건설': { ticker: '000720.KS', code: '000720' },
+  '현대글로비스': { ticker: '086280.KS', code: '086280' },
+  '한화': { ticker: '000880.KS', code: '000880' },
+  '아모레퍼시픽': { ticker: '090430.KS', code: '090430' },
+  '아모레': { ticker: '090430.KS', code: '090430' },
+  'CJ제일제당': { ticker: '097950.KS', code: '097950' },
+  'GS건설': { ticker: '006360.KS', code: '006360' },
+  '롯데케미칼': { ticker: '011170.KS', code: '011170' },
+  'SK케미칼': { ticker: '285130.KS', code: '285130' },
+  '현대제철': { ticker: '004020.KS', code: '004020' },
+  '두산밥캣': { ticker: '241560.KS', code: '241560' },
+  '금양': { ticker: '001570.KS', code: '001570' },
+  'OCI홀딩스': { ticker: '010060.KS', code: '010060' },
+  'LG디스플레이': { ticker: '034220.KS', code: '034220' },
+  'LGD': { ticker: '034220.KS', code: '034220' },
+  // 시총 상위 81~100
+  '효성중공업': { ticker: '298040.KS', code: '298040' },
+  'GS': { ticker: '078930.KS', code: '078930' },
+  'CJ': { ticker: '001040.KS', code: '001040' },
+  '삼성중공업': { ticker: '010140.KS', code: '010140' },
+  '한국타이어': { ticker: '161390.KS', code: '161390' },
+  '롯데지주': { ticker: '004990.KS', code: '004990' },
+  '한국가스공사': { ticker: '036460.KS', code: '036460' },
+  '가스공사': { ticker: '036460.KS', code: '036460' },
+  '미래에셋증권': { ticker: '006800.KS', code: '006800' },
+  '한국금융지주': { ticker: '071050.KS', code: '071050' },
+  '이마트': { ticker: '139480.KS', code: '139480' },
+  '넷마블': { ticker: '251270.KS', code: '251270' },
+  'BGF리테일': { ticker: '282330.KS', code: '282330' },
+  '쌍용C&E': { ticker: '003410.KS', code: '003410' },
+  '한국항공우주': { ticker: '047810.KS', code: '047810' },
+  'KAI': { ticker: '047810.KS', code: '047810' },
+  '삼성카드': { ticker: '029780.KS', code: '029780' },
+  'SK리츠': { ticker: '395400.KS', code: '395400' },
+  'LS': { ticker: '006260.KS', code: '006260' },
+  '호텔신라': { ticker: '008770.KS', code: '008770' },
+};
+
+function findStock(query) {
+  query = query.trim();
+  // 직접 매칭
+  if (KOSPI_STOCKS[query]) return { name: query, ...KOSPI_STOCKS[query] };
+  // 부분 매칭
+  const keys = Object.keys(KOSPI_STOCKS);
+  const match = keys.find(k => k.includes(query) || query.includes(k));
+  if (match) return { name: match, ...KOSPI_STOCKS[match] };
+  // 코드로 검색
+  const byCode = keys.find(k => KOSPI_STOCKS[k].code === query);
+  if (byCode) return { name: byCode, ...KOSPI_STOCKS[byCode] };
+  return null;
+}
+
+// ── 종목별 현재 가격대 (2026년 3월 기준 대략) ──
+const STOCK_PRICES = {
+  '005930': 58000, '000660': 900000, '373220': 370000, '207940': 780000,
+  '005380': 210000, '000270': 120000, '068270': 190000, '105560': 78000,
+  '055550': 52000, '005490': 290000, '035420': 210000, '006400': 350000,
+  '012450': 380000, '012330': 260000, '051910': 300000, '035720': 42000,
+  '028260': 130000, '086790': 64000, '138040': 85000, '009540': 160000,
+  '329180': 180000, '009150': 150000, '096770': 120000, '017670': 58000,
+  '066570': 95000, '030200': 38000, '033780': 95000, '259960': 250000,
+  '032830': 85000, '000810': 310000, '034730': 165000, '003550': 78000,
+  '267250': 75000, '316140': 16000, '034020': 22000, '015760': 23000,
+  '323410': 25000, '377300': 28000, '042660': 55000, '036570': 180000,
+  '326030': 88000, '028300': 75000, '010950': 65000, '042700': 130000,
+  '005830': 105000, '010130': 870000, '009830': 35000, '024110': 14000,
+  '011070': 280000, '402340': 80000, '003490': 28000, '028050': 32000,
+  '267260': 350000, '000720': 35000, '086280': 130000, '000880': 32000,
+  '090430': 120000, '097950': 300000, '006360': 18000, '011170': 85000,
+  '285130': 75000, '004020': 28000, '241560': 55000, '001570': 45000,
+  '010060': 95000, '034220': 12000, '298040': 320000, '078930': 52000,
+  '001040': 95000, '010140': 12000, '161390': 48000, '004990': 28000,
+  '036460': 42000, '006800': 9000, '071050': 72000, '139480': 65000,
+  '251270': 55000, '282330': 210000, '003410': 7000, '047810': 65000,
+  '029780': 38000, '395400': 5000, '006260': 120000, '008770': 65000,
+};
+
+
+let currentData = null;
+let predictedPrices = null;
+
+// ── Toast ──
+function showToast(msg, type = 'info') {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    document.body.appendChild(t);
+  }
+  if (t.parentElement !== document.body) document.body.appendChild(t);
+  t.textContent = msg;
+  const isMobile = window.innerWidth <= 768;
+  // 인라인 스타일로 강제 (stacking context 우회)
+  t.style.cssText = `
+    position:fixed; bottom:${isMobile?16:24}px; z-index:99999;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 20px; font-size:13px; color:var(--text);
+    max-width:${isMobile?'calc(100vw - 32px)':'360px'};
+    transition:all 0.3s ease; opacity:0;
+    ${isMobile ? 'left:50%; right:auto; transform:translateX(-50%) translateY(100px);'
+               : 'right:24px; left:auto; transform:translateY(100px);'}
+    border-color:${type==='error'?'var(--red)':'var(--purple)'};
+  `;
+  t.className = 'toast ' + type;
+  void t.offsetWidth;
+  t.style.opacity = '1';
+  t.style.transform = isMobile ? 'translateX(-50%) translateY(0)' : 'translateY(0)';
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = isMobile ? 'translateX(-50%) translateY(100px)' : 'translateY(100px)';
+  }, 3500);
+}
+
+// ── Autocomplete ──
+const tickerInput = document.getElementById('tickerInput');
+const acBox = document.getElementById('autocomplete');
+let acSelected = -1;
+let acResults = [];
+
+// 중복 제거된 종목 리스트 (이름 기준)
+const uniqueStocks = [];
+const seenCodes = new Set();
+for (const [name, info] of Object.entries(KOSPI_STOCKS)) {
+  if (!seenCodes.has(info.code)) {
+    seenCodes.add(info.code);
+    uniqueStocks.push({ name, code: info.code, price: STOCK_PRICES[info.code] || 0 });
+  }
+}
+
+function highlightMatch(text, query) {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + query.length) + '</mark>' + text.slice(idx + query.length);
+}
+
+function updateAutocomplete() {
+  const q = tickerInput.value.trim();
+  if (!q) { acBox.classList.remove('show'); acResults = []; return; }
+  const ql = q.toLowerCase();
+  acResults = uniqueStocks.filter(s => {
+    // 코드 검색은 포함 매칭
+    if (s.code.includes(q)) return true;
+    // 한글 검색은 포함 매칭
+    if (/[가-힣]/.test(q)) return s.name.includes(q);
+    // 영문 검색은 앞글자 매칭 (S → SK하이닉스 O, 삼성전자 X)
+    return s.name.toLowerCase().startsWith(ql);
+  }).slice(0, window.innerWidth > 768 ? 3 : 8);
+  if (acResults.length === 0) { acBox.classList.remove('show'); return; }
+  acSelected = -1;
+  acBox.innerHTML = acResults.map((s, i) =>
+    `<div class="ac-item" data-idx="${i}">
+      <div><span class="ac-name">${highlightMatch(s.name, q)}</span> <span class="ac-code">${s.code}</span></div>
+      <span class="ac-price">${s.price ? s.price.toLocaleString('ko-KR') + '원' : ''}</span>
+    </div>`
+  ).join('');
+  acBox.classList.add('show');
+  acBox.querySelectorAll('.ac-item').forEach(item => {
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const idx = parseInt(item.dataset.idx);
+      tickerInput.value = acResults[idx].name;
+      acBox.classList.remove('show');
+      searchStock();
+    });
+  });
+}
+
+tickerInput.addEventListener('input', updateAutocomplete);
+tickerInput.addEventListener('focus', updateAutocomplete);
+tickerInput.addEventListener('blur', () => setTimeout(() => acBox.classList.remove('show'), 150));
+
+tickerInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (acSelected >= 0 && acResults[acSelected]) {
+      tickerInput.value = acResults[acSelected].name;
+    }
+    acBox.classList.remove('show');
+    searchStock();
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (acResults.length === 0) return;
+    acSelected = Math.min(acSelected + 1, acResults.length - 1);
+    acBox.querySelectorAll('.ac-item').forEach((el, i) => el.classList.toggle('selected', i === acSelected));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acSelected = Math.max(acSelected - 1, 0);
+    acBox.querySelectorAll('.ac-item').forEach((el, i) => el.classList.toggle('selected', i === acSelected));
+  } else if (e.key === 'Escape') {
+    acBox.classList.remove('show');
+  }
+});
+
+const stockCache = {};
+let isSearching = false;
+
+async function searchStock(forceRefresh) {
+  if (isSearching) return;
+  const query = document.getElementById('tickerInput').value.trim();
+  if (!query) { showToast('종목명을 입력해주세요', 'error'); return; }
+
+  const stock = findStock(query);
+  if (!stock) { showToast(`"${query}" 종목을 찾을 수 없습니다. 한글 종목명으로 검색해주세요.`, 'error'); return; }
+
+  const displayName = stock.name;
+
+  // 이미 로드된 종목이면 캐시 사용
+  if (!forceRefresh && stockCache[stock.code] && currentData?.ticker === displayName) {
+    showToast(`${displayName} 이미 로드됨`, 'info');
+    return;
+  }
+  const ticker = stock.ticker;
+  const stockCode = stock.code;
+
+  // 캐시에 데이터 있으면 바로 사용
+  if (!forceRefresh && stockCache[stockCode]) {
+    showToast(`${displayName} 캐시 데이터 사용`, 'info');
+    const records = stockCache[stockCode];
+    currentData = { ticker: displayName, records };
+    predictedPrices = null;
+    updatePriceInfo(records);
+    const indicators = calcIndicators(records);
+    updateIndicators(indicators, records);
+    drawChart(records, null);
+    document.getElementById('chartHeader').style.display = '';
+    document.getElementById('chartPlaceholder').style.display = 'none';
+    document.getElementById('priceCard').style.display = '';
+    document.getElementById('techCard').style.display = '';
+    document.getElementById('analysisPH').style.display = 'none';
+    document.getElementById('stockName').textContent = displayName;
+    document.getElementById('stockCode').textContent = stockCode;
+    await runAI(records, indicators);
+    return;
+  }
+
+  isSearching = true;
+  showToast(`${displayName}(${stockCode}) 데이터를 불러오는 중...`, 'info');
+
+  let records = null;
+
+  // 타임아웃 fetch 헬퍼
+  function fetchWithTimeout(url, ms = 6000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+  }
+
+  // 프록시 헬퍼 (여러 프록시 동시 시도 - 가장 빠른 것 사용)
+  async function proxyFetch(targetUrl) {
+    const proxies = [
+      u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+      u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      u => `https://thingproxy.freeboard.io/fetch/${u}`,
+    ];
+    // 모든 프록시 동시 시도
+    const result = await Promise.any(
+      proxies.map(async makeUrl => {
+        const res = await fetchWithTimeout(makeUrl(targetUrl), 4000);
+        if (!res.ok) throw new Error('fail');
+        const text = await res.text();
+        try {
+          const wrapper = JSON.parse(text);
+          if (wrapper.contents) return wrapper.contents;
+        } catch(e) {}
+        return text;
+      })
+    );
+    return result;
+  }
+
+  // 데이터 파싱 함수들
+  function parseNaverChart(raw) {
+    const data = JSON.parse(raw);
+    if (!data?.priceInfos?.length) throw new Error('No data');
+    return data.priceInfos.map(p => ({
+      date: p.localDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+      open: p.openPrice, high: p.highPrice, low: p.lowPrice,
+      close: p.closePrice, volume: p.accumulatedTradingVolume,
+    }));
+  }
+  function parseNaverSise(raw) {
+    const cleaned = raw.trim().replace(/'/g, '"').replace(/\s/g, '');
+    const rows = JSON.parse(cleaned);
+    if (!rows?.length) throw new Error('No data');
+    return rows.map(r => ({
+      date: String(r[0]).trim().replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+      open: parseInt(r[1]), high: parseInt(r[2]), low: parseInt(r[3]),
+      close: parseInt(r[4]), volume: parseInt(r[5]),
+    })).filter(r => r.close > 0);
+  }
+  function parseYahoo(raw) {
+    const json = JSON.parse(raw);
+    const result = json.chart?.result?.[0];
+    if (!result?.timestamp) throw new Error('No data');
+    const q = result.indicators.quote[0];
+    return result.timestamp.map((t, i) => ({
+      date: new Date(t * 1000).toISOString().slice(0, 10),
+      open: Math.round(q.open[i]||0), high: Math.round(q.high[i]||0),
+      low: Math.round(q.low[i]||0), close: Math.round(q.close[i]||0),
+      volume: q.volume[i]||0,
+    })).filter(r => r.close > 0);
+  }
+  function parseStooq(raw) {
+    const lines = raw.trim().split('\n');
+    if (lines.length < 10) throw new Error('No data');
+    return lines.slice(1).map(line => {
+      const [date, open, high, low, close, vol] = line.split(',');
+      return { date, open: Math.round(+open), high: Math.round(+high), low: Math.round(+low), close: Math.round(+close), volume: parseInt(vol)||0 };
+    }).filter(r => r.close > 0).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  // 모든 소스 동시 시도 (가장 빠른 성공 사용)
+  const sources = [
+    { url: `https://api.stock.naver.com/chart/domestic/item/${stockCode}?periodType=day&range=3month`, parse: parseNaverChart },
+    { url: `https://fchart.stock.naver.com/siseJson.nhn?symbol=${stockCode}&requestType=1&startTime=20250901&endTime=20260315&timeframe=day`, parse: parseNaverSise },
+    { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`, parse: parseYahoo },
+    { url: `https://stooq.com/q/d/l/?s=${stockCode}.kr&i=d`, parse: parseStooq },
+  ];
+
+  // Promise.any - 하나라도 성공하면 바로 사용
+  try {
+    records = await Promise.any(
+      sources.map(async ({ url, parse }) => {
+        const raw = await proxyFetch(url);
+        const result = parse(raw);
+        if (!result || result.length < 30) throw new Error('Not enough data');
+        return result;
+      })
+    );
+    showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
+  } catch (err) {
+    console.warn('모든 API 실패:', err);
+    records = null;
+  }
+
+  // 실패 시 에러 표시 + 재시도
+  if (!records || records.length < 30) {
+    showToast('실시간 데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.', 'error');
+    document.getElementById('chartPlaceholder').innerHTML = `
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      <p style="color:var(--red);font-weight:600;margin-top:12px;">${displayName} 데이터를 불러올 수 없습니다</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요</p>
+      <button onclick="searchStock(true)" style="margin-top:16px;padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;">다시 시도</button>
+    `;
+    document.getElementById('chartPlaceholder').style.display = '';
+    document.getElementById('chartHeader').style.display = 'none';
+    isSearching = false;
+    return;
+  }
+
+  // 성공 시 캐시 저장
+  stockCache[stockCode] = records;
+
+  currentData = { ticker: displayName, records };
+  predictedPrices = null;
+
+  updatePriceInfo(records);
+  const indicators = calcIndicators(records);
+  updateIndicators(indicators, records);
+  drawChart(records, null);
+
+  // Show cards
+  document.getElementById('chartHeader').style.display = '';
+  document.getElementById('chartPlaceholder').style.display = 'none';
+  document.getElementById('priceCard').style.display = '';
+  document.getElementById('techCard').style.display = '';
+  document.getElementById('analysisPH').style.display = 'none';
+
+  document.getElementById('stockName').textContent = displayName;
+  document.getElementById('stockCode').textContent = stockCode;
+
+  // Run AI
+  await runAI(records, indicators);
+  isSearching = false;
+}
+
+// ── Price Info ──
+function updatePriceInfo(records) {
+  const last = records[records.length - 1];
+  const prev = records[records.length - 2];
+  const change = ((last.close - prev.close) / prev.close * 100).toFixed(2);
+  const isUp = change >= 0;
+
+  document.getElementById('stockPrice').textContent = last.close.toLocaleString('ko-KR') + '원';
+  const changeEl = document.getElementById('stockChange');
+  changeEl.textContent = (isUp ? '+' : '') + change + '%';
+  changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
+
+  document.getElementById('pOpen').textContent = last.open.toLocaleString('ko-KR') + '원';
+  document.getElementById('pHigh').textContent = last.high.toLocaleString('ko-KR') + '원';
+  document.getElementById('pLow').textContent = last.low.toLocaleString('ko-KR') + '원';
+  document.getElementById('pVol').textContent = (last.volume / 10000).toFixed(0) + '만주';
+}
+
+// ── Technical Indicators ──
+function sma(arr, period) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i < period - 1) { result.push(null); continue; }
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j++) sum += arr[j];
+    result.push(sum / period);
+  }
+  return result;
+}
+
+function calcRSI(closes, period = 14) {
+  const gains = [], losses = [];
+  for (let i = 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1];
+    gains.push(diff > 0 ? diff : 0);
+    losses.push(diff < 0 ? -diff : 0);
+  }
+  let avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  let avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  const rsiValues = [];
+  for (let i = 0; i < period; i++) rsiValues.push(null);
+  rsiValues.push(avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss));
+  for (let i = period; i < gains.length; i++) {
+    avgGain = (avgGain * (period - 1) + gains[i]) / period;
+    avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+    rsiValues.push(avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss));
+  }
+  return rsiValues;
+}
+
+function calcMACD(closes) {
+  const ema = (data, p) => {
+    const k = 2 / (p + 1);
+    const res = [data[0]];
+    for (let i = 1; i < data.length; i++) res.push(data[i] * k + res[i - 1] * (1 - k));
+    return res;
+  };
+  const ema12 = ema(closes, 12);
+  const ema26 = ema(closes, 26);
+  const macdLine = ema12.map((v, i) => v - ema26[i]);
+  const signalLine = ema(macdLine, 9);
+  const histogram = macdLine.map((v, i) => v - signalLine[i]);
+  return { macdLine, signalLine, histogram };
+}
+
+function calcBollinger(closes, period = 20) {
+  const ma = sma(closes, period);
+  const upper = [], lower = [];
+  for (let i = 0; i < closes.length; i++) {
+    if (ma[i] === null) { upper.push(null); lower.push(null); continue; }
+    let sumSq = 0;
+    for (let j = i - period + 1; j <= i; j++) sumSq += (closes[j] - ma[i]) ** 2;
+    const std = Math.sqrt(sumSq / period);
+    upper.push(ma[i] + 2 * std);
+    lower.push(ma[i] - 2 * std);
+  }
+  return { upper, lower, middle: ma };
+}
+
+function calcIndicators(records) {
+  const closes = records.map(r => r.close);
+  const ma5 = sma(closes, 5);
+  const ma20 = sma(closes, 20);
+  const ma60 = sma(closes, 60);
+  const rsi = calcRSI(closes);
+  const macd = calcMACD(closes);
+  const bb = calcBollinger(closes);
+  return { ma5, ma20, ma60, rsi, macd, bb, closes };
+}
+
+function updateIndicators(ind, records) {
+  const n = ind.closes.length - 1;
+  const rsiVal = ind.rsi[ind.rsi.length - 1];
+  const rsiColor = rsiVal > 70 ? 'var(--red)' : rsiVal < 30 ? 'var(--mint)' : 'var(--text)';
+  document.getElementById('indRSI').innerHTML = `<span style="color:${rsiColor}">${rsiVal.toFixed(1)}</span>`;
+
+  const macdVal = ind.macd.macdLine[n];
+  document.getElementById('indMACD').textContent = macdVal.toFixed(2);
+  document.getElementById('indMACDSig').textContent = ind.macd.signalLine[n].toFixed(2);
+  document.getElementById('indMA5').textContent = (ind.ma5[n] || 0).toLocaleString('ko-KR', {maximumFractionDigits:0}) + '원';
+  document.getElementById('indMA20').textContent = (ind.ma20[n] || 0).toLocaleString('ko-KR', {maximumFractionDigits:0}) + '원';
+  document.getElementById('indMA60').textContent = ind.ma60[n] ? ind.ma60[n].toLocaleString('ko-KR', {maximumFractionDigits:0}) + '원' : 'N/A';
+  document.getElementById('indBBU').textContent = ind.bb.upper[n] ? ind.bb.upper[n].toLocaleString('ko-KR', {maximumFractionDigits:0}) + '원' : 'N/A';
+  document.getElementById('indBBL').textContent = ind.bb.lower[n] ? ind.bb.lower[n].toLocaleString('ko-KR', {maximumFractionDigits:0}) + '원' : 'N/A';
+}
+
+// ── Chart Drawing ──
+function drawChart(records, predicted) {
+  const canvas = document.getElementById('stockChart');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width - 48;
+  const H = 400;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const closes = records.map(r => r.close);
+  const allPrices = predicted ? [...closes, ...predicted] : closes;
+  const minP = Math.min(...allPrices) * 0.995;
+  const maxP = Math.max(...allPrices) * 1.005;
+  const totalPoints = predicted ? closes.length + predicted.length : closes.length;
+
+  const pad = { top: 20, right: 60, bottom: 40, left: 10 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const x = i => pad.left + (i / (totalPoints - 1)) * cW;
+  const y = v => pad.top + (1 - (v - minP) / (maxP - minP)) * cH;
+
+  // Grid
+  ctx.strokeStyle = '#1a1a1f';
+  ctx.lineWidth = 1;
+  const gridLines = 6;
+  for (let i = 0; i <= gridLines; i++) {
+    const gy = pad.top + (cH / gridLines) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(W - pad.right, gy); ctx.stroke();
+    const price = maxP - (maxP - minP) * (i / gridLines);
+    ctx.fillStyle = '#52525b';
+    ctx.font = '11px Space Grotesk';
+    ctx.textAlign = 'left';
+    ctx.fillText(Math.round(price).toLocaleString('ko-KR'), W - pad.right + 6, gy + 4);
+  }
+
+  // Bollinger Bands fill
+  const indicators = calcIndicators(records);
+  const bbU = indicators.bb.upper;
+  const bbL = indicators.bb.lower;
+  ctx.fillStyle = 'rgba(124,92,255,0.04)';
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < closes.length; i++) {
+    if (bbU[i] === null) continue;
+    if (!started) { ctx.moveTo(x(i), y(bbU[i])); started = true; }
+    else ctx.lineTo(x(i), y(bbU[i]));
+  }
+  for (let i = closes.length - 1; i >= 0; i--) {
+    if (bbL[i] === null) continue;
+    ctx.lineTo(x(i), y(bbL[i]));
+  }
+  ctx.closePath(); ctx.fill();
+
+  // MA lines
+  function drawMA(data, color, alpha = 0.5) {
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    let s = false;
+    data.forEach((v, i) => {
+      if (v === null) return;
+      if (!s) { ctx.moveTo(x(i), y(v)); s = true; }
+      else ctx.lineTo(x(i), y(v));
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  drawMA(indicators.ma5, '#ff9f43', 0.6);
+  drawMA(indicators.ma20, '#3b82f6', 0.6);
+  if (indicators.ma60.some(v => v !== null)) drawMA(indicators.ma60, '#f43f5e', 0.4);
+
+  // Actual price line
+  ctx.strokeStyle = '#00d4aa';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  closes.forEach((v, i) => { i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)); });
+  ctx.stroke();
+
+  // Gradient fill under price
+  const grad = ctx.createLinearGradient(0, y(maxP), 0, y(minP) + cH * 0.3);
+  grad.addColorStop(0, 'rgba(0,212,170,0.15)');
+  grad.addColorStop(1, 'rgba(0,212,170,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  closes.forEach((v, i) => { i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)); });
+  ctx.lineTo(x(closes.length - 1), pad.top + cH);
+  ctx.lineTo(x(0), pad.top + cH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Predicted line
+  if (predicted && predicted.length > 0) {
+    ctx.strokeStyle = '#7c5cff';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x(closes.length - 1), y(closes[closes.length - 1]));
+    predicted.forEach((v, i) => ctx.lineTo(x(closes.length + i), y(v)));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Prediction dots
+    predicted.forEach((v, i) => {
+      ctx.beginPath();
+      ctx.arc(x(closes.length + i), y(v), 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#7c5cff';
+      ctx.fill();
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    // Divider line
+    const dx = x(closes.length - 1);
+    ctx.strokeStyle = 'rgba(124,92,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(dx, pad.top); ctx.lineTo(dx, pad.top + cH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(124,92,255,0.7)';
+    ctx.font = '10px Noto Sans KR';
+    ctx.textAlign = 'center';
+    ctx.fillText('예측', dx, pad.top - 6);
+  }
+
+  // Current price dot
+  const lastX = x(closes.length - 1);
+  const lastY = y(closes[closes.length - 1]);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#00d4aa'; ctx.fill();
+  ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Date labels
+  ctx.fillStyle = '#52525b';
+  ctx.font = '10px Space Grotesk';
+  ctx.textAlign = 'center';
+  const labelCount = Math.min(6, records.length);
+  for (let i = 0; i < labelCount; i++) {
+    const idx = Math.floor((i / (labelCount - 1)) * (records.length - 1));
+    const label = records[idx].date.slice(5);
+    ctx.fillText(label, x(idx), H - 10);
+  }
+}
+
+// ── TensorFlow.js AI ──
+async function runAI(records, indicators) {
+  const bar = document.getElementById('trainingBar');
+  bar.classList.add('active');
+  document.getElementById('trainingStatusText').textContent = 'AI 모델 학습 중...';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('trainingLoss').textContent = 'Loss: -';
+
+  const closes = records.map(r => r.close);
+  const windowSize = 20;
+  const epochs = 50;
+
+  if (closes.length < windowSize + 5) {
+    showToast('데이터가 부족합니다', 'error');
+    bar.classList.remove('active');
+    return;
+  }
+
+  // Normalize
+  const minVal = Math.min(...closes);
+  const maxVal = Math.max(...closes);
+  const range = maxVal - minVal || 1;
+  const normalized = closes.map(v => (v - minVal) / range);
+
+  // Create training data
+  const xs = [], ys = [];
+  for (let i = 0; i < normalized.length - windowSize; i++) {
+    xs.push(normalized.slice(i, i + windowSize));
+    ys.push(normalized[i + windowSize]);
+  }
+
+  const xTensor = tf.tensor2d(xs);
+  const yTensor = tf.tensor1d(ys);
+
+  // Build model
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [windowSize], units: 64, activation: 'relu' }));
+  model.add(tf.layers.dropout({ rate: 0.2 }));
+  model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 16, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 1 }));
+
+  model.compile({ optimizer: tf.train.adam(0.001), loss: 'meanSquaredError' });
+
+  // Train
+  await model.fit(xTensor, yTensor, {
+    epochs,
+    batchSize: 16,
+    shuffle: true,
+    callbacks: {
+      onEpochEnd: (epoch, logs) => {
+        const pct = ((epoch + 1) / epochs * 100).toFixed(0);
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('trainingEpoch').textContent = `에포크 ${epoch + 1}/${epochs}`;
+        document.getElementById('trainingLoss').textContent = `Loss: ${logs.loss.toFixed(6)}`;
+      }
+    }
+  });
+
+  document.getElementById('trainingStatusText').textContent = 'AI 예측 생성 중...';
+
+  // Predict next 5 days
+  let lastWindow = normalized.slice(-windowSize);
+  const predictions = [];
+  for (let i = 0; i < 5; i++) {
+    const input = tf.tensor2d([lastWindow]);
+    const predNorm = model.predict(input).dataSync()[0];
+    const predPrice = predNorm * range + minVal;
+    predictions.push(+predPrice.toFixed(2));
+    lastWindow = [...lastWindow.slice(1), predNorm];
+    input.dispose();
+  }
+
+  predictedPrices = predictions;
+
+  // Cleanup
+  xTensor.dispose();
+  yTensor.dispose();
+  model.dispose();
+
+  // Update UI
+  document.getElementById('trainingStatusText').textContent = 'AI 학습 완료!';
+  document.getElementById('progressFill').style.width = '100%';
+  setTimeout(() => bar.classList.remove('active'), 2000);
+
+  // Draw chart with predictions
+  drawChart(records, predictions);
+
+  // Update prediction panel
+  const lastClose = closes[closes.length - 1];
+  const predLast = predictions[predictions.length - 1];
+  const predChange = ((predLast - lastClose) / lastClose * 100).toFixed(1);
+  const isUp = predLast >= lastClose;
+  const upProb = isUp ? Math.min(50 + Math.abs(predChange) * 5, 95) : Math.max(50 - Math.abs(predChange) * 5, 5);
+  const downProb = (100 - upProb).toFixed(0);
+
+  document.getElementById('predCard').style.display = '';
+  document.getElementById('predDirection').textContent = isUp ? '상승 예측' : '하락 예측';
+  document.getElementById('predDirection').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+  document.getElementById('predUp').textContent = upProb.toFixed(0) + '%';
+  document.getElementById('predDown').textContent = downProb + '%';
+  document.getElementById('predPrice').textContent = Math.round(predLast).toLocaleString('ko-KR') + '원 (' + (isUp ? '+' : '') + predChange + '%)';
+
+  // 차트 아래 AI 결과 패널
+  document.getElementById('aiResultBelow').style.display = 'block';
+  document.getElementById('aiDir').textContent = isUp ? '상승' : '하락';
+  document.getElementById('aiDir').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+  document.getElementById('aiUpProb').textContent = upProb.toFixed(0) + '%';
+  document.getElementById('aiDownProb').textContent = downProb + '%';
+  document.getElementById('aiPredPrice').textContent = Math.round(predLast).toLocaleString('ko-KR') + '원';
+  document.getElementById('aiPredPrice').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+
+  // Overall signal
+  computeSignal(indicators, isUp, upProb, predChange);
+}
+
+function computeSignal(ind, isUp, upProb, predChange) {
+  const n = ind.closes.length - 1;
+  let score = 0; // -100 to +100
+
+  // RSI
+  const rsi = ind.rsi[ind.rsi.length - 1];
+  if (rsi < 30) score += 20;
+  else if (rsi < 40) score += 10;
+  else if (rsi > 70) score -= 20;
+  else if (rsi > 60) score -= 10;
+
+  // MACD
+  const macdVal = ind.macd.macdLine[n];
+  const macdSig = ind.macd.signalLine[n];
+  if (macdVal > macdSig) score += 15;
+  else score -= 15;
+  if (ind.macd.histogram[n] > ind.macd.histogram[n - 1]) score += 5;
+  else score -= 5;
+
+  // MA trend
+  const price = ind.closes[n];
+  if (ind.ma5[n] && price > ind.ma5[n]) score += 5;
+  else if (ind.ma5[n]) score -= 5;
+  if (ind.ma20[n] && price > ind.ma20[n]) score += 10;
+  else if (ind.ma20[n]) score -= 10;
+  if (ind.ma60[n] && price > ind.ma60[n]) score += 10;
+  else if (ind.ma60[n]) score -= 10;
+
+  // AI prediction weight
+  score += (isUp ? 1 : -1) * Math.min(Math.abs(predChange) * 3, 25);
+
+  // Clamp
+  score = Math.max(-100, Math.min(100, score));
+
+  let signal, color;
+  if (score >= 40) { signal = '강력 매수'; color = '#06b6d4'; }
+  else if (score >= 15) { signal = '매수'; color = '#22c55e'; }
+  else if (score > -15) { signal = '중립'; color = '#eab308'; }
+  else if (score > -40) { signal = '매도'; color = '#f97316'; }
+  else { signal = '강력 매도'; color = '#dc2626'; }
+
+  document.getElementById('signalCard').style.display = '';
+  document.getElementById('signalText').textContent = signal;
+  document.getElementById('signalText').style.color = color;
+
+  // Signal bar (side panel)
+  const bars = document.querySelectorAll('#signalBar div');
+  bars.forEach(b => b.classList.remove('active'));
+  let activeIdx;
+  if (score >= 40) activeIdx = 4;
+  else if (score >= 15) activeIdx = 3;
+  else if (score > -15) activeIdx = 2;
+  else if (score > -40) activeIdx = 1;
+  else activeIdx = 0;
+  bars[activeIdx].classList.add('active');
+
+  // Signal bar (below chart)
+  document.getElementById('aiSignalText').textContent = signal;
+  document.getElementById('aiSignalText').style.color = color;
+  document.querySelectorAll('#aiSignalBar div').forEach((b, i) => {
+    b.style.opacity = i === activeIdx ? '1' : '0.2';
+  });
+
+  // Typing explanation
+  const explanations = {
+    '강력 매도': `RSI가 과매수 구간이며 MACD 데드크로스가 확인됩니다.\n이동평균선이 하락 추세를 보이고 있으며, AI 예측도 하락 방향입니다.\n기술적 지표 대부분이 매도 신호를 나타내고 있습니다.`,
+    '매도': `기술적 지표가 약세 흐름을 나타내고 있습니다.\nMACD 히스토그램이 감소 추세이며, 단기 이동평균이 중기선 아래에 위치합니다.\nAI 모델도 소폭 하락을 예측하고 있습니다.`,
+    '중립': `매수와 매도 신호가 혼재되어 있습니다.\nRSI가 중립 구간(40~60)에 위치하며, 뚜렷한 방향성이 보이지 않습니다.\n추가적인 모멘텀 확인 후 진입을 권장합니다.`,
+    '매수': `기술적 지표가 상승 흐름을 나타내고 있습니다.\nMACD 골든크로스 또는 RSI 반등 신호가 감지됩니다.\nAI 예측도 소폭 상승을 전망하고 있습니다.`,
+    '강력 매수': `RSI 반등과 MACD 골든크로스가 동시에 확인됩니다.\n이동평균선이 정배열 상태이며, AI 예측도 강한 상승을 전망합니다.\n기술적 지표 대부분이 매수 신호를 나타내고 있습니다.`,
+  };
+  const disclaimer = `\n\n⚠ 본 분석은 AI 예측 및 기술적 지표를 기반으로 한 참고 자료이며,\n투자 판단의 최종 책임은 투자자 본인에게 있습니다.\n예측은 확신할 수 없으며 실제 시장과 다를 수 있습니다.`;
+  const fullText = (explanations[signal] || '') + disclaimer;
+
+  const explainBox = document.getElementById('signalExplain');
+  const explainText = document.getElementById('signalExplainText');
+  const cursor = document.getElementById('signalTypingCursor');
+  explainBox.style.display = 'block';
+  explainText.textContent = '';
+  cursor.style.display = 'inline-block';
+
+  let ci = 0;
+  if (window._signalTypingTimer) clearInterval(window._signalTypingTimer);
+  window._signalTypingTimer = setInterval(() => {
+    if (ci >= fullText.length) {
+      clearInterval(window._signalTypingTimer);
+      cursor.style.display = 'none';
+      return;
+    }
+    explainText.textContent += fullText[ci];
+    ci++;
+  }, 25);
+}
+
+// ── Window resize ──
+window.addEventListener('resize', () => {
+  if (currentData) {
+    drawChart(currentData.records, predictedPrices);
+  }
+});
+</script>
+<script>
+// ── STARS BACKGROUND ──
+(function() {
+  const c = document.getElementById('starsCanvas');
+  const ctx = c.getContext('2d');
+  let w, h;
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = c.offsetWidth * dpr; h = c.offsetHeight * dpr;
+    c.width = w; c.height = h;
+  }
+  resize(); window.addEventListener('resize', resize);
+  const allStars = [];
+  const colors = [[200,220,255],[255,240,230],[255,210,180],[180,200,255],[255,255,255]];
+  [{count:250,maxR:1},{count:100,maxR:2},{count:40,maxR:3.5}].forEach(l => {
+    for (let i = 0; i < l.count; i++) {
+      allStars.push({
+        x: Math.random(), y: Math.random(),
+        r: Math.random()*l.maxR+0.3,
+        phase: Math.random()*Math.PI*2,
+        speed: 0.01+Math.random()*0.02,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        bright: 0.6+Math.random()*0.4,
+      });
+    }
+  });
+  let t = 0;
+  function draw() {
+    t++; ctx.clearRect(0,0,w,h);
+    allStars.forEach(s => {
+      const sx=s.x*w, sy=s.y*h;
+      const tw = Math.sin(t*s.speed+s.phase);
+      const a = s.bright*(0.5+tw*0.5);
+      if (a<=0.05) return;
+      const [r,g,b] = s.color;
+      if (s.r>1.5) {
+        const gl=ctx.createRadialGradient(sx,sy,0,sx,sy,s.r*5);
+        gl.addColorStop(0,`rgba(${r},${g},${b},${a*0.25})`);
+        gl.addColorStop(1,'transparent');
+        ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(sx,sy,s.r*5,0,Math.PI*2); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(sx,sy,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${r},${g},${b},${a})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

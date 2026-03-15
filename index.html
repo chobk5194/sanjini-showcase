@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>바이브코딩 스터디 1기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a; --surface: #111; --card: #161616;
+      --border: rgba(255,255,255,0.06); --text: #fff;
+      --text-muted: rgba(255,255,255,0.45);
+      --accent: #fff; --accent2: #888;
+      --glow: rgba(255,255,255,0.03);
+      --divider: rgba(255,255,255,0.08);
+    }
+    [data-theme="light"] {
+      --bg: #fafafa; --surface: #fff; --card: #fff;
+      --border: rgba(0,0,0,0.08); --text: #111;
+      --text-muted: rgba(0,0,0,0.45);
+      --accent: #111; --accent2: #666;
+      --glow: rgba(0,0,0,0.02);
+      --divider: rgba(0,0,0,0.08);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.7; overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 3rem; height: 72px;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem;
+      letter-spacing: -0.02em; color: var(--text);
+    }
+    .nav-right { display: flex; align-items: center; gap: 2rem; }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+      font-weight: 400; transition: color 0.3s; letter-spacing: -0.01em;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .theme-toggle {
+      border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; cursor: pointer; padding: 6px 14px;
+      font-size: 13px; font-weight: 500; transition: all 0.2s; color: var(--text-muted);
+      font-family: inherit; white-space: nowrap;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      padding: 8rem 2rem 6rem; position: relative; overflow: hidden;
+      background: #050505;
+    }
+    #starsCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+    }
+    body > *:not(#starsCanvas) { position: relative; z-index: 1; }
+    .hero { background: transparent; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; color: var(--text-muted); margin-bottom: 2.5rem;
+      letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+    }
+    .hero-eyebrow::before {
+      content: ''; width: 32px; height: 1px; background: var(--text-muted);
+    }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 8vw, 6.5rem); font-weight: 700;
+      line-height: 1.05; margin-bottom: 2rem; letter-spacing: -0.03em;
+    }
+    .hero h1 .thin { font-weight: 300; color: var(--text-muted); }
+    .hero p {
+      font-size: clamp(1rem, 1.8vw, 1.2rem); color: var(--text-muted);
+      max-width: 480px; margin-bottom: 3.5rem; font-weight: 300; line-height: 1.8;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 1rem 2.5rem; font-size: 0.9rem; font-weight: 500;
+      color: var(--bg); background: var(--text);
+      text-decoration: none; transition: all 0.4s;
+      letter-spacing: 0.02em;
+    }
+    .hero-cta:hover { opacity: 0.85; gap: 16px; }
+    .hero-cta svg { transition: transform 0.3s; }
+    .hero-cta:hover svg { transform: translateX(3px); }
+    .hero-scroll {
+      position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hero-scroll-line {
+      width: 1px; height: 48px; background: var(--divider); position: relative; overflow: hidden;
+    }
+    .hero-scroll-line::after {
+      content: ''; position: absolute; top: -100%; left: 0; width: 1px; height: 100%;
+      background: var(--text); animation: scrollDown 2s ease infinite;
+    }
+    @keyframes scrollDown { 0% { top: -100%; } 100% { top: 100%; } }
+
+    /* SECTION COMMON */
+    .section-full {
+      padding: 8rem 0; border-top: 1px solid var(--divider);
+    }
+    .section-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 3rem;
+    }
+    .section-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 4rem; gap: 2rem; flex-wrap: wrap;
+    }
+    .section-header-left { max-width: 560px; }
+    .section-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--text-muted); margin-bottom: 1rem; font-weight: 500;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
+      line-height: 1.15; letter-spacing: -0.02em;
+    }
+    .section-desc {
+      color: var(--text-muted); font-size: 1rem; margin-top: 1rem;
+      font-weight: 300; line-height: 1.8;
+    }
+
+    /* DEMO */
+    .demo-section { padding: 8rem 0; border-top: 1px solid var(--divider); }
+    .demo-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+    .demo-container {
+      border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .demo-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.8rem 1.2rem; background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .demo-dot:nth-child(1) { background: #ff5f57; }
+    .demo-dot:nth-child(2) { background: #ffbd2e; }
+    .demo-dot:nth-child(3) { background: #28c840; }
+    .demo-header span { margin-left: 0.6rem; font-size: 0.75rem; color: var(--text-muted); font-family: 'Space Grotesk', monospace; }
+    .demo-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 350px; }
+    .demo-chat { padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+    .demo-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; }
+    .demo-messages::-webkit-scrollbar { width: 4px; }
+    .demo-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .msg { max-width: 85%; padding: 0.7rem 1rem; border-radius: 14px; font-size: 0.85rem; line-height: 1.5; animation: msgIn 0.3s ease; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .msg-user { align-self: flex-end; background: var(--text); color: var(--bg); border-bottom-right-radius: 4px; }
+    .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.06); color: var(--text); border-bottom-left-radius: 4px; }
+    [data-theme="light"] .msg-ai { background: rgba(0,0,0,0.04); }
+    .msg-ai .typing-dots span { display: inline-block; width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; margin-right: 3px; animation: blink 1.2s infinite; }
+    .msg-ai .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .msg-ai .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 60%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
+    .demo-prompts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .demo-prompt-btn {
+      padding: 0.45rem 0.9rem; border-radius: 100px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.75rem; cursor: pointer;
+      transition: all 0.3s; white-space: nowrap;
+    }
+    .demo-prompt-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .demo-prompt-btn.used { opacity: 0.2; pointer-events: none; }
+    .demo-code { padding: 1.2rem; overflow: auto; background: rgba(0,0,0,0.4); }
+    .demo-code pre {
+      font-family: 'Space Grotesk', 'Courier New', monospace;
+      font-size: 0.75rem; line-height: 1.6; color: var(--text-muted);
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .demo-code .kw { color: #c792ea; } .demo-code .fn { color: #82aaff; }
+    .demo-code .str { color: #c3e88d; } .demo-code .cm { color: #546e7a; }
+    .demo-code .num { color: #f78c6c; } .demo-code .attr { color: #ffcb6b; }
+    .cursor-blink {
+      display: inline-block; width: 8px; height: 15px; background: var(--text); margin-left: 2px;
+      animation: cursorBlink 0.8s step-end infinite; vertical-align: text-bottom;
+    }
+    @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* LIVE CANVAS */
+    .demo-live-wrap {
+      margin-top: 1.5rem; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border); background: #0d0d1a;
+      opacity: 0; transform: translateY(20px);
+      transition: all 0.6s ease; pointer-events: none;
+    }
+    .demo-live-wrap.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .demo-live-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.8rem 1.2rem; background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .demo-live-header .live-badge {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #4ade80; background: rgba(74,222,128,0.1);
+      padding: 0.2rem 0.8rem; border-radius: 100px;
+      border: 1px solid rgba(74,222,128,0.2);
+      animation: livePulse 2s ease infinite;
+    }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .demo-live-header span:last-child { font-size: 0.75rem; color: var(--text-muted); }
+    .demo-live-canvas {
+      position: relative; width: 100%; height: 400px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .demo-live-canvas canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .demo-live-hint {
+      position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 0.7rem; color: var(--text-muted);
+      background: rgba(0,0,0,0.6); padding: 0.3rem 1rem; border-radius: 100px;
+      backdrop-filter: blur(8px); pointer-events: none;
+    }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--divider); }
+    .about-card {
+      padding: 3rem 2.5rem; background: var(--bg); transition: all 0.4s;
+    }
+    .about-card:hover { background: var(--surface); }
+    .about-num {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem;
+      color: var(--text-muted); margin-bottom: 1.5rem; letter-spacing: 0.05em;
+    }
+    .about-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.8rem; letter-spacing: -0.01em; }
+    .about-card p { color: var(--text-muted); font-size: 0.9rem; font-weight: 300; line-height: 1.7; }
+
+    /* PROJECTS */
+    .project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .project-card {
+      overflow: hidden; background: var(--card); border: 1px solid var(--border);
+      transition: all 0.5s; text-decoration: none; color: inherit; display: block;
+    }
+    .project-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
+    [data-theme="light"] .project-card:hover { border-color: rgba(0,0,0,0.15); }
+    .project-thumb { height: 240px; overflow: hidden; position: relative; }
+    .project-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .project-card:hover .project-thumb img { transform: scale(1.05); }
+    .project-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%); }
+    .project-tags { position: absolute; top: 16px; left: 16px; display: flex; gap: 0.5rem; }
+    .tag {
+      padding: 0.25rem 0.7rem; background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.7rem; color: rgba(255,255,255,0.8); letter-spacing: 0.02em;
+    }
+    .project-info { padding: 2rem; }
+    .project-info h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+    .project-info .author { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+    .project-info p { color: var(--text-muted); font-size: 0.88rem; font-weight: 300; line-height: 1.7; }
+    .project-info .view-more {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 1.2rem; font-size: 0.8rem; color: var(--text);
+      font-weight: 500; letter-spacing: 0.02em;
+    }
+    .project-info .view-more svg { transition: transform 0.3s; }
+    .project-card:hover .view-more svg { transform: translateX(4px); }
+
+    /* MEMBERS */
+    .member-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--divider); }
+    .member-card {
+      text-align: center; padding: 3rem 1.5rem; background: var(--bg);
+      transition: all 0.4s;
+    }
+    .member-card:hover { background: var(--surface); }
+    .member-avatar {
+      width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 1.2rem;
+      background: var(--divider); display: flex; align-items: center;
+      justify-content: center; font-size: 1.3rem; font-weight: 600;
+      color: var(--text-muted); transition: all 0.4s;
+    }
+    .member-card:hover .member-avatar { background: var(--text); color: var(--bg); }
+    .member-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .member-card p { color: var(--text-muted); font-size: 0.8rem; font-weight: 300; }
+
+    /* FOOTER */
+    footer {
+      padding: 4rem 3rem 3rem; border-top: 1px solid var(--divider);
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 0 auto;
+    }
+    footer p { color: var(--text-muted); font-size: 0.8rem; font-weight: 300; }
+    footer a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+    footer a:hover { color: var(--text); }
+
+    /* ANIMATIONS */
+    .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* LIGHT MODE */
+    [data-theme="light"] .demo-code { background: #f4f4f8; }
+    [data-theme="light"] .demo-live-canvas { background: #0d0d1a; }
+    [data-theme="light"] .tag { background: rgba(0,0,0,0.05); color: var(--text-muted); border-color: rgba(0,0,0,0.1); }
+    [data-theme="light"] #starsCanvas { opacity: 0.3; }
+    [data-theme="light"] .hero-cta { background: #1a1a1a; color: #fff; }
+
+    /* HAMBURGER */
+    .nav-toggle {
+      display: none; width: 44px; height: 44px; border: none;
+      background: transparent; cursor: pointer; position: relative;
+      flex-shrink: 0; z-index: 110;
+    }
+    .nav-toggle span {
+      display: block; width: 20px; height: 1.5px; background: var(--text);
+      position: absolute; left: 12px; transition: all 0.3s;
+    }
+    .nav-toggle span:nth-child(1) { top: 15px; }
+    .nav-toggle span:nth-child(2) { top: 21px; }
+    .nav-toggle span:nth-child(3) { top: 27px; }
+    .nav-toggle.active span:nth-child(1) { top: 21px; transform: rotate(45deg); }
+    .nav-toggle.active span:nth-child(2) { opacity: 0; }
+    .nav-toggle.active span:nth-child(3) { top: 21px; transform: rotate(-45deg); }
+
+    @media (max-width: 768px) {
+      html, body { overflow-x: hidden; width: 100%; }
+      * { max-width: 100vw; }
+
+      nav { padding: 0 1.2rem; height: 60px; }
+      .logo { font-size: 0.95rem; }
+      .nav-toggle { display: block; }
+      .nav-right { gap: 0.8rem; }
+      .nav-links {
+        position: fixed; top: 0; right: -100%; width: 70vw; max-width: 280px;
+        height: 100vh; flex-direction: column; gap: 0;
+        background: var(--bg); border-left: 1px solid var(--border);
+        padding: 5rem 1.5rem 2rem; transition: right 0.3s ease;
+        z-index: 105;
+      }
+      .nav-links.open { right: 0; }
+      .nav-links a {
+        display: flex; padding: 0.9rem 0; font-size: 1.05rem;
+        border-bottom: 1px solid var(--border);
+        min-height: 44px; align-items: center;
+      }
+      .theme-toggle { padding: 5px 10px; font-size: 12px; }
+      .nav-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        z-index: 102;
+      }
+      .nav-overlay.open { display: block; }
+
+      .hero { min-height: 85vh; padding: 6rem 1.5rem 3rem; }
+      .hero h1 { font-size: clamp(2.2rem, 10vw, 3.5rem); }
+      .hero p { font-size: 0.95rem; }
+      .hero-eyebrow { font-size: 0.7rem; margin-bottom: 1.5rem; }
+      .hero-cta { padding: 0.85rem 2rem; font-size: 0.85rem; }
+      .hero-scroll { display: none; }
+
+      .section-full { padding: 4rem 0; }
+      .section-inner { padding: 0 1.2rem; }
+      .section-header { margin-bottom: 2.5rem; }
+      .section-title { font-size: clamp(1.5rem, 6vw, 2rem); }
+
+      .demo-section { padding: 4rem 0; }
+      .demo-inner { padding: 0 1.2rem; }
+      .demo-body { grid-template-columns: 1fr; }
+      .demo-chat { border-right: none; border-bottom: 1px solid var(--border); padding: 0.8rem; max-height: 200px; }
+      .demo-code { padding: 0.8rem; max-height: 200px; overflow-y: auto; }
+      .demo-code pre { font-size: 0.65rem; }
+      .demo-prompt-btn { padding: 0.4rem 0.7rem; font-size: 0.72rem; min-height: 36px; display: inline-flex; align-items: center; }
+      .demo-live-wrap { margin-top: 0.8rem; border-radius: 12px; }
+      .demo-live-canvas { height: 250px; }
+      .demo-live-hint { font-size: 0.45rem; padding: 0.2rem 0.6rem; }
+
+      .about-grid { grid-template-columns: 1fr; }
+      .about-card { padding: 2rem 1.5rem; }
+
+      .project-grid { grid-template-columns: 1fr; }
+      .project-thumb { height: 180px; }
+      .project-info { padding: 1.5rem; }
+
+      .member-grid { grid-template-columns: repeat(2, 1fr); }
+      .member-card { padding: 2rem 1rem; }
+      .member-avatar { width: 52px; height: 52px; font-size: 1.1rem; }
+
+      footer { padding: 2.5rem 1.2rem 2rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    @media (max-width: 400px) {
+      .hero { min-height: 80vh; padding: 5rem 1rem 2.5rem; }
+      .hero h1 { font-size: 2rem; }
+      .demo-section { padding: 3rem 0; }
+      .demo-inner { padding: 0 0.8rem; }
+      .demo-live-canvas { height: 220px; }
+      .member-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="nav-overlay" id="navOverlay"></div>
+  <nav>
+    <div class="logo">VIBE CODING</div>
+    <div class="nav-right">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#members">Members</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 다크 모드</button>
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <canvas id="starsCanvas"></canvas>
+  <section class="hero">
+    <span class="hero-eyebrow fade-up">2026 1st Cohort</span>
+    <h1 class="fade-up">Make What<br><span class="thin">You Imagine</span></h1>
+    <p class="fade-up">AI와 함께 아이디어를 현실로 만드는 바이브코딩 스터디 1기 프로젝트 쇼케이스.</p>
+    <a href="#projects" class="hero-cta fade-up">
+      프로젝트 보기
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="hero-scroll">
+      <div class="hero-scroll-line"></div>
+      Scroll
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <div class="demo-section" id="demo">
+    <div class="demo-inner">
+      <div class="section-header">
+        <div class="section-header-left">
+          <p class="section-label fade-up">Interactive Demo</p>
+          <h2 class="section-title fade-up">바이브 코딩을<br>체험해보세요</h2>
+        </div>
+        <p class="section-desc fade-up" style="margin-top:0; max-width:320px;">프롬프트 하나면 이런 게 만들어집니다.<br>직접 눌러보세요.</p>
+      </div>
+
+      <div class="demo-container fade-up">
+        <div class="demo-header">
+          <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+          <span>vibe-coding-studio</span>
+        </div>
+        <div class="demo-body">
+          <div class="demo-chat">
+            <div class="demo-messages" id="demoMessages">
+              <div class="msg msg-ai">무엇을 만들어볼까요?</div>
+            </div>
+            <div class="demo-prompts" id="demoPrompts">
+              <button class="demo-prompt-btn" data-idx="0">마우스 따라다니는 파티클</button>
+              <button class="demo-prompt-btn" data-idx="1">중력 물리 시뮬레이션</button>
+              <button class="demo-prompt-btn" data-idx="2">우주 워프 터널</button>
+            </div>
+          </div>
+          <div class="demo-code">
+            <pre id="demoCode"><span class="cm">// 프롬프트를 선택하면 코드가 생성됩니다</span><span class="cursor-blink"></span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-live-wrap" id="demoLiveWrap">
+        <div class="demo-live-header">
+          <span class="live-badge">LIVE</span>
+          <span id="liveTitle">실행 결과</span>
+        </div>
+        <div class="demo-live-canvas" id="demoLiveCanvas">
+          <canvas id="liveCanvas"></canvas>
+          <div class="demo-live-hint" id="liveHint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full" id="projects">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-header-left">
+          <p class="section-label fade-up">Projects</p>
+          <h2 class="section-title fade-up">What We Built</h2>
+        </div>
+        <p class="section-desc fade-up" style="margin-top:0; max-width:320px;">각자의 바이브로 탄생한 프로젝트들입니다.</p>
+      </div>
+      <div class="project-grid">
+        <a href="stocksense.html" target="_blank" class="project-card fade-up">
+          <div class="project-thumb">
+            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop" alt="StockSense" />
+            <div class="project-overlay"></div>
+            <div class="project-tags"><span class="tag">TensorFlow.js</span><span class="tag">Finance</span><span class="tag">AI</span></div>
+          </div>
+          <div class="project-info">
+            <h3>StockSense</h3>
+            <p class="author">by 배장우 &amp; 정유채</p>
+            <p>종목을 검색하면 주가 차트를 불러오고, 기술적 지표(RSI, MACD, 이동평균)를 분석합니다. TensorFlow.js로 브라우저에서 직접 AI 모델을 학습해 향후 5일 주가를 예측합니다.</p>
+            <span class="view-more">자세히 보기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+        <a href="sanjini.html" target="_blank" class="project-card fade-up">
+          <div class="project-thumb">
+            <img src="sanjini.png" alt="산지니원정대" />
+            <div class="project-overlay"></div>
+            <div class="project-tags"><span class="tag" style="background:rgba(255,159,67,0.4);color:#ffb74d;">웹 데모</span><span class="tag">캠퍼스</span><span class="tag">게임 UI</span></div>
+          </div>
+          <div class="project-info">
+            <h3>산지니원정대</h3>
+            <p class="author">by 조병권 &amp; 고은재</p>
+            <p>산지니가 반겨주는 인트로부터 지도 기반 퀘스트 선택, 완료 축하와 첫 스트릭 카드까지 이어지는 캠퍼스 어드벤처 웹 데모.</p>
+            <span class="view-more">자세히 보기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full" id="about">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-header-left">
+          <p class="section-label fade-up">About</p>
+          <h2 class="section-title fade-up">바이브로<br>코딩한다는 것</h2>
+        </div>
+        <p class="section-desc fade-up" style="margin-top:0; max-width:360px;">AI를 파트너 삼아 아이디어를 현실로 만드는 스터디.<br>코드를 몰라도, 감각만 있으면 됩니다.</p>
+      </div>
+    </div>
+    <div style="max-width:1200px; margin:0 auto;">
+      <div class="about-grid fade-up">
+        <div class="about-card">
+          <div class="about-num">01</div>
+          <h3>아이디어 퍼스트</h3>
+          <p>문법보다 상상력. "이런 거 있으면 좋겠다"에서 시작합니다.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-num">02</div>
+          <h3>AI 페어 프로그래밍</h3>
+          <p>Claude, GPT 등 AI와 대화하며 함께 코드를 만들어갑니다.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-num">03</div>
+          <h3>빠른 프로토타이핑</h3>
+          <p>완벽하지 않아도 좋습니다. 일단 만들고, 보여주고, 개선합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full" id="members">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-header-left">
+          <p class="section-label fade-up">Members</p>
+          <h2 class="section-title fade-up">함께한 사람들</h2>
+        </div>
+      </div>
+    </div>
+    <div style="max-width:1200px; margin:0 auto;">
+      <div class="member-grid fade-up">
+        <div class="member-card"><div class="member-avatar">장</div><h3>배장우</h3><p>StockSense</p></div>
+        <div class="member-card"><div class="member-avatar">병</div><h3>조병권</h3><p>산지니원정대</p></div>
+        <div class="member-card"><div class="member-avatar">유</div><h3>정유채</h3><p>StockSense</p></div>
+        <div class="member-card"><div class="member-avatar">은</div><h3>고은재</h3><p>산지니원정대</p></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 바이브코딩 스터디 1기</p>
+    <p>Built with Vibe</p>
+  </footer>
+
+  <script>
+    // theme toggle
+    function updateToggleBtn(theme) {
+      document.getElementById('themeToggle').textContent = theme === 'light' ? '🌙 다크 모드' : '☀️ 라이트 모드';
+    }
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateToggleBtn(next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      updateToggleBtn(saved);
+    })();
+
+    // mobile nav toggle
+    (function() {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      const overlay = document.getElementById('navOverlay');
+      function closeNav() {
+        toggle.classList.remove('active');
+        links.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+      toggle.addEventListener('click', () => {
+        const isOpen = links.classList.contains('open');
+        if (isOpen) { closeNav(); } else {
+          toggle.classList.add('active');
+          links.classList.add('open');
+          overlay.classList.add('open');
+        }
+      });
+      overlay.addEventListener('click', closeNav);
+      links.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+    })();
+
+    // scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ── DEMO DATA ──
+    const demos = [
+      {
+        reply: "파티클 시스템 만들게요! 마우스를 움직여보세요.",
+        title: "Particle System",
+        hint: "마우스를 움직여보세요",
+        codeText: `<span class="cm">// Particle System</span>
+<span class="kw">const</span> particles = [];
+
+canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">3</span>; i++) {
+    particles.<span class="fn">push</span>({
+      x: e.offsetX,
+      y: e.offsetY,
+      vx: (Math.<span class="fn">random</span>() - <span class="num">0.5</span>) * <span class="num">4</span>,
+      vy: (Math.<span class="fn">random</span>() - <span class="num">0.5</span>) * <span class="num">4</span>,
+      life: <span class="num">1.0</span>,
+      hue: Math.<span class="fn">random</span>() * <span class="num">60</span> + <span class="num">240</span>,
+      size: Math.<span class="fn">random</span>() * <span class="num">4</span> + <span class="num">2</span>,
+    });
+  }
+});
+
+<span class="kw">function</span> <span class="fn">animate</span>() {
+  ctx.<span class="fn">fillStyle</span> = <span class="str">'rgba(13,13,26,0.15)'</span>;
+  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
+  particles.<span class="fn">forEach</span>(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.life -= <span class="num">0.015</span>;
+    ctx.globalAlpha = p.life;
+    ctx.<span class="fn">fillStyle</span> = \`hsl(\${p.hue},80%,65%)\`;
+    ctx.<span class="fn">beginPath</span>();
+    ctx.<span class="fn">arc</span>(p.x, p.y, p.size, <span class="num">0</span>, Math.PI*<span class="num">2</span>);
+    ctx.<span class="fn">fill</span>();
+  });
+  <span class="fn">requestAnimationFrame</span>(animate);
+}
+<span class="cm">// &#x2728; 완성!</span>`,
+        run: (canvas, ctx, w, h) => {
+          const particles = [];
+          ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
+          canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (w / rect.width);
+            const y = (e.clientY - rect.top) * (h / rect.height);
+            for (let i = 0; i < 3; i++) {
+              particles.push({ x, y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 1, hue: Math.random()*60+240, size: Math.random()*4+2 });
+            }
+          });
+          canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const t = e.touches[0];
+            const x = (t.clientX - rect.left) * (w / rect.width);
+            const y = (t.clientY - rect.top) * (h / rect.height);
+            for (let i = 0; i < 3; i++) {
+              particles.push({ x, y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 1, hue: Math.random()*60+240, size: Math.random()*4+2 });
+            }
+          }, { passive: false });
+          function animate() {
+            ctx.fillStyle = 'rgba(13,13,26,0.15)'; ctx.fillRect(0,0,w,h);
+            for (let i = particles.length - 1; i >= 0; i--) {
+              const p = particles[i];
+              p.x += p.vx; p.y += p.vy; p.life -= 0.012;
+              if (p.life <= 0) { particles.splice(i, 1); continue; }
+              ctx.globalAlpha = p.life;
+              ctx.fillStyle = `hsl(${p.hue},80%,65%)`;
+              ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animate);
+          }
+          animate();
+        }
+      },
+      {
+        reply: "중력 시뮬레이션! 캔버스를 클릭해서 공을 떨어뜨려보세요.",
+        title: "Gravity Physics",
+        hint: "클릭해서 공을 떨어뜨려보세요",
+        codeText: `<span class="cm">// Gravity Physics Simulation</span>
+<span class="kw">const</span> balls = [];
+<span class="kw">const</span> gravity = <span class="num">0.5</span>;
+<span class="kw">const</span> bounce = <span class="num">0.7</span>;
+
+canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, (e) => {
+  balls.<span class="fn">push</span>({
+    x: e.offsetX, y: e.offsetY,
+    vx: (Math.<span class="fn">random</span>() - <span class="num">0.5</span>) * <span class="num">8</span>,
+    vy: <span class="num">0</span>,
+    r: Math.<span class="fn">random</span>() * <span class="num">15</span> + <span class="num">8</span>,
+    hue: Math.<span class="fn">random</span>() * <span class="num">360</span>,
+  });
+});
+
+<span class="kw">function</span> <span class="fn">simulate</span>() {
+  ctx.<span class="fn">fillStyle</span> = <span class="str">'rgba(13,13,26,0.3)'</span>;
+  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
+  balls.<span class="fn">forEach</span>(b => {
+    b.vy += gravity;
+    b.x += b.vx; b.y += b.vy;
+    <span class="kw">if</span> (b.y + b.r > h) {
+      b.y = h - b.r;
+      b.vy *= -bounce;
+    }
+    ctx.<span class="fn">beginPath</span>();
+    ctx.<span class="fn">arc</span>(b.x, b.y, b.r, <span class="num">0</span>, Math.PI*<span class="num">2</span>);
+    ctx.<span class="fn">fillStyle</span> = \`hsl(\${b.hue},70%,60%)\`;
+    ctx.<span class="fn">fill</span>();
+  });
+  <span class="fn">requestAnimationFrame</span>(simulate);
+}
+<span class="cm">// &#x1F3B1; 완성!</span>`,
+        run: (canvas, ctx, w, h) => {
+          const balls = []; const gravity = 0.5; const bounce = 0.7;
+          ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
+          function addBall(cx, cy) {
+            for (let i = 0; i < 3; i++) {
+              balls.push({ x: cx, y: cy, vx: (Math.random()-0.5)*8, vy: -Math.random()*4, r: Math.random()*15+8, hue: Math.random()*360 });
+            }
+          }
+          canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            addBall((e.clientX-rect.left)*(w/rect.width), (e.clientY-rect.top)*(h/rect.height));
+          });
+          canvas.addEventListener('touchstart', (e) => {
+            const rect = canvas.getBoundingClientRect(); const t = e.touches[0];
+            addBall((t.clientX-rect.left)*(w/rect.width), (t.clientY-rect.top)*(h/rect.height));
+          });
+          for (let i = 0; i < 5; i++) addBall(Math.random()*w, Math.random()*h*0.3);
+          function simulate() {
+            ctx.fillStyle = 'rgba(13,13,26,0.3)'; ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.beginPath();
+            ctx.moveTo(0,h-1); ctx.lineTo(w,h-1); ctx.stroke();
+            balls.forEach(b => {
+              b.vy += gravity; b.x += b.vx; b.y += b.vy;
+              if (b.y + b.r > h) { b.y = h - b.r; b.vy *= -bounce; }
+              if (b.x < b.r) { b.x = b.r; b.vx *= -1; }
+              if (b.x > w - b.r) { b.x = w - b.r; b.vx *= -1; }
+              b.vx *= 0.999;
+              ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+              const g = ctx.createRadialGradient(b.x-b.r*0.3, b.y-b.r*0.3, 0, b.x, b.y, b.r);
+              g.addColorStop(0, `hsl(${b.hue},70%,75%)`); g.addColorStop(1, `hsl(${b.hue},70%,50%)`);
+              ctx.fillStyle = g; ctx.fill();
+            });
+            requestAnimationFrame(simulate);
+          }
+          simulate();
+        }
+      },
+      {
+        reply: "우주 미니게임! 운석을 피하며 지구까지 도착하세요!",
+        title: "Space Dodge",
+        hint: "마우스로 우주선 조종 | 운석을 피하세요!",
+        codeText: `<span class="cm">// Space Dodge - 우주 미니게임</span>
+<span class="kw">let</span> shipX = w/<span class="num">2</span>, hp = <span class="num">3</span>, distance = <span class="num">0</span>;
+<span class="kw">const</span> totalDist = <span class="num">2000</span>;
+<span class="kw">const</span> asteroids = [];
+
+<span class="cm">// 마우스로 우주선 조종</span>
+canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
+  targetX = e.offsetX;
+});
+
+<span class="cm">// 운석 생성 (갈수록 빨라짐)</span>
+<span class="kw">function</span> <span class="fn">spawnAsteroid</span>() {
+  asteroids.<span class="fn">push</span>({
+    x: Math.<span class="fn">random</span>() * w,
+    y: <span class="num">-50</span>,
+    speed: Math.<span class="fn">random</span>()*<span class="num">3</span> + <span class="num">2.5</span>,
+    size: Math.<span class="fn">random</span>()*<span class="num">18</span> + <span class="num">12</span>,
+  });
+}
+
+<span class="cm">// 충돌 판정</span>
+<span class="kw">const</span> dist = Math.<span class="fn">hypot</span>(a.x - shipX, a.y - shipY);
+<span class="kw">if</span> (dist < a.size + <span class="num">12</span>) {
+  hp--;
+  <span class="fn">shakeScreen</span>();
+  <span class="kw">if</span> (hp <= <span class="num">0</span>) <span class="fn">gameOver</span>();
+}
+
+<span class="cm">// 미니맵: 지구까지 진행도</span>
+<span class="kw">const</span> progress = distance / totalDist;
+<span class="fn">drawMinimap</span>(progress);
+
+<span class="cm">// 지구 도착 = 클리어!</span>
+<span class="kw">if</span> (distance >= totalDist) {
+  <span class="fn">showVictory</span>(<span class="str">'EARTH REACHED!'</span>);
+}
+<span class="cm">// &#x1F680; 완성!</span>`,
+        run: (canvas, ctx, w, h) => {
+          const stars = []; const COUNT = 400;
+          const asteroids = [];
+          let shipX = w/2, shipY = h * 0.82, targetX = shipX;
+          let shakePow = 0, flashAlpha = 0;
+          let hp = 3, distance = 0, dodged = 0;
+          const totalDist = 2400;
+          let gameOver = false;
+          let nextAsteroid = 60, invincible = 0;
+
+          const bhStart = totalDist * 0.4, bhEnd = totalDist * 0.65;
+          let bhWarning = 0;
+          let bhActive = false, bhAngle = 0;
+          let bhX = w/2, bhY = h*0.3;
+
+          let earthSize = 0, earthPhase = 0;
+
+          for (let i = 0; i < COUNT; i++)
+            stars.push({ x: Math.random()*w, y: Math.random()*h, speed: Math.random()*3+1, size: Math.random()*1.5+0.5 });
+
+          canvas.addEventListener('mousemove', (e) => {
+            const r = canvas.getBoundingClientRect();
+            targetX = (e.clientX - r.left) * (w / r.width);
+          });
+          canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const r = canvas.getBoundingClientRect();
+            targetX = (e.touches[0].clientX - r.left) * (w / r.width);
+          }, { passive: false });
+
+          function spawnAsteroid() {
+            const size = Math.random()*18+12;
+            const a = { x: Math.random()*(w-100)+50, y: -50, speed: Math.random()*3+2.5, size, hue: Math.random()*40+10, rot: 0, rotSpeed: (Math.random()-0.5)*0.06, verts: [] };
+            for (let v = 0; v < 7; v++) a.verts.push(0.6+Math.random()*0.4);
+            asteroids.push(a);
+          }
+
+          function drawShip(x, y) {
+            ctx.save(); ctx.translate(x, y);
+            const eg = ctx.createRadialGradient(0,18,0,0,18,20);
+            eg.addColorStop(0,'rgba(124,92,255,0.6)'); eg.addColorStop(1,'transparent');
+            ctx.fillStyle = eg; ctx.fillRect(-20,8,40,30);
+            ctx.beginPath();
+            ctx.moveTo(0,-18); ctx.lineTo(-14,14); ctx.lineTo(-6,10);
+            ctx.lineTo(0,16); ctx.lineTo(6,10); ctx.lineTo(14,14); ctx.closePath();
+            ctx.fillStyle = invincible>0 && Math.floor(invincible/3)%2 ? 'rgba(255,255,255,0.3)' : '#c8b8ff';
+            ctx.fill(); ctx.strokeStyle='#7c5cff'; ctx.lineWidth=1.2; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0,-4,4,0,Math.PI*2);
+            ctx.fillStyle='#00d4aa'; ctx.fill();
+            ctx.restore();
+          }
+
+          function drawEarth(x, y, size) {
+            ctx.save(); ctx.translate(x, y);
+            const atm = ctx.createRadialGradient(0,0,size*0.8,0,0,size*1.6);
+            atm.addColorStop(0,'rgba(100,180,255,0.15)'); atm.addColorStop(1,'transparent');
+            ctx.fillStyle = atm; ctx.beginPath(); ctx.arc(0,0,size*1.6,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2);
+            const ocean = ctx.createRadialGradient(-size*0.3,-size*0.3,0,0,0,size);
+            ocean.addColorStop(0,'#5599dd'); ocean.addColorStop(1,'#2255aa');
+            ctx.fillStyle = ocean; ctx.fill();
+            ctx.fillStyle = '#44aa55';
+            ctx.beginPath(); ctx.ellipse(-size*0.15,-size*0.2,size*0.35,size*0.25,0.3,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(size*0.2,size*0.25,size*0.2,size*0.3,-0.4,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#55bb66';
+            ctx.beginPath(); ctx.ellipse(-size*0.3,size*0.15,size*0.12,size*0.1,0.5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.ellipse(0,-size*0.85,size*0.3,size*0.1,0,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0,size*0.88,size*0.25,size*0.08,0,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.beginPath(); ctx.ellipse(size*0.1,-size*0.1,size*0.4,size*0.08,0.8,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(-size*0.2,size*0.4,size*0.3,size*0.06,-0.3,0,Math.PI*2); ctx.fill();
+            const spec = ctx.createRadialGradient(-size*0.3,-size*0.35,0,-size*0.2,-size*0.2,size*0.7);
+            spec.addColorStop(0,'rgba(255,255,255,0.2)'); spec.addColorStop(1,'transparent');
+            ctx.fillStyle = spec; ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fill();
+            ctx.restore();
+          }
+
+          function drawBlackhole(x, y, size) {
+            ctx.save(); ctx.translate(x, y);
+            bhAngle += 0.02;
+            for (let r = 0; r < 4; r++) {
+              ctx.beginPath();
+              const radius = size*(1.2+r*0.3);
+              ctx.ellipse(0,0,radius,radius*0.3,bhAngle+r*0.5,0,Math.PI*2);
+              ctx.strokeStyle = `hsla(${280+r*20},80%,${50+r*10}%,${0.3-r*0.05})`;
+              ctx.lineWidth = 3-r*0.5; ctx.stroke();
+            }
+            const bhGrad = ctx.createRadialGradient(0,0,0,0,0,size);
+            bhGrad.addColorStop(0,'#000'); bhGrad.addColorStop(0.7,'rgba(20,0,40,0.9)');
+            bhGrad.addColorStop(1,'transparent');
+            ctx.fillStyle = bhGrad; ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0,0,size*0.8,0,Math.PI*2);
+            ctx.strokeStyle = 'rgba(180,100,255,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+          }
+
+          function drawWarning(alpha) {
+            ctx.save();
+            ctx.fillStyle = `rgba(255,0,0,${alpha*0.08})`;
+            ctx.fillRect(0,0,w,h);
+            ctx.font = 'bold 24px Space Grotesk, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = `rgba(255,50,50,${alpha})`;
+            ctx.fillText('⚠ WARNING ⚠', w/2, h/2 - 20);
+            ctx.font = '13px Noto Sans KR, sans-serif';
+            ctx.fillStyle = `rgba(255,150,150,${alpha*0.8})`;
+            ctx.fillText('블랙홀 접근 감지!', w/2, h/2 + 8);
+            ctx.strokeStyle = `rgba(255,0,0,${alpha*0.5})`;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(2,2,w-4,h-4);
+            ctx.restore();
+          }
+
+          function drawMinimap() {
+            const mx = w-70, my = 15, mw = 55, mh = 140;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(mx,my,mw,mh,8); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '8px Space Grotesk, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('MAP', mx+mw/2, my+12);
+            const trackX = mx+mw/2, trackTop = my+22, trackBot = my+mh-18;
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.setLineDash([2,3]);
+            ctx.beginPath(); ctx.moveTo(trackX,trackTop); ctx.lineTo(trackX,trackBot); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#4488ff'; ctx.beginPath(); ctx.arc(trackX,trackTop,6,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#33bb55'; ctx.beginPath(); ctx.arc(trackX-2,trackTop-1,3,0.3,1.8); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '7px sans-serif'; ctx.fillText('Earth',trackX,trackTop-9);
+            const bhMapTop = trackBot-(trackBot-trackTop)*(bhEnd/totalDist);
+            const bhMapBot = trackBot-(trackBot-trackTop)*(bhStart/totalDist);
+            ctx.fillStyle = 'rgba(150,50,255,0.15)'; ctx.fillRect(mx+4,bhMapTop,mw-8,bhMapBot-bhMapTop);
+            ctx.fillStyle = 'rgba(150,50,255,0.5)'; ctx.font = '6px sans-serif'; ctx.fillText('BH',trackX,(bhMapTop+bhMapBot)/2+2);
+            const progress = Math.min(distance/totalDist,1);
+            const shipMapY = trackBot-(trackBot-trackTop)*progress;
+            ctx.fillStyle = '#c8b8ff'; ctx.beginPath();
+            ctx.moveTo(trackX,shipMapY-4); ctx.lineTo(trackX-3,shipMapY+3); ctx.lineTo(trackX+3,shipMapY+3); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillText('Start',trackX,trackBot+10);
+            ctx.fillStyle = '#00d4aa'; ctx.font = 'bold 9px Space Grotesk, sans-serif'; ctx.fillText(Math.floor(progress*100)+'%',trackX,my+mh-4);
+          }
+
+          function drawHUD() {
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '11px Space Grotesk, sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText('HP',16,30);
+            for (let i = 0; i < 3; i++) {
+              ctx.fillStyle = i<hp ? '#ff5577' : 'rgba(255,255,255,0.1)'; ctx.fillRect(38+i*18,20,14,14);
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.strokeRect(38+i*18,20,14,14);
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '10px Space Grotesk, sans-serif';
+            ctx.fillText('DODGED: '+dodged, 16, 52);
+          }
+
+          ctx.fillStyle = '#00000a'; ctx.fillRect(0,0,w,h);
+
+          function gameLoop() {
+            if (gameOver) return;
+            shakePow *= 0.88; flashAlpha *= 0.82;
+            if (invincible > 0) invincible--;
+            const sx = (Math.random()-0.5)*shakePow, sy = (Math.random()-0.5)*shakePow;
+            ctx.save(); ctx.translate(sx, sy);
+            ctx.fillStyle = 'rgba(0,0,10,0.25)'; ctx.fillRect(-10,-10,w+20,h+20);
+
+            const inBH = distance >= bhStart && distance < bhEnd;
+            stars.forEach(s => {
+              s.y += s.speed * (inBH ? 0.5 : 1);
+              if (s.y > h) { s.y = 0; s.x = Math.random()*w; }
+              ctx.globalAlpha = 0.5+s.speed/4;
+              let drawX = s.x, drawY = s.y;
+              if (inBH) {
+                const dx = s.x-bhX, dy = s.y-bhY;
+                const d = Math.hypot(dx,dy)+1;
+                const pull = 2000/(d*d)*5;
+                drawX -= dx/d*pull; drawY -= dy/d*pull;
+              }
+              ctx.fillStyle = inBH ? `hsl(${280+Math.random()*40},60%,70%)` : '#fff';
+              ctx.beginPath(); ctx.arc(drawX,drawY,s.size,0,Math.PI*2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            const shipSpeed = inBH ? 0.04 : 0.12;
+            shipX += (targetX - shipX) * shipSpeed;
+            if (inBH) { shipX += (bhX - shipX) * 0.025; }
+            shipX = Math.max(20, Math.min(w-20, shipX));
+
+            distance++;
+
+            const warnStart = bhStart - 120;
+            if (distance >= warnStart && distance < bhStart) {
+              bhWarning = Math.sin((distance-warnStart)/120*Math.PI);
+            } else { bhWarning = 0; }
+
+            nextAsteroid--;
+            let spawnRate;
+            if (inBH) { spawnRate = 12; }
+            else { spawnRate = Math.max(25, 70 - Math.floor(distance/totalDist*50)); }
+            if (nextAsteroid <= 0) { spawnAsteroid(); nextAsteroid = Math.floor(Math.random()*spawnRate)+spawnRate/2; }
+            if (inBH) {
+              asteroids.forEach(a => {
+                const dx = bhX-a.x, dy = bhY-a.y;
+                const d = Math.hypot(dx,dy)+1;
+                a.x += dx/d*1.5; a.y += dy/d*0.5;
+              });
+            }
+
+            if (inBH) { drawBlackhole(bhX, bhY, 45 + Math.sin(distance*0.02)*5); }
+
+            for (let i = asteroids.length-1; i >= 0; i--) {
+              const a = asteroids[i];
+              a.y += a.speed; a.rot += a.rotSpeed;
+              if (a.y > h+50) { dodged++; asteroids.splice(i,1); continue; }
+              if (a.x < -50 || a.x > w+50) { asteroids.splice(i,1); continue; }
+              if (invincible <= 0) {
+                const dist = Math.hypot(a.x-shipX, a.y-shipY);
+                if (dist < a.size+12) {
+                  hp--; shakePow=30; flashAlpha=0.7; invincible=60;
+                  asteroids.splice(i,1);
+                  if (hp<=0) {
+                    gameOver=true; ctx.restore();
+                    ctx.fillStyle='rgba(0,0,10,0.85)'; ctx.fillRect(0,0,w,h);
+                    ctx.fillStyle='#ff4444'; ctx.font='bold 28px Space Grotesk, sans-serif'; ctx.textAlign='center';
+                    ctx.fillText('GAME OVER',w/2,h/2-10);
+                    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='14px Noto Sans KR, sans-serif';
+                    ctx.fillText('운석에 파괴되었습니다... 회피: '+dodged+'개',w/2,h/2+20);
+                    return;
+                  }
+                  continue;
+                }
+              }
+              ctx.save(); ctx.translate(a.x,a.y); ctx.rotate(a.rot);
+              ctx.globalAlpha=0.15;
+              const glow = ctx.createRadialGradient(0,0,0,0,0,a.size*2);
+              glow.addColorStop(0,`hsla(${a.hue},60%,50%,0.4)`); glow.addColorStop(1,'transparent');
+              ctx.fillStyle=glow; ctx.fillRect(-a.size*2,-a.size*2,a.size*4,a.size*4);
+              ctx.globalAlpha=1;
+              ctx.beginPath();
+              for (let v=0;v<a.verts.length;v++) {
+                const angle=(v/a.verts.length)*Math.PI*2, rr=a.size*a.verts[v];
+                v===0?ctx.moveTo(Math.cos(angle)*rr,Math.sin(angle)*rr):ctx.lineTo(Math.cos(angle)*rr,Math.sin(angle)*rr);
+              }
+              ctx.closePath(); ctx.fillStyle=`hsl(${a.hue},30%,25%)`; ctx.fill();
+              ctx.strokeStyle=`hsl(${a.hue},40%,45%)`; ctx.lineWidth=1.5; ctx.stroke();
+              ctx.restore();
+            }
+
+            const earthStart = totalDist * 0.85;
+            if (distance >= earthStart) {
+              earthPhase = (distance - earthStart) / (totalDist - earthStart);
+              earthSize = earthPhase * 120;
+              drawEarth(w/2, -60 + earthPhase * (h*0.35+60), earthSize);
+            }
+
+            drawShip(shipX, shipY);
+            if (bhWarning > 0) drawWarning(bhWarning);
+            if (inBH) {
+              const vig = ctx.createRadialGradient(bhX,bhY,50,bhX,bhY,w*0.8);
+              vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(30,0,60,0.4)');
+              ctx.fillStyle=vig; ctx.fillRect(0,0,w,h);
+            }
+            if (flashAlpha>0.01) { ctx.fillStyle=`rgba(255,100,50,${flashAlpha})`; ctx.fillRect(0,0,w,h); }
+            ctx.restore();
+            drawMinimap(); drawHUD();
+
+            if (distance >= totalDist) {
+              gameOver = true;
+              let arrFrame = 0;
+              function arrivalAnim() {
+                arrFrame++;
+                ctx.fillStyle = `rgba(0,0,10,${Math.min(arrFrame/60,0.85)})`; ctx.fillRect(0,0,w,h);
+                const eSize = 80 + arrFrame*1.5;
+                drawEarth(w/2, h/2 - 20, Math.min(eSize, 140));
+                ctx.globalAlpha = Math.min(arrFrame/30, 1);
+                ctx.fillStyle='#fff'; ctx.font='bold 26px Space Grotesk, sans-serif'; ctx.textAlign='center';
+                ctx.fillText('EARTH REACHED!', w/2, h/2 + Math.min(eSize,140) + 30);
+                ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='13px Noto Sans KR, sans-serif';
+                ctx.fillText('지구에 무사히 도착했습니다!  회피: '+dodged+'개', w/2, h/2 + Math.min(eSize,140) + 55);
+                ctx.globalAlpha = 1;
+                if (arrFrame < 90) requestAnimationFrame(arrivalAnim);
+              }
+              arrivalAnim();
+              return;
+            }
+
+            requestAnimationFrame(gameLoop);
+          }
+          gameLoop();
+        }
+      }
+    ];
+
+    // ── DEMO LOGIC ──
+    let demoRunning = false;
+    const messagesEl = document.getElementById('demoMessages');
+    const codeEl = document.getElementById('demoCode');
+    const liveWrap = document.getElementById('demoLiveWrap');
+    let liveCanvas = document.getElementById('liveCanvas');
+    let liveCtx = liveCanvas.getContext('2d');
+
+    function resetCanvas() {
+      const container = document.getElementById('demoLiveCanvas');
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = 'liveCanvas';
+      liveCanvas.replaceWith(newCanvas);
+      liveCanvas = newCanvas;
+      liveCtx = liveCanvas.getContext('2d');
+      resizeCanvas();
+    }
+
+    function resizeCanvas() {
+      const container = document.getElementById('demoLiveCanvas');
+      liveCanvas.width = container.clientWidth * window.devicePixelRatio;
+      liveCanvas.height = container.clientHeight * window.devicePixelRatio;
+      liveCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    document.getElementById('demoPrompts').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.demo-prompt-btn');
+      if (!btn || demoRunning) return;
+      demoRunning = true;
+      // reset all buttons, mark only clicked one
+      document.querySelectorAll('.demo-prompt-btn').forEach(b => b.classList.remove('used'));
+      btn.classList.add('used');
+
+      const idx = parseInt(btn.dataset.idx);
+      const demo = demos[idx];
+
+      // user msg
+      const userMsg = document.createElement('div');
+      userMsg.className = 'msg msg-user';
+      userMsg.textContent = btn.textContent;
+      messagesEl.appendChild(userMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      // typing indicator
+      const typingMsg = document.createElement('div');
+      typingMsg.className = 'msg msg-ai';
+      typingMsg.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+      messagesEl.appendChild(typingMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      await sleep(1000);
+      typingMsg.innerHTML = demo.reply;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      await sleep(500);
+
+      // type code line by line
+      const lines = demo.codeText.split('\n');
+      codeEl.innerHTML = '';
+      for (let i = 0; i < lines.length; i++) {
+        await sleep(50);
+        const old = codeEl.querySelector('.cursor-blink');
+        if (old) old.remove();
+        codeEl.innerHTML += lines[i] + '\n';
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor-blink';
+        codeEl.appendChild(cursor);
+        codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
+      }
+
+      await sleep(300);
+
+      // show live panel (reset previous canvas & listeners)
+      resetCanvas();
+      document.getElementById('liveTitle').textContent = demo.title;
+      document.getElementById('liveHint').textContent = demo.hint;
+      liveWrap.classList.add('active');
+      const cw = liveCanvas.width / window.devicePixelRatio;
+      const ch = liveCanvas.height / window.devicePixelRatio;
+      demo.run(liveCanvas, liveCtx, cw, ch);
+
+      liveWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      const doneMsg = document.createElement('div');
+      doneMsg.className = 'msg msg-ai';
+      doneMsg.innerHTML = '완성! 아래에서 직접 인터랙션 해보세요 ↓';
+      messagesEl.appendChild(doneMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      demoRunning = false;
+    });
+
+    window.addEventListener('resize', () => {
+      if (liveWrap.classList.contains('active')) resizeCanvas();
+    });
+    // ── STARS BACKGROUND (full page) ──
+    (function() {
+      const c = document.getElementById('starsCanvas');
+      const ctx = c.getContext('2d');
+      let w, h;
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = c.offsetWidth * dpr;
+        h = c.offsetHeight * dpr;
+        c.width = w; c.height = h;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const layers = [
+        { count: 250, maxR: 1.0 },   // far — small dim
+        { count: 100, maxR: 2.0 },   // mid
+        { count: 40, maxR: 3.5 },    // close — big bright
+      ];
+      const allStars = [];
+      const starColors = [
+        [200, 220, 255], [255, 240, 230], [255, 210, 180],
+        [180, 200, 255], [255, 255, 255],
+      ];
+      layers.forEach(layer => {
+        for (let i = 0; i < layer.count; i++) {
+          const col = starColors[Math.floor(Math.random() * starColors.length)];
+          allStars.push({
+            x: Math.random(), y: Math.random(),
+            r: Math.random() * layer.maxR + 0.3,
+            twinklePhase: Math.random() * Math.PI * 2,
+            twinkleSpeed: 0.003 + Math.random() * 0.015,
+            twinkleSpeed2: 0.007 + Math.random() * 0.023,
+            color: col,
+            brightness: 0.5 + Math.random() * 0.5,
+            minBright: 0.15 + Math.random() * 0.2,
+          });
+        }
+      });
+
+      let t = 0;
+      function draw() {
+        t++;
+        ctx.clearRect(0, 0, w, h);
+
+        allStars.forEach(s => {
+          const sx = s.x * w;
+          const sy = s.y * h;
+          const tw1 = Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+          const tw2 = Math.sin(t * s.twinkleSpeed2 + s.twinklePhase * 1.7);
+          const twinkle = (tw1 * 0.6 + tw2 * 0.4);
+          const alpha = s.minBright + (s.brightness - s.minBright) * (0.5 + twinkle * 0.5);
+
+          const [cr, cg, cb] = s.color;
+
+          // glow for larger stars
+          if (s.r > 1.5) {
+            const gl = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 5);
+            gl.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.25})`);
+            gl.addColorStop(1, 'transparent');
+            ctx.fillStyle = gl;
+            ctx.beginPath();
+            ctx.arc(sx, sy, s.r * 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
+          ctx.fill();
+        });
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>

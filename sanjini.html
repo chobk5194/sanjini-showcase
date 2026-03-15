@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>산지니 원정대</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%}
+    body{font-family:"Noto Sans KR",sans-serif;color:#f7fbff;background:radial-gradient(circle at top left,rgba(139,203,255,.28),transparent 28%),radial-gradient(circle at top right,rgba(255,215,95,.18),transparent 24%),linear-gradient(180deg,#081327 0%,#0d2142 38%,#132f57 100%);overflow-x:hidden}
+    .back-link{display:inline-flex;align-items:center;gap:8px;padding:22px 24px 0;color:rgba(247,251,255,.76);text-decoration:none;font-size:14px;font-weight:800}
+    .back-link:hover{color:#fff}
+    .page{max-width:1180px;margin:0 auto;padding:14px 24px 42px;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,430px);gap:28px;align-items:center}
+    .copy{padding:30px;border-radius:32px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);box-shadow:0 34px 90px rgba(6,13,28,.3);backdrop-filter:blur(20px)}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+    .eyebrow::before{content:"";width:30px;height:1px;background:currentColor}
+    .copy h1{margin-top:18px;font-family:"Do Hyeon",sans-serif;font-size:clamp(3rem,5vw,4.8rem);line-height:.92;letter-spacing:-.04em}
+    .copy p{margin-top:18px;color:rgba(247,251,255,.78);font-size:15px;line-height:1.9;font-weight:700}
+    .copy-grid{display:grid;gap:12px;margin-top:22px}
+    .copy-card{padding:18px;border-radius:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
+    .copy-card strong{display:block;font-size:14px;margin-bottom:6px}
+    .copy-card span{display:block;color:rgba(247,251,255,.74);font-size:13px;line-height:1.75;font-weight:700}
+    .copy-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}
+    .metric{padding:16px 14px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);text-align:center}
+    .metric small{display:block;font-size:11px;letter-spacing:.14em;color:rgba(247,251,255,.72);margin-bottom:8px;font-weight:900}
+    .metric strong{font-size:20px;font-weight:900}
+    .frame{width:min(100%,25.2rem,calc((100vh - 2rem) * 390 / 844));justify-self:center;padding:10px;border-radius:38px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);box-shadow:0 34px 90px rgba(6,13,28,.3);backdrop-filter:blur(18px)}
+    .frame-inner{position:relative;aspect-ratio:390/844;border-radius:30px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,rgba(88,191,255,.98),rgba(178,231,255,.98) 36%,rgba(245,252,255,.99) 100%)}
+    .frame-inner::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.34;background-image:linear-gradient(rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px);background-size:20px 20px}
+    .shell-top{position:relative;z-index:2;margin:14px 14px 0;padding:14px 16px;border-radius:22px;background:rgba(255,255,255,.22);display:flex;justify-content:space-between;gap:12px;align-items:center;backdrop-filter:blur(12px)}
+    .shell-top small{display:block;font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.78);font-weight:900;margin-bottom:4px}
+    .shell-top strong{font-size:14px;font-weight:900}
+    .meta-group{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .meta-chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.84);color:#2f6fbc;font-size:12px;font-weight:900}
+    #app{position:relative;z-index:2;height:calc(100% - 88px);padding:12px 14px 14px}
+    .layout{height:100%;display:flex;flex-direction:column;gap:12px}
+    .screen{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:28px;border:1px solid rgba(255,255,255,.64);background:rgba(255,255,255,.14)}
+    .scroll{height:100%;overflow-y:auto;padding:12px 12px 18px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}
+    .scroll::-webkit-scrollbar{display:none}
+    .card{border-radius:28px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .panel{padding:18px}
+    .tag{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:#ebf7ff;color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.12em}
+    .title{margin-top:12px;color:#183a66;font-size:22px;line-height:1.1;font-weight:900}
+    .copy-text{margin-top:10px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.75;font-weight:700}
+    .hero{position:relative;min-height:258px;border-radius:30px;overflow:hidden;box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .hero img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,22,48,.08),rgba(8,22,48,.18) 38%,rgba(8,22,48,.72))}
+    .hero-body{position:absolute;inset:0;z-index:1;padding:18px;display:flex;flex-direction:column;justify-content:space-between}
+    .hero-label{display:inline-flex;width:fit-content;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.14em}
+    .hero-title{margin-top:6px;font-family:"Do Hyeon",sans-serif;font-size:38px;line-height:.96;letter-spacing:-.04em}
+    .hero-copy{margin-top:10px;max-width:240px;color:rgba(255,255,255,.9);font-size:14px;line-height:1.7;font-weight:700}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .mini-card{padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .mini-card small{display:block;color:rgba(43,103,179,.7);font-size:11px;font-weight:900;letter-spacing:.16em;margin-bottom:8px}
+    .mini-card strong{color:#183a66;font-size:26px;font-weight:900}
+    .mini-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.7;font-weight:700}
+    .progress-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .pill-stat{padding:10px 12px;border-radius:20px;background:#ebf7ff;color:#2f6fbc;font-size:12px;font-weight:900;min-width:88px;text-align:right}
+    .pill-stat strong{display:block;color:#183a66;font-size:18px;margin-top:4px}
+    .xp-track{margin-top:16px;height:12px;border-radius:999px;background:#dbefff;overflow:hidden}
+    .xp-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#4bb6ff,#ffd75f);transition:width .24s ease}
+    .feature{padding:18px;background:linear-gradient(180deg,#173862,#1f4a7e);color:#fff}
+    .feature small{display:block;color:#a9dbff;font-size:11px;letter-spacing:.16em;font-weight:900;margin-bottom:10px}
+    .feature h3{font-size:22px;line-height:1.15;font-weight:900}
+    .feature p{margin-top:10px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.86);font-weight:700}
+    .feature .loc{display:inline-flex;margin-top:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:900}
+    .map-shell{height:100%;padding:0}
+    .map-stage{position:relative;aspect-ratio:9/14;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,#d6efff,#f6fdff)}
+    .map-stage.full{height:100%;aspect-ratio:auto;border-radius:27px;box-shadow:none}
+    .map-stage img{width:100%;height:100%;display:block;object-fit:cover}
+    .map-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(24,58,102,.08))}
+    .map-stage.full::after{background:linear-gradient(180deg,rgba(10,27,57,.12),rgba(10,27,57,.02) 30%,rgba(24,58,102,.12))}
+    .marker{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;border:none;background:transparent;cursor:pointer;z-index:2}
+    .marker-core{position:relative;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ff5e5e;border:3px solid #fff;color:#fff;font-size:28px;font-weight:900;box-shadow:0 12px 24px rgba(255,94,94,.36)}
+    .marker-core::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:rgba(255,94,94,.44);z-index:-1;animation:markerPulse 1.8s ease-out infinite}
+    .marker-label{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.95);color:#183a66;font-size:12px;font-weight:900;white-space:nowrap;box-shadow:0 10px 16px rgba(24,58,102,.12)}
+    .marker.is-complete .marker-core{background:#2ab67a;box-shadow:0 12px 24px rgba(42,182,122,.26)}
+    .marker.is-complete .marker-core::before{animation:none;opacity:0}
+    .marker.is-disabled{pointer-events:none;opacity:.45}
+    .check{position:absolute;right:-2px;top:-2px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffd75f;color:#183a66;font-size:11px;font-weight:900;border:1px solid #fff}
+    .timeline,.memory-grid{display:grid;gap:12px}
+    .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .timeline-item,.memory-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .timeline-item small{display:block;color:rgba(43,103,179,.72);font-size:11px;font-weight:900;margin-bottom:6px}
+    .timeline-item strong{display:block;color:#183a66;font-size:16px;font-weight:900}
+    .timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.72;font-weight:700}
+    .memory-card::before{content:"";position:absolute;inset:0 0 auto;height:86px;background:linear-gradient(180deg,rgba(78,182,255,.2),transparent)}
+    .memory-card>*{position:relative}
+    .memory-card.is-locked{opacity:.62;background:rgba(255,255,255,.72)}
+    .memory-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .memory-badge,.memory-state{padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900}
+    .memory-badge{background:#ebf7ff;color:#2f6fbc}
+    .memory-state{background:rgba(255,255,255,.86);color:#2f6fbc}
+    .memory-state.done{background:rgba(255,215,95,.9);color:#183a66}
+    .memory-card h3{margin-top:14px;color:#183a66;font-size:16px;line-height:1.3;font-weight:900}
+    .memory-photo{margin-top:14px;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:#dcebfb;box-shadow:0 14px 26px rgba(24,58,102,.12)}
+    .memory-photo img{width:100%;height:100%;display:block;object-fit:cover}
+    .memory-note{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.78);color:#183a66;font-size:13px;line-height:1.7;font-weight:800}
+    .record-note{margin-top:10px;padding:10px 12px;border-radius:16px;background:#eef9ff;color:#183a66;font-size:12px;line-height:1.68;font-weight:800}
+    .tabbar{padding:8px;border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 40px rgba(24,58,102,.16);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    .tab{border:none;border-radius:18px;padding:10px 8px;background:transparent;color:rgba(43,103,179,.78);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .18s ease,color .18s ease,transform .18s ease}
+    .tab:hover{transform:translateY(-1px)}
+    .tab:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .tab-chip{min-width:50px;padding:6px 8px;border-radius:999px;background:#edf8ff;color:#2f6fbc;font-size:10px;font-weight:900;letter-spacing:.1em}
+    .tab.active{background:#2f6fbc;color:#fff;box-shadow:0 12px 24px rgba(43,103,179,.22)}
+    .tab.active .tab-chip{background:rgba(255,255,255,.2);color:#fff}
+    .tab-label{font-size:13px;font-weight:900}
+    .btn{border:none;border-radius:18px;min-height:52px;padding:14px 18px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;transition:transform .18s ease,filter .18s ease}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.02)}
+    .btn.primary{background:#ffd75f;color:#183a66;box-shadow:0 14px 24px rgba(255,215,95,.34)}
+    .btn.secondary{background:#fff;color:#183a66;border:1px solid rgba(24,58,102,.1)}
+    .overlay{position:absolute;inset:0;z-index:10}
+    .dim{position:absolute;inset:0;background:rgba(8,20,42,.34);backdrop-filter:blur(3px);pointer-events:none}
+    .tutorial,.quest-sheet-wrap,.celebration{display:flex}
+    .tutorial{flex-direction:column;justify-content:flex-start;padding:18px 16px 16px}
+    .quest-sheet-wrap{align-items:flex-end;padding:16px 14px 12px}
+    .celebration{align-items:center;justify-content:center;padding:16px;overflow:hidden}
+    .character-stage{position:relative;min-height:320px}
+    .character-stage::before{content:"";position:absolute;right:18px;bottom:30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.38),transparent 70%);filter:blur(14px)}
+    .character-stage.celebrate{min-height:304px;padding-top:6px}
+    .character-stage.celebrate::before{left:50%;right:auto;bottom:10px;width:210px;height:210px;transform:translateX(-50%)}
+    .bubble{position:absolute;left:0;top:8px;z-index:2;width:min(100%,236px);padding:16px 18px;border-radius:26px 26px 26px 12px;background:rgba(255,255,255,.98);box-shadow:0 18px 34px rgba(24,58,102,.18)}
+    .bubble::after{content:"";position:absolute;left:26px;bottom:-10px;width:22px;height:22px;transform:rotate(24deg);border-radius:0 0 8px 0;background:inherit}
+    .bubble.celebrate{left:50%;top:0;width:min(100%,244px);padding:15px 18px 16px;transform:translateX(-50%);border-radius:26px;background:linear-gradient(180deg,#fff7df,#fff0b7)}
+    .bubble.celebrate::after{left:50%;bottom:-9px;width:20px;height:20px;transform:translateX(-50%) rotate(45deg);border-radius:0 0 8px 0}
+    .bubble small{display:inline-flex;margin-bottom:8px;padding:6px 10px;border-radius:999px;background:#ebf7ff;color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.08em}
+    .bubble p{color:#183a66;font-size:17px;line-height:1.55;font-weight:900;white-space:pre-line}
+    .bubble.celebrate p{font-size:15px;line-height:1.6;text-align:center}
+    .cursor{color:#ff6b63;animation:blink .9s step-end infinite}
+    .character{position:absolute;right:-4px;bottom:0;z-index:1;width:min(100%,220px);animation:bob 4.2s ease-in-out infinite;filter:drop-shadow(0 18px 30px rgba(24,58,102,.18))}
+    .character.celebrate{left:50%;right:auto;bottom:-4px;width:min(100%,214px);transform:translateX(-50%);animation:bobCenter 3.1s ease-in-out infinite}
+    .character img{width:100%;display:block}
+    .spark{position:absolute;color:#fff6b7;font-size:20px;animation:sparkle 2.1s ease-in-out infinite;z-index:2}
+    .spark.one{right:30px;top:74px}
+    .spark.two{right:58px;bottom:114px;animation-delay:-.7s}
+    .character-stage.celebrate .spark.one{left:calc(50% - 114px);right:auto;top:86px}
+    .character-stage.celebrate .spark.two{left:calc(50% + 86px);right:auto;bottom:88px}
+    .dialogue-actions{position:absolute;left:16px;bottom:18px;z-index:3;display:grid;gap:10px;width:min(calc(100% - 32px),206px)}
+    .guide-tap,.celebration-panel,.celebration-footer{position:relative;z-index:1}
+    .guide-tap{width:100%;margin-top:34px}
+    .tutorial .character-stage{min-height:428px}
+    .tutorial .bubble{top:0;left:8px;width:min(100%,260px);padding:18px 20px 20px}
+    .tutorial .bubble p{font-size:18px;line-height:1.52}
+    .tutorial .character{right:12px;bottom:38px;width:min(100%,230px)}
+    .tutorial .spark.one{right:24px;top:122px}
+    .tutorial .spark.two{right:72px;bottom:170px}
+    .dialogue-chip{display:inline-flex;justify-content:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:12px;font-weight:900;box-shadow:0 12px 20px rgba(24,58,102,.12)}
+    .sheet{width:100%;padding:20px;border-radius:30px 30px 24px 24px;background:rgba(255,255,255,.98);border:1px solid rgba(255,255,255,.8);box-shadow:0 -16px 30px rgba(24,58,102,.18)}
+    .sheet-handle{width:58px;height:6px;margin:0 auto 16px;border-radius:999px;background:#d5edf9}
+    .sheet h3{margin-top:14px;color:#183a66;font-size:26px;line-height:1.15;font-weight:900}
+    .sheet p{margin-top:12px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.78;font-weight:700}
+    .sheet-meta{margin-top:16px;padding:14px 16px;border-radius:18px;background:#fff7df;color:#183a66;font-size:14px;line-height:1.7;font-weight:900}
+    .stack{display:grid;gap:10px;margin-top:18px}
+    .capture-box{margin-top:16px;padding:16px;border-radius:22px;background:#eef9ff;border:1px solid #d7efff}
+    .capture-box h4{color:#183a66;font-size:17px;font-weight:900}
+    .capture-box p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.72;font-weight:700}
+    .capture-grid{display:grid;gap:12px;margin-top:14px}
+    .upload-label{display:flex;align-items:center;justify-content:center;min-height:132px;padding:14px;border-radius:22px;border:1.5px dashed #9bcdf6;background:rgba(255,255,255,.86);cursor:pointer;text-align:center;color:#2f6fbc;font-size:13px;line-height:1.65;font-weight:900}
+    .upload-label input{display:none}
+    .upload-preview{position:relative;overflow:hidden;border-radius:22px;background:#dcebfb;aspect-ratio:4/3}
+    .upload-preview img{width:100%;height:100%;display:block;object-fit:cover}
+    .upload-badge{position:absolute;left:12px;bottom:12px;padding:8px 10px;border-radius:999px;background:rgba(13,25,48,.82);color:#fff;font-size:11px;font-weight:900}
+    .memo-field{width:100%;min-height:108px;padding:14px 16px;border-radius:20px;border:1px solid #cfe7fb;background:rgba(255,255,255,.94);color:#183a66;font:inherit;font-size:14px;line-height:1.7;resize:none}
+    .memo-field::placeholder{color:rgba(43,103,179,.5)}
+    .helper-note{margin-top:10px;color:rgba(43,103,179,.76);font-size:12px;font-weight:800}
+    .celebration-shell{position:relative;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:12px}
+    .celebration-panel{position:relative;display:grid;gap:12px;align-items:center}
+    .confetti-zone{position:absolute;inset:0 0 auto;height:170px;overflow:hidden;pointer-events:none}
+    .confetti{position:absolute;top:-8px;width:10px;height:18px;border-radius:4px;animation:confetti 2.8s ease-in-out infinite}
+    .stage-card{text-align:center;padding:18px}
+    .stage-card strong{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,215,95,.84);color:#183a66;font-size:11px;font-weight:900;letter-spacing:.14em}
+    .stage-card h4{margin-top:14px;color:#183a66;font-size:24px;line-height:1.2;font-weight:900}
+    .stage-card p{margin-top:10px;color:rgba(43,103,179,.82);font-size:14px;line-height:1.72;font-weight:700}
+    .xp-box{padding:18px;border-radius:26px;background:#eef9ff}
+    .xp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .xp-head small{display:block;color:rgba(43,103,179,.7);font-size:11px;letter-spacing:.14em;font-weight:900;margin-bottom:8px}
+    .xp-head strong{display:block;color:#183a66;font-size:30px;font-weight:900}
+    .xp-level{padding:10px 12px;border-radius:20px;background:#fff;text-align:right;font-size:12px;color:#2f6fbc;font-weight:900;box-shadow:0 10px 18px rgba(24,58,102,.08)}
+    .xp-level span{display:block;color:#183a66;font-size:18px;margin-top:4px}
+    .xp-note{margin-top:12px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.72;font-weight:700}
+    .level-up{margin-top:12px;padding:12px 14px;border-radius:20px;background:#183a66;color:#fff;font-size:13px;line-height:1.68;font-weight:900}
+    .streak-card{padding:18px;border-radius:28px;background:linear-gradient(180deg,#fff7df,#fff0b8);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .streak-card small{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.8);color:#183a66;font-size:12px;font-weight:900}
+    .streak-card h4{margin-top:14px;color:#183a66;font-size:22px;font-weight:900}
+    .streak-card p{margin-top:8px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.72;font-weight:700}
+    .streak-value{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.7);color:#183a66;font-size:14px;font-weight:900}
+    .all-clear{padding:18px;border-radius:28px;background:linear-gradient(180deg,#183a66,#24538d);color:#fff;box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .all-clear small{display:block;color:#a6d8ff;font-size:11px;letter-spacing:.16em;font-weight:900;margin-bottom:10px}
+    .all-clear h4{font-size:22px;line-height:1.2;font-weight:900}
+    .all-clear p{margin-top:10px;color:rgba(255,255,255,.86);font-size:14px;line-height:1.75;font-weight:700}
+    .celebration-footer{display:grid;gap:10px}
+    .hint{display:flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:999px;background:rgba(255,255,255,.14);font-size:12px;font-weight:900;color:rgba(255,255,255,.84)}
+    .empty{padding:18px;border-radius:24px;background:rgba(255,255,255,.82);border:1px dashed #c5e6fb;color:rgba(43,103,179,.82);font-size:14px;line-height:1.78;font-weight:700}
+    .toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:20;padding:12px 16px;border-radius:999px;background:rgba(13,25,48,.9);color:#fff;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 16px 28px rgba(9,18,35,.24);animation:toastIn .22s ease}
+    @keyframes markerPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.75);opacity:0}}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes bobCenter{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
+    @keyframes sparkle{0%,100%{transform:scale(.8) rotate(0);opacity:.6}50%{transform:scale(1.2) rotate(12deg);opacity:1}}
+    @keyframes confetti{0%{transform:translateY(-30px) rotate(0);opacity:0}14%{opacity:1}100%{transform:translateY(190px) rotate(220deg);opacity:0}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    @keyframes toastIn{from{transform:translate(-50%,-8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+    @media (max-width:980px){
+      .page{grid-template-columns:1fr;padding:12px 16px 28px}
+      .copy{order:2}
+      .frame{order:1}
+    }
+    @media (max-width:520px){
+      .back-link{padding:18px 16px 0}
+      .page{padding:10px 12px 24px}
+      .copy{padding:22px}
+      .frame{width:100%;padding:8px;border-radius:30px}
+      .frame-inner{border-radius:24px}
+      .shell-top{margin:10px 10px 0}
+      #app{padding:10px 10px 12px}
+      .hero{min-height:236px}
+      .tutorial{padding:14px 12px 14px}
+      .guide-tap{margin-top:18px}
+      .tutorial .character-stage{min-height:388px}
+      .bubble{width:min(100%,218px)}
+      .tutorial .bubble{left:6px;width:min(100%,246px);padding:16px 18px 18px}
+      .tutorial .bubble p{font-size:16px;line-height:1.5}
+      .bubble.celebrate{width:min(100%,226px);padding:14px 16px 15px}
+      .bubble.celebrate p{font-size:14px}
+      .character{width:min(100%,196px)}
+      .tutorial .character{right:4px;bottom:28px;width:min(100%,210px)}
+      .character.celebrate{width:min(100%,196px)}
+      .character-stage.celebrate{min-height:286px}
+      .tutorial .spark.one{right:14px;top:104px}
+      .tutorial .spark.two{right:60px;bottom:142px}
+      .dialogue-actions{left:12px;bottom:14px;width:min(calc(100% - 24px),194px)}
+      .character-stage.celebrate .spark.one{left:calc(50% - 98px);top:76px}
+      .character-stage.celebrate .spark.two{left:calc(50% + 70px);bottom:80px}
+      .xp-head{align-items:center}
+      .xp-head strong{font-size:28px}
+      .stage-card h4,.streak-card h4,.all-clear h4{font-size:21px}
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html">← 쇼케이스로 돌아가기</a>
+  <div class="page">
+    <section class="copy">
+      <div class="eyebrow">App Style Showcase</div>
+      <h1>산지니 원정대</h1>
+      <p>설명형 데모가 아니라 실제 앱을 옮겨놓은 듯한 정적 쇼케이스로 구성했다. 고정 폰 비율 안에서 홈, 지도, 기록, 추억 탭이 전환되고 첫 지도 진입에는 튜토리얼, 모든 퀘스트 완료에는 단계형 XP 축하 오버레이가 뜬다.</p>
+      <div class="copy-grid">
+        <div class="copy-card"><strong>고정 폰 비율</strong><span>화면이 바뀌어도 프레임 높이는 유지되고 내부 스크린과 오버레이만 전환된다.</span></div>
+        <div class="copy-card"><strong>홈 · 지도 · 기록 · 추억</strong><span>하단 탭 구조로 앱 정보구조를 그대로 드러내고 지도 탭은 첫 진입에만 튜토리얼을 보여준다.</span></div>
+        <div class="copy-card"><strong>단계형 보상 흐름</strong><span>퀘스트 완료 후 미션 성공, 경험치, 연속 기록, 전체 완료 축하를 한 단계씩 넘기며 확인한다.</span></div>
+      </div>
+      <div class="copy-metrics">
+        <div class="metric"><small>탭</small><strong>4</strong></div>
+        <div class="metric"><small>퀘스트</small><strong>3</strong></div>
+        <div class="metric"><small>기본 XP</small><strong>40</strong></div>
+      </div>
+    </section>
+    <section class="frame">
+      <div class="frame-inner">
+        <header class="shell-top">
+          <div>
+            <small>산지니 원정대</small>
+            <strong id="frameTitle">오늘의 홈</strong>
+          </div>
+          <div class="meta-group">
+            <div id="frameLevel" class="meta-chip">레벨 1</div>
+            <div id="frameStreak" class="meta-chip">연속 0일</div>
+          </div>
+        </header>
+        <div id="app"></div>
+      </div>
+    </section>
+  </div>
+  <script>
+    const tutorialDialogues = [
+      "안녕!\n산지니 원정대에 온 걸 환영해!",
+      "오늘도 캠퍼스에\n새로운 모험이 기다리고 있어!",
+      "오늘의 퀘스트를 확인해볼까?"
+    ];
+    const tabMeta = {
+      home: { label: "홈", chip: "오늘", title: "오늘의 홈" },
+      map: { label: "지도", chip: "미션", title: "탐험 지도" },
+      record: { label: "기록", chip: "로그", title: "활동 기록" },
+      memory: { label: "추억", chip: "보관", title: "추억 보관함" }
+    };
+    const quests = [
+      { id: "library-explore", title: "도서관 탐험", description: "오늘 도서관에 가서 공부 인증을 남기고 조용한 집중 시간을 완성해 보자.", locationLabel: "도서관", category: "학업", xpReward: 40, memoryTitle: "조용한 오후의 도서관", memoryDescription: "책 냄새와 함께 오늘의 집중 시간을 기록했다.", top: "37%", left: "32%" },
+      { id: "student-center-lunch", title: "학생회관 점심 미션", description: "학생회관에서 오늘의 메뉴를 먹고 잠깐 쉬어 가며 캠퍼스 리듬을 채워 보자.", locationLabel: "학생회관", category: "휴식", xpReward: 40, memoryTitle: "학생회관에서 보낸 점심", memoryDescription: "바쁜 하루 속에서도 캠퍼스의 여유를 챙긴 한 장면.", top: "66%", left: "51%" },
+      { id: "geumjeongsan-walk", title: "금정산 산책", description: "금정산 쪽으로 걸어가며 캠퍼스 바깥 풍경과 공기를 천천히 느껴 보자.", locationLabel: "금정산", category: "탐험", xpReward: 40, memoryTitle: "금정산으로 이어지는 길", memoryDescription: "캠퍼스의 끝에서 새로운 풍경을 발견한 탐험 기록.", top: "26%", left: "72%" }
+    ];
+    const state = {
+      currentTab: "home",
+      overlay: null,
+      selectedQuestId: null,
+      activeDialogueIndex: 0,
+      xpTotal: 0,
+      streakCount: 0,
+      completedToday: false,
+      completedQuestIds: [],
+      hasSeenTutorial: false,
+      toast: null,
+      visibleDialogue: "",
+      isTyping: false,
+      celebration: null,
+      animatedXp: 0,
+      questDrafts: {},
+      questMemories: {}
+    };
+
+    const app = document.getElementById("app");
+    const frameTitle = document.getElementById("frameTitle");
+    const frameLevel = document.getElementById("frameLevel");
+    const frameStreak = document.getElementById("frameStreak");
+
+    let typingTimer = null;
+    let toastTimer = null;
+    let xpTimer = null;
+
+    const getLevel = (xp) => Math.floor(xp / 100) + 1;
+    const xpIntoLevel = (xp) => xp % 100;
+    const questById = (id) => quests.find((quest) => quest.id === id) || null;
+    const escapeHtml = (text) => String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    const currentCelebrationStep = () => state.celebration ? state.celebration.steps[state.celebration.currentStepIndex] : null;
+
+    function getQuestDraft(id) {
+      return state.questDrafts[id] || { note: "", photoData: "", photoName: "" };
+    }
+
+    function getQuestMemory(id) {
+      return state.questMemories[id] || null;
+    }
+
+    function clearTyping() {
+      if (typingTimer) {
+        window.clearInterval(typingTimer);
+        typingTimer = null;
+      }
+    }
+
+    function clearToast() {
+      if (toastTimer) {
+        window.clearTimeout(toastTimer);
+        toastTimer = null;
+      }
+    }
+
+    function clearXp() {
+      if (xpTimer) {
+        window.clearInterval(xpTimer);
+        xpTimer = null;
+      }
+    }
+
+    function showToast(message) {
+      clearToast();
+      state.toast = message;
+      render();
+      toastTimer = window.setTimeout(() => {
+        state.toast = null;
+        toastTimer = null;
+        render();
+      }, 1500);
+    }
+
+    function setFrameMeta() {
+      const title =
+        state.overlay === "tutorial" ? "튜토리얼" :
+        state.overlay === "quest" ? "퀘스트" :
+        state.overlay === "celebration" ? "미션 성공" :
+        tabMeta[state.currentTab].title;
+      frameTitle.textContent = title;
+      frameLevel.textContent = `레벨 ${getLevel(state.xpTotal)}`;
+      frameStreak.textContent = `연속 ${state.streakCount}일`;
+    }
+
+    function renderToast() {
+      return state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : "";
+    }
+
+    function renderTabs() {
+      const disabled = state.overlay !== null;
+      return `<nav class="tabbar">${Object.entries(tabMeta).map(([id, tab]) => `<button class="tab ${state.currentTab === id ? "active" : ""}" type="button" data-action="tab" data-tab="${id}" ${disabled ? "disabled" : ""}><span class="tab-chip">${tab.chip}</span><span class="tab-label">${tab.label}</span></button>`).join("")}</nav>`;
+    }
+
+    function renderHome() {
+      const completeCount = state.completedQuestIds.length;
+      const featured = quests.find((quest) => !state.completedQuestIds.includes(quest.id)) || quests[quests.length - 1];
+      const progress = Math.max(xpIntoLevel(state.xpTotal), 6);
+      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 캠퍼스 RPG</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">캠퍼스 활동을 미션처럼 기록하고 오늘의 탐험을 작은 성취로 쌓아 가는 앱.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>오늘의 캠퍼스 미션을 한 칸씩 채우는 중.</p></article><article class="mini-card"><small>연속 기록</small><strong>${state.streakCount}일</strong><p>매일의 캠퍼스 활동이 개인용 RPG 로그처럼 이어진다.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP 남았어.</p></section><section class="card feature"><small>오늘의 추천 미션</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">위치: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
+    }
+
+    function renderMarkers(locked) {
+      return quests.map((quest) => {
+        const done = state.completedQuestIds.includes(quest.id);
+        const disabled = locked || done;
+        return `<button class="marker ${done ? "is-complete" : ""} ${disabled ? "is-disabled" : ""}" type="button" data-action="${disabled ? "" : "quest"}" data-id="${quest.id}" style="top:${quest.top};left:${quest.left};" ${disabled ? "disabled" : ""}><span class="marker-core">${done ? "✓" : "!"}</span>${done ? '<span class="check">✓</span>' : ""}<span class="marker-label">${escapeHtml(quest.locationLabel)}</span></button>`;
+      }).join("");
+    }
+
+    function renderMap() {
+      return `<div class="map-shell"><section class="map-stage full"><img src="campus-map.png" alt="캠퍼스 지도" />${renderMarkers(state.overlay === "tutorial")}</section></div>`;
+    }
+
+    function renderRecord() {
+      const items = state.completedQuestIds.map((id) => questById(id)).filter(Boolean);
+      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 캠퍼스 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션에 획득한 누적 경험치.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">기록 타임라인</div><div class="title">오늘의 활동 로그</div></div><div class="pill-stat">연속 기록<strong>${state.streakCount}일</strong></div></div><div class="timeline" style="margin-top:14px;">${items.length ? items.map((quest, index) => { const memory = getQuestMemory(quest.id); return `<article class="timeline-item"><small>완료 기록 ${index + 1}</small><strong>${escapeHtml(quest.title)}</strong><p>${escapeHtml(quest.locationLabel)}에서 활동을 완료했고 XP +${quest.xpReward}를 획득했다.</p>${memory && memory.note ? `<div class="record-note">메모: ${escapeHtml(memory.note)}</div>` : ""}${memory && memory.photoData ? '<div class="record-note">사진 추억도 함께 남겼어.</div>' : ""}</article>`; }).join("") : '<div class="empty">아직 오늘의 로그가 비어 있어. 지도 탭으로 이동해 첫 번째 미션을 완료하면 기록이 타임라인처럼 쌓이기 시작한다.</div>'}</div></section></div>`;
+    }
+
+    function renderMemory() {
+      return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관함</div><div class="title">캠퍼스 스크랩</div><p class="copy-text">완료한 미션은 사진과 한 줄 메모가 담긴 추억 카드로 남고 아직 가지 못한 장소는 잠긴 상태로 기다린다.</p></section><section class="memory-grid">${quests.map((quest) => {
+        const done = state.completedQuestIds.includes(quest.id);
+        const memory = getQuestMemory(quest.id);
+        return `<article class="memory-card ${done ? "" : "is-locked"}"><div class="memory-top"><div class="memory-badge">${escapeHtml(quest.locationLabel)}</div><div class="memory-state ${done ? "done" : ""}">${done ? "보관 완료" : "잠금"}</div></div><h3>${escapeHtml(quest.memoryTitle)}</h3>${done && memory && memory.photoData ? `<div class="memory-photo"><img src="${memory.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 사진" /></div>` : ""}<p>${done ? escapeHtml(quest.memoryDescription) : "아직 이 장소의 추억은 비어 있어. 오늘의 미션을 완료하면 이 카드가 열릴 거야."}</p>${done && memory && memory.note ? `<div class="memory-note">${escapeHtml(memory.note)}</div>` : done ? '<div class="memory-note">메모 없이도 오늘의 발자국은 추억으로 남아 있어.</div>' : ""}</article>`;
+      }).join("")}</section></div>`;
+    }
+
+    function renderGuideStage({ label, text, typing, mode }) {
+      return `<div class="character-stage ${mode === "celebrate" ? "celebrate" : ""}"><div class="bubble ${mode === "celebrate" ? "celebrate" : ""}"><small>${label}</small><p>${text}${typing ? '<span class="cursor">|</span>' : ""}</p></div><div class="character ${mode === "celebrate" ? "celebrate" : ""}"><img src="main_character.png" alt="산지니 캐릭터" /></div><span class="spark one">✦</span><span class="spark two">✦</span></div>`;
+    }
+
+    function renderTutorial() {
+      return `<div class="overlay tutorial"><div class="dim"></div><div class="guide-tap" data-action="tutorial-next">${renderGuideStage({ label: "산지니 가이드", text: escapeHtml(state.visibleDialogue), typing: state.isTyping, mode: "tutorial" })}</div><div class="dialogue-actions"><div class="dialogue-chip">대화 ${state.activeDialogueIndex + 1} / ${tutorialDialogues.length}</div><button class="btn primary" type="button" data-action="tutorial-next">${state.activeDialogueIndex === tutorialDialogues.length - 1 ? "퀘스트 시작" : "다음"}</button></div></div>`;
+    }
+
+    function renderQuestOverlay() {
+      const quest = questById(state.selectedQuestId);
+      if (!quest) {
+        return "";
+      }
+      const draft = getQuestDraft(quest.id);
+      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="tag">${escapeHtml(quest.locationLabel)}</div><h3>${escapeHtml(quest.title)}</h3><p>${escapeHtml(quest.description)}</p><div class="sheet-meta">오늘의 위치: ${escapeHtml(quest.locationLabel)}<br />보상 XP: +${quest.xpReward}</div><div class="capture-box"><h4>오늘의 추억 남기기</h4><p>이 퀘스트를 끝내기 전에 사진 한 장과 짧은 메모를 남겨 두면 기록과 추억 탭에 함께 저장돼.</p><div class="capture-grid">${draft.photoData ? `<div class="upload-preview"><img src="${draft.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 미리보기" /><div class="upload-badge">${escapeHtml(draft.photoName || "사진 선택 완료")}</div></div><label class="upload-label" style="min-height:72px;">다른 사진 선택하기<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>` : `<label class="upload-label">사진 업로드하기<br />캠퍼스 순간을 추억 카드에 남겨보자.<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`}<textarea class="memo-field" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">사진과 메모는 현재 브라우저 세션에서만 유지돼.</div></div><div class="stack"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
+    }
+
+    function renderCelebrationCard(payload, step) {
+      const quest = questById(payload.questId);
+      if (!quest) {
+        return "";
+      }
+      if (step === "mission") {
+        return `<section class="card stage-card"><strong>미션 성공</strong><h4>${escapeHtml(quest.locationLabel)} 미션을 완수했어!</h4><p>산지니가 오늘의 탐험이 정말 좋았다고 말하고 있어.</p></section>`;
+      }
+      if (step === "xp") {
+        const level = getLevel(state.animatedXp);
+        const finalLevel = getLevel(payload.nextXp);
+        const leveledUp = getLevel(payload.previousXp) !== finalLevel;
+        const progress = Math.max(xpIntoLevel(state.animatedXp), 6);
+        return `<section class="card xp-box"><div class="xp-head"><div><small>경험치 보상</small><strong>+${payload.xpEarned} XP</strong></div><div class="xp-level">현재 레벨<span>${level}</span></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="xp-note">누적 XP ${state.animatedXp} · 다음 레벨까지 ${100 - xpIntoLevel(state.animatedXp)} XP</p>${leveledUp ? `<div class="level-up">레벨 업! 이제 레벨 ${finalLevel} 탐험가야.</div>` : ""}</section>`;
+      }
+      if (step === "streak") {
+        return `<section class="streak-card"><small>연속 기록 달성</small><h4>오늘도 모험 성공!</h4><p>오늘의 첫 퀘스트를 완수해서 연속 기록이 한 칸 더 이어졌어.</p><div class="streak-value">연속 ${payload.streakCountAfter}일 달성</div></section>`;
+      }
+      if (step === "allClear") {
+        return `<section class="all-clear"><small>오늘의 미션 전부 성공</small><h4>세 개의 캠퍼스 미션을 모두 완료했어.</h4><p>오늘 하루의 활동이 기록과 추억 탭에 모두 남았어. 이제 너만의 캠퍼스 RPG 로그가 한 페이지 더 쌓였어.</p></section>`;
+      }
+      return "";
+    }
+
+    function renderCelebration() {
+      const payload = state.celebration;
+      const quest = payload ? questById(payload.questId) : null;
+      const step = currentCelebrationStep();
+      if (!payload || !quest || !step) {
+        return "";
+      }
+      const pieces = [
+        { left: "8%", delay: "0s", color: "#ffd65a" },
+        { left: "23%", delay: "0.35s", color: "#8cd7ff" },
+        { left: "39%", delay: "0.75s", color: "#ff9287" },
+        { left: "55%", delay: "0.2s", color: "#ffd65a" },
+        { left: "72%", delay: "0.55s", color: "#7bcfff" },
+        { left: "86%", delay: "0.15s", color: "#ff6b63" }
+      ];
+      const bubbleText =
+        step === "mission" ? "와! 퀘스트를 완료했어!\n정말 대단해!" :
+        step === "xp" ? "경험치가 쌓이고 있어!\n지금 성장 중이야." :
+        step === "streak" ? "오늘도 기록 성공!\n연속 기록을 이어가고 있어." :
+        "오늘의 미션 전부 성공!\n정말 멋진 탐험이었어.";
+      const isFinalStep = payload.currentStepIndex === payload.steps.length - 1 && !(step === "xp" && payload.isXpAnimating);
+      const buttonLabel = isFinalStep ? "지도 화면으로 돌아가기" : "다음";
+      const hintText = step === "xp" && payload.isXpAnimating ? "한 번 더 누르면 경험치가 즉시 채워져." : "한 번 터치해서 다음 화면으로 넘어가기";
+      return `<div class="overlay celebration"><div class="dim"></div><div class="celebration-shell"><div class="confetti-zone">${pieces.map((piece) => `<span class="confetti" style="left:${piece.left};background:${piece.color};animation-delay:${piece.delay};"></span>`).join("")}</div><div class="celebration-panel" data-action="celebration-next">${renderGuideStage({ label: step === "xp" ? "경험치 보상" : step === "streak" ? "연속 기록" : step === "allClear" ? "전체 완료" : "미션 성공", text: bubbleText, typing: false, mode: "celebrate" })}${renderCelebrationCard(payload, step)}</div><div class="celebration-footer"><div class="hint" data-action="celebration-next">${hintText}</div><button class="btn ${isFinalStep ? "secondary" : "primary"}" type="button" data-action="celebration-next">${buttonLabel}</button></div></div></div>`;
+    }
+
+    function renderOverlay() {
+      if (state.overlay === "tutorial") {
+        return renderTutorial();
+      }
+      if (state.overlay === "quest") {
+        return renderQuestOverlay();
+      }
+      if (state.overlay === "celebration") {
+        return renderCelebration();
+      }
+      return "";
+    }
+
+    function renderCurrent() {
+      if (state.currentTab === "home") {
+        return renderHome();
+      }
+      if (state.currentTab === "map") {
+        return renderMap();
+      }
+      if (state.currentTab === "record") {
+        return renderRecord();
+      }
+      return renderMemory();
+    }
+
+    function render() {
+      setFrameMeta();
+      app.innerHTML = `<div class="layout"><div class="screen">${renderToast()}${renderCurrent()}${renderOverlay()}</div>${renderTabs()}</div>`;
+      bind();
+    }
+
+    function startTyping(text) {
+      clearTyping();
+      state.visibleDialogue = "";
+      state.isTyping = true;
+      render();
+      let index = 0;
+      typingTimer = window.setInterval(() => {
+        index += 1;
+        state.visibleDialogue = text.slice(0, index);
+        render();
+        if (index >= text.length) {
+          clearTyping();
+          state.isTyping = false;
+          render();
+        }
+      }, 24);
+    }
+
+    function revealDialogue() {
+      clearTyping();
+      state.visibleDialogue = tutorialDialogues[state.activeDialogueIndex];
+      state.isTyping = false;
+      render();
+    }
+
+    function openMap() {
+      state.currentTab = "map";
+      state.selectedQuestId = null;
+      if (!state.hasSeenTutorial) {
+        state.activeDialogueIndex = 0;
+        state.overlay = "tutorial";
+        startTyping(tutorialDialogues[0]);
+        return;
+      }
+      state.overlay = null;
+      render();
+    }
+
+    function changeTab(nextTab) {
+      if (state.overlay) {
+        return;
+      }
+      if (nextTab === "map") {
+        openMap();
+        return;
+      }
+      state.currentTab = nextTab;
+      state.selectedQuestId = null;
+      render();
+    }
+
+    function advanceTutorial() {
+      if (state.isTyping) {
+        revealDialogue();
+        return;
+      }
+      if (state.activeDialogueIndex < tutorialDialogues.length - 1) {
+        state.activeDialogueIndex += 1;
+        startTyping(tutorialDialogues[state.activeDialogueIndex]);
+        return;
+      }
+      clearTyping();
+      state.hasSeenTutorial = true;
+      state.visibleDialogue = "";
+      state.isTyping = false;
+      state.overlay = null;
+      render();
+    }
+
+    function selectQuest(id) {
+      if (!id || state.completedQuestIds.includes(id)) {
+        return;
+      }
+      state.selectedQuestId = id;
+      state.overlay = "quest";
+      render();
+    }
+
+    function closeOverlay() {
+      state.overlay = null;
+      state.selectedQuestId = null;
+      render();
+    }
+
+    function updateQuestNote(id, note) {
+      const draft = getQuestDraft(id);
+      state.questDrafts[id] = {
+        ...draft,
+        note
+      };
+    }
+
+    function updateQuestPhoto(id, file) {
+      if (!file) {
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const draft = getQuestDraft(id);
+        state.questDrafts[id] = {
+          ...draft,
+          photoData: String(reader.result || ""),
+          photoName: file.name
+        };
+        render();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function buildCelebrationPayload(quest, previousXp, nextXp, isFirstToday, streakCountAfter, nextIds) {
+      const steps = ["mission", "xp"];
+      if (isFirstToday) {
+        steps.push("streak");
+      }
+      if (nextIds.length === quests.length) {
+        steps.push("allClear");
+      }
+      return {
+        questId: quest.id,
+        xpEarned: quest.xpReward,
+        previousXp,
+        nextXp,
+        isFirstToday,
+        completedAllToday: nextIds.length === quests.length,
+        streakCountAfter,
+        steps,
+        currentStepIndex: 0,
+        isXpAnimating: false
+      };
+    }
+
+    function finishXpAnimation() {
+      const payload = state.celebration;
+      if (!payload) {
+        return;
+      }
+      clearXp();
+      state.animatedXp = payload.nextXp;
+      payload.isXpAnimating = false;
+      render();
+    }
+
+    function startXpAnimation() {
+      const payload = state.celebration;
+      if (!payload) {
+        return;
+      }
+      clearXp();
+      state.animatedXp = payload.previousXp;
+      payload.isXpAnimating = true;
+      render();
+      const distance = payload.nextXp - payload.previousXp;
+      const steps = 24;
+      const stepValue = distance / steps;
+      let currentStep = 0;
+      xpTimer = window.setInterval(() => {
+        currentStep += 1;
+        if (currentStep >= steps) {
+          state.animatedXp = payload.nextXp;
+          payload.isXpAnimating = false;
+          clearXp();
+          render();
+          return;
+        }
+        state.animatedXp = Math.round(payload.previousXp + stepValue * currentStep);
+        render();
+      }, 28);
+    }
+
+    function enterCelebrationStep(index) {
+      const payload = state.celebration;
+      if (!payload) {
+        return;
+      }
+      payload.currentStepIndex = index;
+      const step = payload.steps[index];
+      if (step === "xp") {
+        startXpAnimation();
+        return;
+      }
+      clearXp();
+      payload.isXpAnimating = false;
+      if (payload.steps.includes("xp") && index > payload.steps.indexOf("xp")) {
+        state.animatedXp = payload.nextXp;
+      }
+      render();
+    }
+
+    function completeQuest() {
+      const quest = questById(state.selectedQuestId);
+      if (!quest || state.completedQuestIds.includes(quest.id)) {
+        return;
+      }
+      const previousXp = state.xpTotal;
+      const nextXp = previousXp + quest.xpReward;
+      const nextIds = [...state.completedQuestIds, quest.id];
+      const isFirstToday = !state.completedToday;
+      const nextStreak = isFirstToday ? state.streakCount + 1 : state.streakCount;
+      state.completedQuestIds = nextIds;
+      state.xpTotal = nextXp;
+      state.completedToday = true;
+      if (isFirstToday) {
+        state.streakCount = nextStreak;
+      }
+      const draft = getQuestDraft(quest.id);
+      state.questMemories[quest.id] = {
+        note: draft.note.trim(),
+        photoData: draft.photoData,
+        photoName: draft.photoName
+      };
+      state.celebration = buildCelebrationPayload(quest, previousXp, nextXp, isFirstToday, nextStreak, nextIds);
+      state.selectedQuestId = null;
+      state.overlay = "celebration";
+      state.animatedXp = previousXp;
+      enterCelebrationStep(0);
+    }
+
+    function closeCelebration() {
+      clearXp();
+      state.animatedXp = state.xpTotal;
+      state.overlay = null;
+      state.celebration = null;
+      state.currentTab = "map";
+      render();
+    }
+
+    function advanceCelebration() {
+      const payload = state.celebration;
+      if (!payload) {
+        return;
+      }
+      const step = currentCelebrationStep();
+      if (step === "xp" && payload.isXpAnimating) {
+        finishXpAnimation();
+        return;
+      }
+      if (payload.currentStepIndex < payload.steps.length - 1) {
+        enterCelebrationStep(payload.currentStepIndex + 1);
+        return;
+      }
+      closeCelebration();
+    }
+
+    function bind() {
+      app.querySelectorAll('[data-action="tab"]').forEach((button) => {
+        button.onclick = () => changeTab(button.dataset.tab);
+      });
+      const mapButton = app.querySelector('[data-action="open-map"]');
+      if (mapButton) {
+        mapButton.onclick = openMap;
+      }
+      app.querySelectorAll('[data-action="quest"]').forEach((button) => {
+        button.onclick = () => selectQuest(button.dataset.id);
+      });
+      app.querySelectorAll('[data-action="tutorial-next"]').forEach((element) => {
+        element.onclick = (event) => {
+          event.stopPropagation();
+          advanceTutorial();
+        };
+      });
+      const completeButton = app.querySelector('[data-action="complete"]');
+      if (completeButton) {
+        completeButton.onclick = completeQuest;
+      }
+      app.querySelectorAll('[data-action="memory-note"]').forEach((element) => {
+        element.oninput = () => {
+          updateQuestNote(element.dataset.id, element.value);
+        };
+      });
+      app.querySelectorAll('[data-action="memory-photo"]').forEach((element) => {
+        element.onchange = () => {
+          updateQuestPhoto(element.dataset.id, element.files && element.files[0]);
+        };
+      });
+      const closeButton = app.querySelector('[data-action="close"]');
+      if (closeButton) {
+        closeButton.onclick = closeOverlay;
+      }
+      app.querySelectorAll('[data-action="celebration-next"]').forEach((element) => {
+        element.onclick = (event) => {
+          event.stopPropagation();
+          advanceCelebration();
+        };
+      });
+    }
+
+    state.animatedXp = state.xpTotal;
+    render();
+  </script>
+</body>
+</html>
