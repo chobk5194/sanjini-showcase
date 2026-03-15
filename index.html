@@ -812,6 +812,8 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
       const btn = e.target.closest('.demo-prompt-btn');
       if (!btn || demoRunning) return;
       demoRunning = true;
+      // re-enable all buttons, then disable only the clicked one
+      document.querySelectorAll('.demo-prompt-btn').forEach(b => b.classList.remove('used'));
       btn.classList.add('used');
 
       const idx = parseInt(btn.dataset.idx);
