@@ -167,14 +167,17 @@ header {
 
 .search-wrapper { position: relative; }
 .autocomplete {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
   max-height: 280px;
   overflow-y: auto;
+  z-index: 9999;
   display: none;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  margin-top: 4px;
 }
 .autocomplete.show { display: block; }
 .ac-item {
@@ -548,9 +551,12 @@ canvas#stockChart {
     width: 100%;
   }
 
-  /* Autocomplete on mobile */
+  /* Autocomplete on mobile: 밀려나게 */
   .autocomplete {
+    position: static;
+    margin-top: 4px;
     max-height: 50vh;
+    z-index: auto;
   }
 
   /* Back link */
@@ -1265,7 +1271,7 @@ function updateAutocomplete() {
     if (/[가-힣]/.test(q)) return s.name.includes(q);
     // 영문 검색은 앞글자 매칭 (S → SK하이닉스 O, 삼성전자 X)
     return s.name.toLowerCase().startsWith(ql);
-  }).slice(0, 8);
+  }).slice(0, window.innerWidth > 768 ? 3 : 8);
   if (acResults.length === 0) { acBox.classList.remove('show'); return; }
   acSelected = -1;
   acBox.innerHTML = acResults.map((s, i) =>
