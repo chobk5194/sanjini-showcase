@@ -160,7 +160,7 @@
     }
     .poster-overlay {
       position: absolute; inset: 0; z-index: 2; padding: 18px;
-      display: flex; flex-direction: column; justify-content: space-between;
+      display: flex; flex-direction: column; justify-content: flex-start; gap: 12px;
       pointer-events: none;
     }
     .poster-top {
@@ -172,7 +172,7 @@
       box-shadow: 0 14px 24px rgba(24,58,102,0.12);
     }
     .poster-hint {
-      align-self: stretch; padding: 16px 18px; border-radius: 24px;
+      align-self: flex-start; max-width: 240px; padding: 16px 18px; border-radius: 24px;
       background: rgba(13,25,48,0.56); border: 1px solid rgba(255,255,255,0.18);
       color: rgba(255,255,255,0.94); backdrop-filter: blur(14px);
       box-shadow: 0 20px 30px rgba(9,18,35,0.22);
@@ -394,6 +394,7 @@
       #app { padding: 14px 10px 12px; min-height: 690px; }
       .poster-screen { min-height: 646px; }
       .poster-hotspot { min-height: 38px; padding: 0 12px; font-size: 12px; }
+      .poster-hint { max-width: 220px; padding: 14px 16px; }
       .guide-bubble { left: 4px; top: 8px; max-width: 206px; padding: 14px 16px; }
       .guide-text { font-size: 15px; }
       .guide-figure { width: min(100%, 194px); }
@@ -454,10 +455,10 @@
     ];
 
     const posterMenus = [
-      { id: "mission", label: "미션", top: "18%", left: "23%" },
-      { id: "achievement", label: "업적", top: "28%", left: "79%" },
-      { id: "record", label: "기록", top: "68%", left: "22%" },
-      { id: "memory", label: "추억", top: "80%", left: "75%" }
+      { id: "mission", label: "미션", top: "88.5%", left: "17.5%" },
+      { id: "achievement", label: "업적", top: "88.5%", left: "39.5%" },
+      { id: "record", label: "기록", top: "88.5%", left: "61.5%" },
+      { id: "memory", label: "추억", top: "88.5%", left: "83.5%" }
     ];
 
     const state = {
@@ -556,10 +557,6 @@
                 >${menu.label}</button>
               `).join("")}
             </div>
-          </div>
-          <div class="tip-card">
-            <strong>탐험 힌트</strong>
-            <p>처음 한 번은 지도 위에서 산지니가 튜토리얼을 진행해 준다. 그다음부터는 바로 퀘스트 지도로 들어간다.</p>
           </div>
         </section>
       `;
