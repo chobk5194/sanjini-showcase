@@ -711,12 +711,19 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
               const scale = (1 - a.z / (w*1.2));
               const drawSize = a.size * scale * 8;
 
-              // hit detection: when asteroid gets very close and near center
-              if (a.z < 40 && !a.hit) {
-                a.hit = true;
-                shakePow = 25;
-                flashAlpha = 0.6;
-                // explosion particles handled by flash
+              // hit detection: asteroid close + near screen center = hit
+              if (a.z < 60 && !a.hit) {
+                const distToCenter = Math.hypot(ax - w/2, ay - h/2);
+                if (distToCenter < 80) {
+                  // HIT! couldn't dodge
+                  a.hit = true;
+                  shakePow = 30;
+                  flashAlpha = 0.7;
+                } else {
+                  // DODGED! asteroid flies past
+                  a.hit = true; // mark so it doesn't re-check
+                  // no shake/flash = safe
+                }
               }
 
               if (a.hit) { asteroids.splice(i, 1); continue; }
