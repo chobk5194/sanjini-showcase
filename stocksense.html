@@ -826,6 +826,7 @@ canvas#stockChart {
     font-size: 11px;
   }
 }
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
 #starsCanvas {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 0;
@@ -929,6 +930,10 @@ body > *:not(#starsCanvas) { position: relative; z-index: 1; }
       </div>
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px;">
         <span>강력매도</span><span>매도</span><span>중립</span><span>매수</span><span>강력매수</span>
+      </div>
+      <div id="signalExplain" style="margin-top:16px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;display:none;">
+        <div id="signalExplainText" style="font-size:13px;color:var(--text-dim);line-height:1.8;font-family:'Noto Sans KR',sans-serif;white-space:pre-wrap;"></div>
+        <span id="signalTypingCursor" style="display:inline-block;width:6px;height:14px;background:var(--text-dim);margin-left:2px;animation:cursorBlink 0.8s step-end infinite;vertical-align:text-bottom;"></span>
       </div>
     </div>
     <div class="placeholder" id="chartPlaceholder">
@@ -1915,6 +1920,36 @@ function computeSignal(ind, isUp, upProb, predChange) {
   document.querySelectorAll('#aiSignalBar div').forEach((b, i) => {
     b.style.opacity = i === activeIdx ? '1' : '0.2';
   });
+
+  // Typing explanation
+  const explanations = {
+    '강력 매도': `RSI가 과매수 구간이며 MACD 데드크로스가 확인됩니다.\n이동평균선이 하락 추세를 보이고 있으며, AI 예측도 하락 방향입니다.\n기술적 지표 대부분이 매도 신호를 나타내고 있습니다.`,
+    '매도': `기술적 지표가 약세 흐름을 나타내고 있습니다.\nMACD 히스토그램이 감소 추세이며, 단기 이동평균이 중기선 아래에 위치합니다.\nAI 모델도 소폭 하락을 예측하고 있습니다.`,
+    '중립': `매수와 매도 신호가 혼재되어 있습니다.\nRSI가 중립 구간(40~60)에 위치하며, 뚜렷한 방향성이 보이지 않습니다.\n추가적인 모멘텀 확인 후 진입을 권장합니다.`,
+    '매수': `기술적 지표가 상승 흐름을 나타내고 있습니다.\nMACD 골든크로스 또는 RSI 반등 신호가 감지됩니다.\nAI 예측도 소폭 상승을 전망하고 있습니다.`,
+    '강력 매수': `RSI 반등과 MACD 골든크로스가 동시에 확인됩니다.\n이동평균선이 정배열 상태이며, AI 예측도 강한 상승을 전망합니다.\n기술적 지표 대부분이 매수 신호를 나타내고 있습니다.`,
+  };
+  const disclaimer = `\n\n⚠ 본 분석은 AI 예측 및 기술적 지표를 기반으로 한 참고 자료이며,\n투자 판단의 최종 책임은 투자자 본인에게 있습니다.\n예측은 확신할 수 없으며 실제 시장과 다를 수 있습니다.`;
+  const fullText = (explanations[signal] || '') + disclaimer;
+
+  const explainBox = document.getElementById('signalExplain');
+  const explainText = document.getElementById('signalExplainText');
+  const cursor = document.getElementById('signalTypingCursor');
+  explainBox.style.display = 'block';
+  explainText.textContent = '';
+  cursor.style.display = 'inline-block';
+
+  let ci = 0;
+  if (window._signalTypingTimer) clearInterval(window._signalTypingTimer);
+  window._signalTypingTimer = setInterval(() => {
+    if (ci >= fullText.length) {
+      clearInterval(window._signalTypingTimer);
+      cursor.style.display = 'none';
+      return;
+    }
+    explainText.textContent += fullText[ci];
+    ci++;
+  }, 25);
 }
 
 // ── Window resize ──
