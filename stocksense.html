@@ -943,55 +943,87 @@ async function searchStock() {
 
   let records = null;
 
-  // 여러 방법으로 실시간 데이터 시도
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`;
+  // 네이버 금융 API로 실시간 데이터 가져오기
+  const naverChartUrl = `https://api.stock.naver.com/chart/domestic/item/${stockCode}?periodType=day&range=3month`;
+  const naverBasicUrl = `https://m.stock.naver.com/api/stock/${stockCode}/basic`;
+  const stooqUrl = `https://stooq.com/q/d/l/?s=${stockCode}.kr&i=d`;
 
   const attempts = [
-    // 1) corsproxy.io
+    // 1) 네이버 금융 차트 API via allorigins
     async () => {
-      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`);
-      if (!res.ok) throw new Error('corsproxy fail');
-      return await res.json();
-    },
-    // 2) allorigins (returns wrapped JSON)
-    async () => {
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(naverChartUrl)}`);
       if (!res.ok) throw new Error('allorigins fail');
       const wrapper = await res.json();
-      return JSON.parse(wrapper.contents);
+      const data = JSON.parse(wrapper.contents);
+      if (!data || !data.priceInfos || data.priceInfos.length === 0) throw new Error('No naver chart data');
+      return data.priceInfos.map(p => ({
+        date: p.localDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+        open: p.openPrice,
+        high: p.highPrice,
+        low: p.lowPrice,
+        close: p.closePrice,
+        volume: p.accumulatedTradingVolume,
+      }));
     },
-    // 3) corsproxy.org
+    // 2) 네이버 금융 시세 페이지 크롤링 via allorigins
     async () => {
-      const res = await fetch(`https://corsproxy.org/?${encodeURIComponent(yahooUrl)}`);
-      if (!res.ok) throw new Error('corsproxy.org fail');
-      return await res.json();
+      const siseUrl = `https://fchart.stock.naver.com/siseJson.nhn?symbol=${stockCode}&requestType=1&startTime=20250901&endTime=20260315&timeframe=day`;
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(siseUrl)}`);
+      if (!res.ok) throw new Error('sise fail');
+      const wrapper = await res.json();
+      // 응답이 JS array 형태 텍스트
+      const text = wrapper.contents.trim();
+      const cleaned = text.replace(/'/g, '"').replace(/\s/g, '');
+      const rows = JSON.parse(cleaned);
+      if (!rows || rows.length === 0) throw new Error('No sise data');
+      return rows.map(r => ({
+        date: String(r[0]).trim().replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+        open: parseInt(r[1]),
+        high: parseInt(r[2]),
+        low: parseInt(r[3]),
+        close: parseInt(r[4]),
+        volume: parseInt(r[5]),
+      })).filter(r => r.close > 0);
+    },
+    // 3) Stooq CSV via allorigins
+    async () => {
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(stooqUrl)}`);
+      if (!res.ok) throw new Error('stooq fail');
+      const wrapper = await res.json();
+      const lines = wrapper.contents.trim().split('\n');
+      if (lines.length < 10) throw new Error('No stooq data');
+      return lines.slice(1).map(line => {
+        const [date, open, high, low, close, vol] = line.split(',');
+        return { date, open: Math.round(+open), high: Math.round(+high), low: Math.round(+low), close: Math.round(+close), volume: parseInt(vol) || 0 };
+      }).filter(r => r.close > 0).sort((a, b) => a.date.localeCompare(b.date));
+    },
+    // 4) Yahoo Finance via allorigins
+    async () => {
+      const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`;
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      if (!res.ok) throw new Error('yahoo fail');
+      const wrapper = await res.json();
+      const json = JSON.parse(wrapper.contents);
+      const result = json.chart?.result?.[0];
+      if (!result || !result.timestamp) throw new Error('No yahoo data');
+      return result.timestamp.map((t, i) => {
+        const d = new Date(t * 1000);
+        const q = result.indicators.quote[0];
+        return { date: d.toISOString().slice(0, 10), open: Math.round(q.open[i]||0), high: Math.round(q.high[i]||0), low: Math.round(q.low[i]||0), close: Math.round(q.close[i]||0), volume: q.volume[i]||0 };
+      }).filter(r => r.close > 0);
     },
   ];
 
-  for (const attempt of attempts) {
+  for (let i = 0; i < attempts.length; i++) {
     try {
-      const json = await attempt();
-      const result = json.chart?.result?.[0];
-      if (!result || !result.timestamp) throw new Error('No data');
-      const timestamps = result.timestamp;
-      const quote = result.indicators.quote[0];
-      records = timestamps.map((t, i) => {
-        const d = new Date(t * 1000);
-        return {
-          date: d.toISOString().slice(0, 10),
-          open: Math.round(quote.open[i] || 0),
-          high: Math.round(quote.high[i] || 0),
-          low: Math.round(quote.low[i] || 0),
-          close: Math.round(quote.close[i] || 0),
-          volume: quote.volume[i] || 0,
-        };
-      }).filter(r => r.close > 0);
-      if (records.length >= 30) {
+      records = await attempts[i]();
+      if (records && records.length >= 30) {
         showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
         break;
       }
+      records = null;
     } catch (err) {
-      console.warn('API 시도 실패:', err.message);
+      console.warn(`API 시도 ${i+1} 실패:`, err.message);
       records = null;
     }
   }
