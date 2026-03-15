@@ -754,27 +754,52 @@ function findStock(query) {
   return null;
 }
 
-// ── Fallback Sample Data (SK하이닉스 유사) ──
-const SAMPLE_DATA = (() => {
-  const base = 178000;
-  const data = {};
+// ── 종목별 현재 가격대 (2026년 3월 기준 대략) ──
+const STOCK_PRICES = {
+  '005930': 58000, '000660': 900000, '373220': 370000, '207940': 780000,
+  '005380': 210000, '000270': 120000, '068270': 190000, '105560': 78000,
+  '055550': 52000, '005490': 290000, '035420': 210000, '006400': 350000,
+  '012450': 380000, '012330': 260000, '051910': 300000, '035720': 42000,
+  '028260': 130000, '086790': 64000, '138040': 85000, '009540': 160000,
+  '329180': 180000, '009150': 150000, '096770': 120000, '017670': 58000,
+  '066570': 95000, '030200': 38000, '033780': 95000, '259960': 250000,
+  '032830': 85000, '000810': 310000, '034730': 165000, '003550': 78000,
+  '267250': 75000, '316140': 16000, '034020': 22000, '015760': 23000,
+  '323410': 25000, '377300': 28000, '042660': 55000, '036570': 180000,
+  '326030': 88000, '028300': 75000, '010950': 65000, '042700': 130000,
+  '005830': 105000, '010130': 870000, '009830': 35000, '024110': 14000,
+  '011070': 280000, '402340': 80000, '003490': 28000, '028050': 32000,
+  '267260': 350000, '000720': 35000, '086280': 130000, '000880': 32000,
+  '090430': 120000, '097950': 300000, '006360': 18000, '011170': 85000,
+  '285130': 75000, '004020': 28000, '241560': 55000, '001570': 45000,
+  '010060': 95000, '034220': 12000, '298040': 320000, '078930': 52000,
+  '001040': 95000, '010140': 12000, '161390': 48000, '004990': 28000,
+  '036460': 42000, '006800': 9000, '071050': 72000, '139480': 65000,
+  '251270': 55000, '282330': 210000, '003410': 7000, '047810': 65000,
+  '029780': 38000, '395400': 5000, '006260': 120000, '008770': 65000,
+};
+
+// ── 종목별 샘플 데이터 생성 ──
+function generateSampleData(stockCode) {
+  const base = STOCK_PRICES[stockCode] || 100000;
+  const volatility = base * 0.02; // 2% 변동성
+  const records = [];
   const d = new Date('2026-03-10');
-  for (let i = 99; i >= 0; i--) {
+  for (let i = 119; i >= 0; i--) {
     const dd = new Date(d);
     dd.setDate(dd.getDate() - i);
     if (dd.getDay() === 0 || dd.getDay() === 6) continue;
-    const key = dd.toISOString().slice(0, 10);
-    const drift = (99 - i) * 300;
-    const noise = (Math.sin(i * 0.5) * 3000) + (Math.random() - 0.5) * 2000;
+    const drift = (119 - i) * (base * 0.001);
+    const noise = (Math.sin(i * 0.5) * volatility) + (Math.random() - 0.5) * volatility;
     const close = Math.round(base + drift + noise);
-    const open = Math.round(close + (Math.random() - 0.5) * 1500);
-    const high = Math.round(Math.max(open, close) + Math.random() * 1500);
-    const low = Math.round(Math.min(open, close) - Math.random() * 1500);
-    const vol = Math.floor(5000000 + Math.random() * 10000000);
-    data[key] = { '1. open': String(open), '2. high': String(high), '3. low': String(low), '4. close': String(close), '5. volume': String(vol) };
+    const open = Math.round(close + (Math.random() - 0.5) * volatility * 0.5);
+    const high = Math.round(Math.max(open, close) + Math.random() * volatility * 0.3);
+    const low = Math.round(Math.min(open, close) - Math.random() * volatility * 0.3);
+    const vol = Math.floor(3000000 + Math.random() * 8000000);
+    records.push({ date: dd.toISOString().slice(0, 10), open, high, low, close, volume: vol });
   }
-  return data;
-})();
+  return records;
+}
 
 let currentData = null;
 let predictedPrices = null;
@@ -837,19 +862,11 @@ async function searchStock() {
     }
   }
 
-  // Fallback to sample data
+  // Fallback to sample data with realistic price for the stock
   if (!records || records.length < 30) {
     console.warn('API 실패, 샘플 데이터 사용');
-    const dates = Object.keys(SAMPLE_DATA).sort();
-    records = dates.map(d => ({
-      date: d,
-      open: parseFloat(SAMPLE_DATA[d]['1. open']),
-      high: parseFloat(SAMPLE_DATA[d]['2. high']),
-      low: parseFloat(SAMPLE_DATA[d]['3. low']),
-      close: parseFloat(SAMPLE_DATA[d]['4. close']),
-      volume: parseInt(SAMPLE_DATA[d]['5. volume']),
-    }));
-    showToast('API 제한으로 샘플 데이터를 사용합니다', 'error');
+    records = generateSampleData(stockCode);
+    showToast('API 제한으로 샘플 데이터를 사용합니다 (실제 가격과 다를 수 있습니다)', 'error');
   }
 
   currentData = { ticker: displayName, records };
