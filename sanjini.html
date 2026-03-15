@@ -129,31 +129,50 @@
       color: rgba(255,255,255,0.94); font-size: 14px; line-height: 1.8;
       max-width: 280px; margin-top: 10px; font-weight: 700;
     }
-    .character-wrap { position: relative; display: flex; justify-content: center; padding: 8px 0; }
+    .character-wrap { position: relative; display: flex; justify-content: center; padding: 8px 0 2px; }
     .character-wrap::before {
-      content: ""; position: absolute; inset: 18px 20px auto; height: 220px;
+      content: ""; position: absolute; inset: 28px 18px auto; height: 220px;
       background: radial-gradient(circle at center, rgba(255,255,255,0.35), transparent 70%);
       filter: blur(18px);
     }
     .character-card {
-      position: relative; width: min(100%, 312px); padding: 12px; border-radius: 30px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(225,245,255,0.96));
-      border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 20px 42px rgba(24,58,102,0.18);
+      position: relative; width: min(100%, 320px); min-height: 352px; padding: 10px 10px 0;
       animation: bob 4.2s ease-in-out infinite;
     }
     .character-card.celebrate { animation-duration: 3.1s; }
-    .visual { position: relative; height: 306px; overflow: hidden; border-radius: 24px; background: linear-gradient(180deg, #9bd4ff, #effaff); }
-    .visual img { width: 100%; height: 100%; object-fit: cover; object-position: center 72%; transform: scale(1.14); display: block; }
-    .visual::after { content: ""; position: absolute; inset: auto 0 0; height: 92px; background: linear-gradient(180deg, transparent, rgba(239,250,255,0.95)); }
-    .bubble {
-      position: absolute; padding: 9px 12px; border-radius: 18px; font-size: 12px;
-      font-weight: 900; box-shadow: 0 12px 20px rgba(24,58,102,0.12);
+    .character-stage {
+      position: absolute; inset: auto 0 0; display: flex; justify-content: center; align-items: flex-end;
     }
-    .bubble.left { left: -4px; top: 30px; background: rgba(255,255,255,0.96); color: var(--blue); }
-    .bubble.right { right: -4px; bottom: 28px; background: var(--yellow); color: var(--navy); }
+    .character-stage::after {
+      content: ""; position: absolute; left: 50%; bottom: 12px; width: 200px; height: 34px;
+      border-radius: 999px; transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(24,58,102,0.18), rgba(24,58,102,0.02) 72%);
+      filter: blur(8px);
+    }
+    .character-figure {
+      position: relative; z-index: 1; width: min(100%, 282px);
+      filter: drop-shadow(0 18px 30px rgba(24,58,102,0.18));
+    }
+    .character-figure img { width: 100%; height: auto; display: block; }
+    .speech-bubble {
+      position: absolute; left: 10px; top: 4px; z-index: 2; max-width: 228px;
+      padding: 16px 18px; border-radius: 24px 24px 24px 10px; background: rgba(255,255,255,0.98);
+      color: var(--navy); box-shadow: 0 18px 30px rgba(24,58,102,0.16);
+    }
+    .speech-bubble::after {
+      content: ""; position: absolute; left: 24px; bottom: -10px; width: 22px; height: 22px;
+      border-radius: 0 0 6px 0; transform: rotate(24deg);
+      background: inherit;
+    }
+    .speech-label {
+      display: inline-flex; margin-bottom: 8px; padding: 6px 10px; border-radius: 999px;
+      background: #eaf6ff; color: var(--blue); font-size: 11px; letter-spacing: 0.08em; font-weight: 900;
+    }
+    .speech-text { font-size: 16px; line-height: 1.55; font-weight: 900; white-space: pre-line; }
+    .character-card.celebrate .speech-bubble { background: linear-gradient(180deg, #fff7df, #fff1b8); }
     .sparkle { position: absolute; color: #fff7be; font-size: 20px; animation: sparkle 2.1s ease-in-out infinite; }
-    .sparkle.one { right: 28px; top: 32px; }
-    .sparkle.two { left: 34px; bottom: 56px; animation-delay: -0.7s; }
+    .sparkle.one { right: 28px; top: 88px; }
+    .sparkle.two { right: 54px; bottom: 118px; animation-delay: -0.7s; }
     .card {
       border-radius: 28px; background: rgba(255,255,255,0.96);
       border: 1px solid rgba(255,255,255,0.72); box-shadow: 0 16px 30px rgba(24,58,102,0.16);
@@ -278,6 +297,10 @@
       .frame-inner { min-height: 744px; border-radius: 24px; }
       .shell-top { margin: 10px 10px 0; }
       #app { padding: 14px 10px 12px; min-height: 690px; }
+      .character-card { min-height: 336px; }
+      .character-figure { width: min(100%, 258px); }
+      .speech-bubble { left: 4px; top: 6px; max-width: 206px; padding: 14px 16px; }
+      .speech-text { font-size: 15px; }
       .dialogue-text { font-size: 18px; }
     }
   </style>
@@ -370,12 +393,21 @@
 
     function renderCharacter(variant) {
       const cheer = variant === "celebrate";
+      const speech = cheer
+        ? "와! 퀘스트를 완료했어!\n정말 대단해!"
+        : "안녕!\n오늘도 같이 모험 떠나볼까?";
       return `
         <div class="character-wrap">
           <div class="character-card ${cheer ? "celebrate" : ""}">
-            <div class="visual"><img src="sanjini.png" alt="산지니 캐릭터" /></div>
-            <div class="bubble left">${cheer ? "해냈어!" : "반가워!"}</div>
-            <div class="bubble right">${cheer ? "축하해!" : "모험 출발"}</div>
+            <div class="speech-bubble">
+              <div class="speech-label">산지니</div>
+              <div class="speech-text">${speech}</div>
+            </div>
+            <div class="character-stage">
+              <div class="character-figure">
+                <img src="main_character.png" alt="산지니 캐릭터" />
+              </div>
+            </div>
             <span class="sparkle one">✦</span>
             <span class="sparkle two">✦</span>
           </div>
