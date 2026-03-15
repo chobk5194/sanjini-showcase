@@ -1193,27 +1193,6 @@ const STOCK_PRICES = {
   '029780': 38000, '395400': 5000, '006260': 120000, '008770': 65000,
 };
 
-// ── 종목별 샘플 데이터 생성 ──
-function generateSampleData(stockCode) {
-  const base = STOCK_PRICES[stockCode] || 100000;
-  const volatility = base * 0.02; // 2% 변동성
-  const records = [];
-  const d = new Date('2026-03-10');
-  for (let i = 119; i >= 0; i--) {
-    const dd = new Date(d);
-    dd.setDate(dd.getDate() - i);
-    if (dd.getDay() === 0 || dd.getDay() === 6) continue;
-    const drift = (119 - i) * (base * 0.001);
-    const noise = (Math.sin(i * 0.5) * volatility) + (Math.random() - 0.5) * volatility;
-    const close = Math.round(base + drift + noise);
-    const open = Math.round(close + (Math.random() - 0.5) * volatility * 0.5);
-    const high = Math.round(Math.max(open, close) + Math.random() * volatility * 0.3);
-    const low = Math.round(Math.min(open, close) - Math.random() * volatility * 0.3);
-    const vol = Math.floor(3000000 + Math.random() * 8000000);
-    records.push({ date: dd.toISOString().slice(0, 10), open, high, low, close, volume: vol });
-  }
-  return records;
-}
 
 let currentData = null;
 let predictedPrices = null;
@@ -1326,27 +1305,29 @@ async function searchStock() {
     return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
   }
 
-  // 프록시 헬퍼 (여러 프록시 시도)
+  // 프록시 헬퍼 (여러 프록시 동시 시도 - 가장 빠른 것 사용)
   async function proxyFetch(targetUrl) {
     const proxies = [
       u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
       u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
       u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      u => `https://thingproxy.freeboard.io/fetch/${u}`,
     ];
-    for (const makeUrl of proxies) {
-      try {
-        const res = await fetchWithTimeout(makeUrl(targetUrl), 5000);
-        if (!res.ok) continue;
+    // 모든 프록시 동시 시도
+    const result = await Promise.any(
+      proxies.map(async makeUrl => {
+        const res = await fetchWithTimeout(makeUrl(targetUrl), 4000);
+        if (!res.ok) throw new Error('fail');
         const text = await res.text();
-        // allorigins wraps in {contents: ...}
         try {
           const wrapper = JSON.parse(text);
           if (wrapper.contents) return wrapper.contents;
         } catch(e) {}
         return text;
-      } catch(e) { continue; }
-    }
-    throw new Error('All proxies failed');
+      })
+    );
+    return result;
   }
 
   // 데이터 파싱 함수들
@@ -1414,10 +1395,18 @@ async function searchStock() {
     records = null;
   }
 
-  // Fallback
+  // 실패 시 에러 표시 + 재시도
   if (!records || records.length < 30) {
-    records = generateSampleData(stockCode);
-    showToast('실시간 데이터를 불러올 수 없어 시뮬레이션 데이터를 사용합니다', 'error');
+    showToast('실시간 데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.', 'error');
+    document.getElementById('chartPlaceholder').innerHTML = `
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      <p style="color:var(--red);font-weight:600;margin-top:12px;">${displayName} 데이터를 불러올 수 없습니다</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요</p>
+      <button onclick="searchStock()" style="margin-top:16px;padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;">다시 시도</button>
+    `;
+    document.getElementById('chartPlaceholder').style.display = '';
+    document.getElementById('chartHeader').style.display = 'none';
+    return;
   }
 
   currentData = { ticker: displayName, records };
