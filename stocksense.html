@@ -539,7 +539,6 @@ canvas#stockChart {
     RSI, MACD, 이동평균선, 볼린저밴드 등 <span style="color:var(--mint)">기술적 지표를 자동 분석</span>하고,
     <span style="color:var(--purple)">TensorFlow.js 신경망</span>이 브라우저에서 직접 학습하여 향후 5일간의 주가를 예측합니다.<br>
     기술적 분석 점수와 AI 예측을 결합해 <strong>강력매수 ~ 강력매도</strong> 종합 시그널을 제공합니다.
-    <span style="color:var(--text-muted)">by 배장우 &amp; 정유채</span>
   </p>
 </div>
 
@@ -563,6 +562,46 @@ canvas#stockChart {
       </div>
     </div>
     <canvas id="stockChart"></canvas>
+    <!-- AI 예측 결과 (차트 아래) -->
+    <div id="aiResultBelow" style="display:none; padding:20px 24px; border-top:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);"></div>
+        <span style="font-weight:600;font-size:15px;">AI 예측 결과</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:auto;">TensorFlow.js Dense Network</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">예측 방향</div>
+          <div id="aiDir" style="font-size:18px;font-weight:700;">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">상승 확률</div>
+          <div id="aiUpProb" style="font-size:18px;font-weight:700;color:var(--mint);">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">하락 확률</div>
+          <div id="aiDownProb" style="font-size:18px;font-weight:700;color:var(--red);">-</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">5일 후 예측가</div>
+          <div id="aiPredPrice" style="font-size:18px;font-weight:700;">-</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;color:var(--text-dim);">종합 시그널:</span>
+        <span id="aiSignalText" style="font-size:20px;font-weight:800;letter-spacing:1px;">-</span>
+      </div>
+      <div id="aiSignalBar" style="display:flex;gap:4px;margin-top:10px;height:6px;">
+        <div style="flex:1;border-radius:3px;background:#dc2626;opacity:0.2;" data-level="0"></div>
+        <div style="flex:1;border-radius:3px;background:#f97316;opacity:0.2;" data-level="1"></div>
+        <div style="flex:1;border-radius:3px;background:#eab308;opacity:0.2;" data-level="2"></div>
+        <div style="flex:1;border-radius:3px;background:#22c55e;opacity:0.2;" data-level="3"></div>
+        <div style="flex:1;border-radius:3px;background:#06b6d4;opacity:0.2;" data-level="4"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px;">
+        <span>강력매도</span><span>매도</span><span>중립</span><span>매수</span><span>강력매수</span>
+      </div>
+    </div>
     <div class="placeholder" id="chartPlaceholder">
       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
       <p>종목을 검색하면 차트와 AI 분석 결과가 표시됩니다</p>
@@ -1416,6 +1455,15 @@ async function runAI(records, indicators) {
   document.getElementById('predDown').textContent = downProb + '%';
   document.getElementById('predPrice').textContent = Math.round(predLast).toLocaleString('ko-KR') + '원 (' + (isUp ? '+' : '') + predChange + '%)';
 
+  // 차트 아래 AI 결과 패널
+  document.getElementById('aiResultBelow').style.display = '';
+  document.getElementById('aiDir').textContent = isUp ? '상승' : '하락';
+  document.getElementById('aiDir').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+  document.getElementById('aiUpProb').textContent = upProb.toFixed(0) + '%';
+  document.getElementById('aiDownProb').textContent = downProb + '%';
+  document.getElementById('aiPredPrice').textContent = Math.round(predLast).toLocaleString('ko-KR') + '원';
+  document.getElementById('aiPredPrice').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+
   // Overall signal
   computeSignal(indicators, isUp, upProb, predChange);
 }
@@ -1465,7 +1513,7 @@ function computeSignal(ind, isUp, upProb, predChange) {
   document.getElementById('signalText').textContent = signal;
   document.getElementById('signalText').style.color = color;
 
-  // Signal bar
+  // Signal bar (side panel)
   const bars = document.querySelectorAll('#signalBar div');
   bars.forEach(b => b.classList.remove('active'));
   let activeIdx;
@@ -1475,6 +1523,13 @@ function computeSignal(ind, isUp, upProb, predChange) {
   else if (score > -40) activeIdx = 1;
   else activeIdx = 0;
   bars[activeIdx].classList.add('active');
+
+  // Signal bar (below chart)
+  document.getElementById('aiSignalText').textContent = signal;
+  document.getElementById('aiSignalText').style.color = color;
+  document.querySelectorAll('#aiSignalBar div').forEach((b, i) => {
+    b.style.opacity = i === activeIdx ? '1' : '0.2';
+  });
 }
 
 // ── Window resize ──
