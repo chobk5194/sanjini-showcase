@@ -14,6 +14,12 @@
       --accent: #7c5cff; --accent2: #00d4aa;
       --glow: rgba(124,92,255,0.15);
     }
+    [data-theme="light"] {
+      --bg: #f5f5f7; --surface: #fff; --card: #fff;
+      --border: rgba(0,0,0,0.1); --text: #1a1a1a;
+      --text-muted: rgba(0,0,0,0.5);
+      --glow: rgba(124,92,255,0.08);
+    }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
@@ -24,10 +30,10 @@
     /* NAV */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 1rem 2rem; background: rgba(0,0,0,0.6);
+      padding: 1rem 2rem; background: color-mix(in srgb, var(--bg) 80%, transparent);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
     }
     .logo {
       font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem;
@@ -37,6 +43,12 @@
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
     .nav-links a:hover { color: var(--text); }
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--surface); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 18px; transition: all 0.3s; color: var(--text);
+    }
+    .theme-toggle:hover { border-color: var(--accent); background: var(--glow); }
 
     /* HERO */
     .hero {
@@ -219,6 +231,19 @@
     .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
+    /* LIGHT MODE OVERRIDES */
+    [data-theme="light"] body { background: var(--bg); color: var(--text); }
+    [data-theme="light"] .btn-primary { background: #1a1a1a; color: #fff; }
+    [data-theme="light"] .btn-secondary { color: var(--text); }
+    [data-theme="light"] .demo-code { background: #f0f0f5; }
+    [data-theme="light"] .demo-live-canvas { background: #0d0d1a; }
+    [data-theme="light"] .about-card { background: var(--surface); border-color: var(--border); }
+    [data-theme="light"] .project-card { background: var(--surface); }
+    [data-theme="light"] .member-card { background: var(--surface); border-color: var(--border); }
+    [data-theme="light"] .hero::before { opacity: 0.3; }
+    [data-theme="light"] .marquee span { color: var(--text-muted); }
+    [data-theme="light"] .tag { background: rgba(0,0,0,0.05); color: var(--accent); }
+
     @media (max-width: 640px) {
       nav { padding: 0.8rem 1.2rem; } .nav-links { gap: 1rem; }
       section { padding: 4rem 1.2rem; }
@@ -237,6 +262,7 @@
       <li><a href="#projects">프로젝트</a></li>
       <li><a href="#members">멤버</a></li>
     </ul>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="다크/라이트 모드 전환">&#9790;</button>
   </nav>
 
   <section class="hero">
@@ -373,6 +399,23 @@
   </footer>
 
   <script>
+    // theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      document.getElementById('themeToggle').textContent = next === 'light' ? '\u2600' : '\u263E';
+    }
+    (function() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('themeToggle').textContent = '\u2600';
+      }
+    })();
+
     // scroll animations
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
