@@ -563,7 +563,7 @@ canvas#stockChart {
     </div>
     <canvas id="stockChart"></canvas>
     <!-- AI 예측 결과 (차트 아래) -->
-    <div id="aiResultBelow" style="display:none; padding:20px 24px; border-top:1px solid var(--border);">
+    <div id="aiResultBelow" style="display:none; padding:20px 0 0; margin-top:20px; border-top:1px solid var(--border);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);"></div>
         <span style="font-weight:600;font-size:15px;">AI 예측 결과</span>
@@ -1456,7 +1456,7 @@ async function runAI(records, indicators) {
   document.getElementById('predPrice').textContent = Math.round(predLast).toLocaleString('ko-KR') + '원 (' + (isUp ? '+' : '') + predChange + '%)';
 
   // 차트 아래 AI 결과 패널
-  document.getElementById('aiResultBelow').style.display = '';
+  document.getElementById('aiResultBelow').style.display = 'block';
   document.getElementById('aiDir').textContent = isUp ? '상승' : '하락';
   document.getElementById('aiDir').style.color = isUp ? 'var(--mint)' : 'var(--red)';
   document.getElementById('aiUpProb').textContent = upProb.toFixed(0) + '%';
