@@ -253,10 +253,10 @@
     <div class="marquee-track">
       <span class="marquee-item">MoodPlaylist</span><span class="marquee-item">SnapRecipe</span>
       <span class="marquee-item">StudyMate</span><span class="marquee-item">PetMood</span>
-      <span class="marquee-item">CodeReview Bot</span><span class="marquee-item">VIBE CODING</span>
+      <span class="marquee-item">VIBE CODING</span>
       <span class="marquee-item">MoodPlaylist</span><span class="marquee-item">SnapRecipe</span>
       <span class="marquee-item">StudyMate</span><span class="marquee-item">PetMood</span>
-      <span class="marquee-item">CodeReview Bot</span><span class="marquee-item">VIBE CODING</span>
+      <span class="marquee-item">VIBE CODING</span>
     </div>
   </div>
 
@@ -381,19 +381,6 @@
           <div class="project-links"><a href="#" class="demo-link">Demo</a><a href="#">GitHub</a></div>
         </div>
       </div>
-      <div class="project-card fade-up">
-        <div class="project-thumb">
-          <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop" alt="CodeReview Bot" />
-          <div class="project-overlay"></div>
-          <div class="project-tags"><span class="tag">GitHub API</span><span class="tag">AI</span></div>
-        </div>
-        <div class="project-info">
-          <h3>CodeReview Bot</h3>
-          <p class="author">by 정다운</p>
-          <p>PR을 올리면 AI가 자동으로 코드를 리뷰하고 개선점을 코멘트로 남겨줍니다.</p>
-          <div class="project-links"><a href="#" class="demo-link">Demo</a><a href="#">GitHub</a></div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -406,7 +393,6 @@
       <div class="member-card fade-up"><div class="member-avatar">병</div><h3>조병권</h3><p>SnapRecipe</p></div>
       <div class="member-card fade-up"><div class="member-avatar">유</div><h3>정유채</h3><p>StudyMate</p></div>
       <div class="member-card fade-up"><div class="member-avatar">은</div><h3>고은재</h3><p>PetMood</p></div>
-      <div class="member-card fade-up"><div class="member-avatar">다</div><h3>정다운</h3><p>CodeReview Bot</p></div>
     </div>
   </section>
 
@@ -585,43 +571,44 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
         }
       },
       {
-        reply: "우주 워프 터널! 별들 사이를 뚫고 날아가는 느낌을 만들게요.",
-        title: "Starfield Warp",
-        hint: "마우스를 움직여 방향을 조종하세요 | 큰 운석을 피하세요!",
-        codeText: `<span class="cm">// Starfield Warp Tunnel</span>
-<span class="kw">const</span> stars = [];
-<span class="kw">const</span> COUNT = <span class="num">400</span>;
-<span class="kw">let</span> cx = w/<span class="num">2</span>, cy = h/<span class="num">2</span>;
+        reply: "우주 미니게임! 운석을 피하며 지구까지 도착하세요!",
+        title: "Space Dodge",
+        hint: "마우스로 우주선 조종 | 운석을 피하세요!",
+        codeText: `<span class="cm">// Space Dodge - 우주 미니게임</span>
+<span class="kw">let</span> shipX = w/<span class="num">2</span>, hp = <span class="num">3</span>, distance = <span class="num">0</span>;
+<span class="kw">const</span> totalDist = <span class="num">2000</span>;
+<span class="kw">const</span> asteroids = [];
 
-<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < COUNT; i++) {
-  stars.<span class="fn">push</span>({
-    x: Math.<span class="fn">random</span>()*w - cx,
-    y: Math.<span class="fn">random</span>()*h - cy,
-    z: Math.<span class="fn">random</span>() * w,
+<span class="cm">// 마우스로 우주선 조종</span>
+canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
+  targetX = e.offsetX;
+});
+
+<span class="cm">// 운석 생성 (갈수록 빨라짐)</span>
+<span class="kw">function</span> <span class="fn">spawnAsteroid</span>() {
+  asteroids.<span class="fn">push</span>({
+    x: Math.<span class="fn">random</span>() * w,
+    y: <span class="num">-50</span>,
+    speed: Math.<span class="fn">random</span>()*<span class="num">3</span> + <span class="num">2.5</span>,
+    size: Math.<span class="fn">random</span>()*<span class="num">18</span> + <span class="num">12</span>,
   });
 }
 
-canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
-  cx = e.offsetX;
-  cy = e.offsetY;
-});
+<span class="cm">// 충돌 판정</span>
+<span class="kw">const</span> dist = Math.<span class="fn">hypot</span>(a.x - shipX, a.y - shipY);
+<span class="kw">if</span> (dist < a.size + <span class="num">12</span>) {
+  hp--;
+  <span class="fn">shakeScreen</span>();
+  <span class="kw">if</span> (hp <= <span class="num">0</span>) <span class="fn">gameOver</span>();
+}
 
-<span class="kw">function</span> <span class="fn">warp</span>() {
-  ctx.<span class="fn">fillStyle</span> = <span class="str">'rgba(0,0,10,0.2)'</span>;
-  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
-  stars.<span class="fn">forEach</span>(s => {
-    s.z -= <span class="num">8</span>;
-    <span class="kw">if</span> (s.z <= <span class="num">0</span>) s.z = w;
-    <span class="kw">const</span> sx = (s.x / s.z) * w + cx;
-    <span class="kw">const</span> sy = (s.y / s.z) * h + cy;
-    <span class="kw">const</span> r = (<span class="num">1</span> - s.z/w) * <span class="num">3</span>;
-    ctx.globalAlpha = <span class="num">1</span> - s.z/w;
-    ctx.<span class="fn">fillStyle</span> = <span class="str">'#fff'</span>;
-    ctx.<span class="fn">beginPath</span>();
-    ctx.<span class="fn">arc</span>(sx, sy, r, <span class="num">0</span>, Math.PI*<span class="num">2</span>);
-    ctx.<span class="fn">fill</span>();
-  });
-  <span class="fn">requestAnimationFrame</span>(warp);
+<span class="cm">// 미니맵: 지구까지 진행도</span>
+<span class="kw">const</span> progress = distance / totalDist;
+<span class="fn">drawMinimap</span>(progress);
+
+<span class="cm">// 지구 도착 = 클리어!</span>
+<span class="kw">if</span> (distance >= totalDist) {
+  <span class="fn">showVictory</span>(<span class="str">'EARTH REACHED!'</span>);
 }
 <span class="cm">// &#x1F680; 완성!</span>`,
         run: (canvas, ctx, w, h) => {
