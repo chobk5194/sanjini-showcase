@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockSense - AI 주식 예측</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --border: #1e1e24;
+  --border-hover: #2a2a32;
+  --purple: #7c5cff;
+  --purple-dim: rgba(124,92,255,0.15);
+  --purple-glow: rgba(124,92,255,0.3);
+  --mint: #00d4aa;
+  --mint-dim: rgba(0,212,170,0.15);
+  --red: #ff4d6a;
+  --red-dim: rgba(255,77,106,0.15);
+  --orange: #ff9f43;
+  --orange-dim: rgba(255,159,67,0.15);
+  --text: #e4e4e7;
+  --text-dim: #71717a;
+  --text-muted: #52525b;
+}
+
+body {
+  font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 20px 32px 0;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--purple); }
+
+header {
+  padding: 16px 32px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--purple), var(--mint));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.logo h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--purple), var(--mint));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo span {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  width: 360px;
+  max-width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-box:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-dim);
+}
+
+.search-box svg { flex-shrink: 0; color: var(--text-dim); }
+
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+}
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box button {
+  background: var(--purple);
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: background 0.2s, transform 0.1s;
+}
+.search-box button:hover { background: #6a4de6; }
+.search-box button:active { transform: scale(0.97); }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  padding: 0 32px 24px;
+  min-height: 0;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-container {
+  position: relative;
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stock-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stock-price {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.stock-change {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+.stock-change.up { color: var(--mint); background: var(--mint-dim); }
+.stock-change.down { color: var(--red); background: var(--red-dim); }
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-line {
+  width: 24px;
+  height: 2px;
+  border-radius: 1px;
+}
+.legend-line.actual { background: var(--mint); }
+.legend-line.predicted { background: var(--purple); border-top: 2px dashed var(--purple); height: 0; }
+.legend-line.ma5 { background: #ff9f43; }
+.legend-line.ma20 { background: #3b82f6; }
+.legend-line.ma60 { background: #f43f5e; }
+
+canvas#stockChart {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+}
+
+/* Right Panel */
+.analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(400px + 100px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.price-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.price-item {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 12px;
+}
+.price-item .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.price-item .value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.indicator-row:last-child { border-bottom: none; }
+.indicator-label { color: var(--text-dim); }
+.indicator-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+}
+
+.signal-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.prediction-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.pred-direction {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.pred-prob {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.prob-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.prob-item .prob-label { color: var(--text-dim); font-size: 12px; }
+.prob-item .prob-val { font-family: 'Space Grotesk'; font-weight: 700; font-size: 20px; }
+
+.overall-signal {
+  text-align: center;
+  padding: 20px;
+}
+
+.signal-text {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.signal-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 16px 0 8px;
+  gap: 2px;
+}
+.signal-bar div {
+  flex: 1;
+  border-radius: 3px;
+  opacity: 0.25;
+  transition: opacity 0.3s;
+}
+.signal-bar div.active { opacity: 1; }
+.signal-bar .sb-strong-sell { background: #dc2626; }
+.signal-bar .sb-sell { background: #f97316; }
+.signal-bar .sb-neutral { background: #eab308; }
+.signal-bar .sb-buy { background: #22c55e; }
+.signal-bar .sb-strong-buy { background: #06b6d4; }
+
+.signal-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Training bar */
+.training-section {
+  padding: 0 32px 32px;
+}
+
+.training-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: none;
+}
+.training-bar.active { display: block; }
+
+.training-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.training-status {
+  color: var(--purple);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--purple-dim);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.training-epoch { color: var(--text-dim); font-size: 13px; font-family: 'Space Grotesk'; }
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--mint));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.training-loss {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk';
+}
+
+/* Placeholder */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+.placeholder svg { opacity: 0.3; }
+.placeholder p { font-size: 14px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  header { padding: 16px 16px 20px; }
+  .main-grid { padding: 0 16px 24px; }
+  .training-section { padding: 0 16px 24px; }
+  .back-link { padding: 16px 16px 0; }
+  .search-box { width: 100%; }
+  .analysis-panel { max-height: none; }
+}
+
+/* scrollbar */
+.analysis-panel::-webkit-scrollbar { width: 4px; }
+.analysis-panel::-webkit-scrollbar-track { background: transparent; }
+.analysis-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 100;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 360px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: var(--red); }
+.toast.info { border-color: var(--purple); }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+  돌아가기
+</a>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    <div>
+      <h1>StockSense</h1>
+      <span>AI 기반 주식 분석 &amp; 예측</span>
+    </div>
+  </div>
+  <div class="search-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="tickerInput" placeholder="종목 검색 (예: AAPL, TSLA, 005930.KS)" spellcheck="false">
+    <button onclick="searchStock()">분석</button>
+  </div>
+</header>
+
+<div class="main-grid">
+  <!-- Chart -->
+  <div class="card chart-container">
+    <div class="chart-header" id="chartHeader" style="display:none;">
+      <div>
+        <span class="stock-name" id="stockName">AAPL</span>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;">
+          <span class="stock-price" id="stockPrice">$0.00</span>
+          <span class="stock-change" id="stockChange">0%</span>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span><span class="legend-line actual"></span> 실제 가격</span>
+        <span><span class="legend-line predicted"></span> AI 예측</span>
+        <span><span class="legend-line ma5"></span> MA5</span>
+        <span><span class="legend-line ma20"></span> MA20</span>
+      </div>
+    </div>
+    <canvas id="stockChart"></canvas>
+    <div class="placeholder" id="chartPlaceholder">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <p>종목을 검색하면 차트와 AI 분석 결과가 표시됩니다</p>
+      <p style="font-size:12px;color:var(--text-muted)">예: AAPL, MSFT, GOOGL, TSLA</p>
+    </div>
+  </div>
+
+  <!-- Analysis Panel -->
+  <div class="analysis-panel" id="analysisPanel">
+    <!-- Price Info -->
+    <div class="card" id="priceCard" style="display:none;">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        가격 정보
+      </div>
+      <div class="price-info">
+        <div class="price-item"><div class="label">시가</div><div class="value" id="pOpen">-</div></div>
+        <div class="price-item"><div class="label">고가</div><div class="value" id="pHigh" style="color:var(--red)">-</div></div>
+        <div class="price-item"><div class="label">저가</div><div class="value" id="pLow" style="color:var(--mint)">-</div></div>
+        <div class="price-item"><div class="label">거래량</div><div class="value" id="pVol">-</div></div>
+      </div>
+    </div>
+
+    <!-- Technical Indicators -->
+    <div class="card" id="techCard" style="display:none;">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M21 21H4.6c-.56 0-.84 0-1.054-.109a1 1 0 0 1-.437-.437C3 20.24 3 19.96 3 19.4V3"/><path d="m7 14 4-4 4 4 6-6"/></svg>
+        기술적 지표
+      </div>
+      <div id="techIndicators">
+        <div class="indicator-row"><span class="indicator-label">RSI (14)</span><span class="indicator-value" id="indRSI">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MACD</span><span class="indicator-value" id="indMACD">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MACD Signal</span><span class="indicator-value" id="indMACDSig">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 5일</span><span class="indicator-value" id="indMA5">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 20일</span><span class="indicator-value" id="indMA20">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">MA 60일</span><span class="indicator-value" id="indMA60">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">볼린저 상단</span><span class="indicator-value" id="indBBU">-</span></div>
+        <div class="indicator-row"><span class="indicator-label">볼린저 하단</span><span class="indicator-value" id="indBBL">-</span></div>
+      </div>
+    </div>
+
+    <!-- AI Prediction -->
+    <div class="card prediction-card" id="predCard" style="display:none;">
+      <div class="card-title" style="justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93L12 22"/><path d="M8 6a4 4 0 0 1 8 0"/><path d="M17 12.5c1.77.54 3 1.84 3 3.5 0 2.49-3.58 4-8 4s-8-1.51-8-4c0-1.66 1.23-2.96 3-3.5"/></svg>
+        AI 예측 결과
+      </div>
+      <div class="pred-direction" id="predDirection">-</div>
+      <div class="pred-prob">
+        <div class="prob-item"><span class="prob-label">상승 확률</span><span class="prob-val" id="predUp" style="color:var(--mint)">-</span></div>
+        <div class="prob-item"><span class="prob-label">하락 확률</span><span class="prob-val" id="predDown" style="color:var(--red)">-</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text-dim);">
+        5일 후 예측가: <span id="predPrice" style="font-weight:700;color:var(--text);font-family:'Space Grotesk'">-</span>
+      </div>
+    </div>
+
+    <!-- Overall Signal -->
+    <div class="card overall-signal" id="signalCard" style="display:none;">
+      <div class="card-title" style="justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        종합 시그널
+      </div>
+      <div class="signal-text" id="signalText">-</div>
+      <div class="signal-bar" id="signalBar">
+        <div class="sb-strong-sell"></div>
+        <div class="sb-sell"></div>
+        <div class="sb-neutral"></div>
+        <div class="sb-buy"></div>
+        <div class="sb-strong-buy"></div>
+      </div>
+      <div class="signal-labels">
+        <span>강력 매도</span><span>매도</span><span>중립</span><span>매수</span><span>강력 매수</span>
+      </div>
+    </div>
+
+    <!-- Placeholder for analysis -->
+    <div class="card" id="analysisPH" style="display:flex;align-items:center;justify-content:center;min-height:200px;">
+      <div style="text-align:center;color:var(--text-muted);">
+        <p style="font-size:14px;">종목을 검색하여 분석을 시작하세요</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Training Progress -->
+<div class="training-section">
+  <div class="training-bar" id="trainingBar">
+    <div class="training-header">
+      <div class="training-status">
+        <div class="spinner"></div>
+        <span id="trainingStatusText">AI 모델 학습 중...</span>
+      </div>
+      <span class="training-epoch" id="trainingEpoch">에포크 0/50</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="training-loss" id="trainingLoss">Loss: -</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Fallback Sample Data (AAPL-like) ──
+const SAMPLE_DATA = (() => {
+  const base = 185;
+  const data = {};
+  const d = new Date('2025-12-01');
+  for (let i = 99; i >= 0; i--) {
+    const dd = new Date(d);
+    dd.setDate(dd.getDate() - i);
+    // skip weekends
+    if (dd.getDay() === 0 || dd.getDay() === 6) continue;
+    const key = dd.toISOString().slice(0, 10);
+    const drift = (99 - i) * 0.12;
+    const noise = (Math.sin(i * 0.5) * 4) + (Math.random() - 0.5) * 3;
+    const close = +(base + drift + noise).toFixed(2);
+    const open = +(close + (Math.random() - 0.5) * 2).toFixed(2);
+    const high = +(Math.max(open, close) + Math.random() * 2).toFixed(2);
+    const low = +(Math.min(open, close) - Math.random() * 2).toFixed(2);
+    const vol = Math.floor(40000000 + Math.random() * 30000000);
+    data[key] = { '1. open': String(open), '2. high': String(high), '3. low': String(low), '4. close': String(close), '5. volume': String(vol) };
+  }
+  return data;
+})();
+
+let currentData = null;
+let predictedPrices = null;
+
+// ── Toast ──
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Search ──
+document.getElementById('tickerInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchStock(); });
+
+async function searchStock() {
+  const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if (!ticker) { showToast('종목 코드를 입력해주세요', 'error'); return; }
+  showToast(`${ticker} 데이터를 불러오는 중...`, 'info');
+
+  let timeSeries = null;
+  try {
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(ticker)}&apikey=demo&outputsize=compact`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json['Time Series (Daily)']) {
+      timeSeries = json['Time Series (Daily)'];
+    } else {
+      throw new Error(json['Note'] || json['Error Message'] || 'API 오류');
+    }
+  } catch (err) {
+    console.warn('API 실패, 샘플 데이터 사용:', err.message);
+    if (ticker === 'AAPL' || true) {
+      timeSeries = SAMPLE_DATA;
+      showToast('API 제한으로 샘플 데이터를 사용합니다', 'error');
+    }
+  }
+
+  if (!timeSeries) { showToast('데이터를 불러올 수 없습니다', 'error'); return; }
+
+  // Parse data (oldest first)
+  const dates = Object.keys(timeSeries).sort();
+  const records = dates.map(d => ({
+    date: d,
+    open: parseFloat(timeSeries[d]['1. open']),
+    high: parseFloat(timeSeries[d]['2. high']),
+    low: parseFloat(timeSeries[d]['3. low']),
+    close: parseFloat(timeSeries[d]['4. close']),
+    volume: parseInt(timeSeries[d]['5. volume']),
+  }));
+
+  currentData = { ticker, records };
+  predictedPrices = null;
+
+  updatePriceInfo(records);
+  const indicators = calcIndicators(records);
+  updateIndicators(indicators, records);
+  drawChart(records, null);
+
+  // Show cards
+  document.getElementById('chartHeader').style.display = '';
+  document.getElementById('chartPlaceholder').style.display = 'none';
+  document.getElementById('priceCard').style.display = '';
+  document.getElementById('techCard').style.display = '';
+  document.getElementById('analysisPH').style.display = 'none';
+
+  document.getElementById('stockName').textContent = ticker;
+
+  // Run AI
+  await runAI(records, indicators);
+}
+
+// ── Price Info ──
+function updatePriceInfo(records) {
+  const last = records[records.length - 1];
+  const prev = records[records.length - 2];
+  const change = ((last.close - prev.close) / prev.close * 100).toFixed(2);
+  const isUp = change >= 0;
+
+  document.getElementById('stockPrice').textContent = '$' + last.close.toFixed(2);
+  const changeEl = document.getElementById('stockChange');
+  changeEl.textContent = (isUp ? '+' : '') + change + '%';
+  changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
+
+  document.getElementById('pOpen').textContent = '$' + last.open.toFixed(2);
+  document.getElementById('pHigh').textContent = '$' + last.high.toFixed(2);
+  document.getElementById('pLow').textContent = '$' + last.low.toFixed(2);
+  document.getElementById('pVol').textContent = (last.volume / 1e6).toFixed(1) + 'M';
+}
+
+// ── Technical Indicators ──
+function sma(arr, period) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i < period - 1) { result.push(null); continue; }
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j++) sum += arr[j];
+    result.push(sum / period);
+  }
+  return result;
+}
+
+function calcRSI(closes, period = 14) {
+  const gains = [], losses = [];
+  for (let i = 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1];
+    gains.push(diff > 0 ? diff : 0);
+    losses.push(diff < 0 ? -diff : 0);
+  }
+  let avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  let avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  const rsiValues = [];
+  for (let i = 0; i < period; i++) rsiValues.push(null);
+  rsiValues.push(avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss));
+  for (let i = period; i < gains.length; i++) {
+    avgGain = (avgGain * (period - 1) + gains[i]) / period;
+    avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+    rsiValues.push(avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss));
+  }
+  return rsiValues;
+}
+
+function calcMACD(closes) {
+  const ema = (data, p) => {
+    const k = 2 / (p + 1);
+    const res = [data[0]];
+    for (let i = 1; i < data.length; i++) res.push(data[i] * k + res[i - 1] * (1 - k));
+    return res;
+  };
+  const ema12 = ema(closes, 12);
+  const ema26 = ema(closes, 26);
+  const macdLine = ema12.map((v, i) => v - ema26[i]);
+  const signalLine = ema(macdLine, 9);
+  const histogram = macdLine.map((v, i) => v - signalLine[i]);
+  return { macdLine, signalLine, histogram };
+}
+
+function calcBollinger(closes, period = 20) {
+  const ma = sma(closes, period);
+  const upper = [], lower = [];
+  for (let i = 0; i < closes.length; i++) {
+    if (ma[i] === null) { upper.push(null); lower.push(null); continue; }
+    let sumSq = 0;
+    for (let j = i - period + 1; j <= i; j++) sumSq += (closes[j] - ma[i]) ** 2;
+    const std = Math.sqrt(sumSq / period);
+    upper.push(ma[i] + 2 * std);
+    lower.push(ma[i] - 2 * std);
+  }
+  return { upper, lower, middle: ma };
+}
+
+function calcIndicators(records) {
+  const closes = records.map(r => r.close);
+  const ma5 = sma(closes, 5);
+  const ma20 = sma(closes, 20);
+  const ma60 = sma(closes, 60);
+  const rsi = calcRSI(closes);
+  const macd = calcMACD(closes);
+  const bb = calcBollinger(closes);
+  return { ma5, ma20, ma60, rsi, macd, bb, closes };
+}
+
+function updateIndicators(ind, records) {
+  const n = ind.closes.length - 1;
+  const rsiVal = ind.rsi[ind.rsi.length - 1];
+  const rsiColor = rsiVal > 70 ? 'var(--red)' : rsiVal < 30 ? 'var(--mint)' : 'var(--text)';
+  document.getElementById('indRSI').innerHTML = `<span style="color:${rsiColor}">${rsiVal.toFixed(1)}</span>`;
+
+  const macdVal = ind.macd.macdLine[n];
+  document.getElementById('indMACD').textContent = macdVal.toFixed(2);
+  document.getElementById('indMACDSig').textContent = ind.macd.signalLine[n].toFixed(2);
+  document.getElementById('indMA5').textContent = '$' + (ind.ma5[n] || 0).toFixed(2);
+  document.getElementById('indMA20').textContent = '$' + (ind.ma20[n] || 0).toFixed(2);
+  document.getElementById('indMA60').textContent = ind.ma60[n] ? '$' + ind.ma60[n].toFixed(2) : 'N/A';
+  document.getElementById('indBBU').textContent = ind.bb.upper[n] ? '$' + ind.bb.upper[n].toFixed(2) : 'N/A';
+  document.getElementById('indBBL').textContent = ind.bb.lower[n] ? '$' + ind.bb.lower[n].toFixed(2) : 'N/A';
+}
+
+// ── Chart Drawing ──
+function drawChart(records, predicted) {
+  const canvas = document.getElementById('stockChart');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width - 48;
+  const H = 400;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const closes = records.map(r => r.close);
+  const allPrices = predicted ? [...closes, ...predicted] : closes;
+  const minP = Math.min(...allPrices) * 0.995;
+  const maxP = Math.max(...allPrices) * 1.005;
+  const totalPoints = predicted ? closes.length + predicted.length : closes.length;
+
+  const pad = { top: 20, right: 60, bottom: 40, left: 10 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const x = i => pad.left + (i / (totalPoints - 1)) * cW;
+  const y = v => pad.top + (1 - (v - minP) / (maxP - minP)) * cH;
+
+  // Grid
+  ctx.strokeStyle = '#1a1a1f';
+  ctx.lineWidth = 1;
+  const gridLines = 6;
+  for (let i = 0; i <= gridLines; i++) {
+    const gy = pad.top + (cH / gridLines) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(W - pad.right, gy); ctx.stroke();
+    const price = maxP - (maxP - minP) * (i / gridLines);
+    ctx.fillStyle = '#52525b';
+    ctx.font = '11px Space Grotesk';
+    ctx.textAlign = 'left';
+    ctx.fillText('$' + price.toFixed(1), W - pad.right + 6, gy + 4);
+  }
+
+  // Bollinger Bands fill
+  const indicators = calcIndicators(records);
+  const bbU = indicators.bb.upper;
+  const bbL = indicators.bb.lower;
+  ctx.fillStyle = 'rgba(124,92,255,0.04)';
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < closes.length; i++) {
+    if (bbU[i] === null) continue;
+    if (!started) { ctx.moveTo(x(i), y(bbU[i])); started = true; }
+    else ctx.lineTo(x(i), y(bbU[i]));
+  }
+  for (let i = closes.length - 1; i >= 0; i--) {
+    if (bbL[i] === null) continue;
+    ctx.lineTo(x(i), y(bbL[i]));
+  }
+  ctx.closePath(); ctx.fill();
+
+  // MA lines
+  function drawMA(data, color, alpha = 0.5) {
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    let s = false;
+    data.forEach((v, i) => {
+      if (v === null) return;
+      if (!s) { ctx.moveTo(x(i), y(v)); s = true; }
+      else ctx.lineTo(x(i), y(v));
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  drawMA(indicators.ma5, '#ff9f43', 0.6);
+  drawMA(indicators.ma20, '#3b82f6', 0.6);
+  if (indicators.ma60.some(v => v !== null)) drawMA(indicators.ma60, '#f43f5e', 0.4);
+
+  // Actual price line
+  ctx.strokeStyle = '#00d4aa';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  closes.forEach((v, i) => { i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)); });
+  ctx.stroke();
+
+  // Gradient fill under price
+  const grad = ctx.createLinearGradient(0, y(maxP), 0, y(minP) + cH * 0.3);
+  grad.addColorStop(0, 'rgba(0,212,170,0.15)');
+  grad.addColorStop(1, 'rgba(0,212,170,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  closes.forEach((v, i) => { i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)); });
+  ctx.lineTo(x(closes.length - 1), pad.top + cH);
+  ctx.lineTo(x(0), pad.top + cH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Predicted line
+  if (predicted && predicted.length > 0) {
+    ctx.strokeStyle = '#7c5cff';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x(closes.length - 1), y(closes[closes.length - 1]));
+    predicted.forEach((v, i) => ctx.lineTo(x(closes.length + i), y(v)));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Prediction dots
+    predicted.forEach((v, i) => {
+      ctx.beginPath();
+      ctx.arc(x(closes.length + i), y(v), 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#7c5cff';
+      ctx.fill();
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    // Divider line
+    const dx = x(closes.length - 1);
+    ctx.strokeStyle = 'rgba(124,92,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(dx, pad.top); ctx.lineTo(dx, pad.top + cH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(124,92,255,0.7)';
+    ctx.font = '10px Noto Sans KR';
+    ctx.textAlign = 'center';
+    ctx.fillText('예측', dx, pad.top - 6);
+  }
+
+  // Current price dot
+  const lastX = x(closes.length - 1);
+  const lastY = y(closes[closes.length - 1]);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#00d4aa'; ctx.fill();
+  ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Date labels
+  ctx.fillStyle = '#52525b';
+  ctx.font = '10px Space Grotesk';
+  ctx.textAlign = 'center';
+  const labelCount = Math.min(6, records.length);
+  for (let i = 0; i < labelCount; i++) {
+    const idx = Math.floor((i / (labelCount - 1)) * (records.length - 1));
+    const label = records[idx].date.slice(5);
+    ctx.fillText(label, x(idx), H - 10);
+  }
+}
+
+// ── TensorFlow.js AI ──
+async function runAI(records, indicators) {
+  const bar = document.getElementById('trainingBar');
+  bar.classList.add('active');
+  document.getElementById('trainingStatusText').textContent = 'AI 모델 학습 중...';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('trainingLoss').textContent = 'Loss: -';
+
+  const closes = records.map(r => r.close);
+  const windowSize = 20;
+  const epochs = 50;
+
+  if (closes.length < windowSize + 5) {
+    showToast('데이터가 부족합니다', 'error');
+    bar.classList.remove('active');
+    return;
+  }
+
+  // Normalize
+  const minVal = Math.min(...closes);
+  const maxVal = Math.max(...closes);
+  const range = maxVal - minVal || 1;
+  const normalized = closes.map(v => (v - minVal) / range);
+
+  // Create training data
+  const xs = [], ys = [];
+  for (let i = 0; i < normalized.length - windowSize; i++) {
+    xs.push(normalized.slice(i, i + windowSize));
+    ys.push(normalized[i + windowSize]);
+  }
+
+  const xTensor = tf.tensor2d(xs);
+  const yTensor = tf.tensor1d(ys);
+
+  // Build model
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [windowSize], units: 64, activation: 'relu' }));
+  model.add(tf.layers.dropout({ rate: 0.2 }));
+  model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 16, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 1 }));
+
+  model.compile({ optimizer: tf.train.adam(0.001), loss: 'meanSquaredError' });
+
+  // Train
+  await model.fit(xTensor, yTensor, {
+    epochs,
+    batchSize: 16,
+    shuffle: true,
+    callbacks: {
+      onEpochEnd: (epoch, logs) => {
+        const pct = ((epoch + 1) / epochs * 100).toFixed(0);
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('trainingEpoch').textContent = `에포크 ${epoch + 1}/${epochs}`;
+        document.getElementById('trainingLoss').textContent = `Loss: ${logs.loss.toFixed(6)}`;
+      }
+    }
+  });
+
+  document.getElementById('trainingStatusText').textContent = 'AI 예측 생성 중...';
+
+  // Predict next 5 days
+  let lastWindow = normalized.slice(-windowSize);
+  const predictions = [];
+  for (let i = 0; i < 5; i++) {
+    const input = tf.tensor2d([lastWindow]);
+    const predNorm = model.predict(input).dataSync()[0];
+    const predPrice = predNorm * range + minVal;
+    predictions.push(+predPrice.toFixed(2));
+    lastWindow = [...lastWindow.slice(1), predNorm];
+    input.dispose();
+  }
+
+  predictedPrices = predictions;
+
+  // Cleanup
+  xTensor.dispose();
+  yTensor.dispose();
+  model.dispose();
+
+  // Update UI
+  document.getElementById('trainingStatusText').textContent = 'AI 학습 완료!';
+  document.getElementById('progressFill').style.width = '100%';
+  setTimeout(() => bar.classList.remove('active'), 2000);
+
+  // Draw chart with predictions
+  drawChart(records, predictions);
+
+  // Update prediction panel
+  const lastClose = closes[closes.length - 1];
+  const predLast = predictions[predictions.length - 1];
+  const predChange = ((predLast - lastClose) / lastClose * 100).toFixed(1);
+  const isUp = predLast >= lastClose;
+  const upProb = isUp ? Math.min(50 + Math.abs(predChange) * 5, 95) : Math.max(50 - Math.abs(predChange) * 5, 5);
+  const downProb = (100 - upProb).toFixed(0);
+
+  document.getElementById('predCard').style.display = '';
+  document.getElementById('predDirection').textContent = isUp ? '상승 예측' : '하락 예측';
+  document.getElementById('predDirection').style.color = isUp ? 'var(--mint)' : 'var(--red)';
+  document.getElementById('predUp').textContent = upProb.toFixed(0) + '%';
+  document.getElementById('predDown').textContent = downProb + '%';
+  document.getElementById('predPrice').textContent = '$' + predLast.toFixed(2) + ' (' + (isUp ? '+' : '') + predChange + '%)';
+
+  // Overall signal
+  computeSignal(indicators, isUp, upProb, predChange);
+}
+
+function computeSignal(ind, isUp, upProb, predChange) {
+  const n = ind.closes.length - 1;
+  let score = 0; // -100 to +100
+
+  // RSI
+  const rsi = ind.rsi[ind.rsi.length - 1];
+  if (rsi < 30) score += 20;
+  else if (rsi < 40) score += 10;
+  else if (rsi > 70) score -= 20;
+  else if (rsi > 60) score -= 10;
+
+  // MACD
+  const macdVal = ind.macd.macdLine[n];
+  const macdSig = ind.macd.signalLine[n];
+  if (macdVal > macdSig) score += 15;
+  else score -= 15;
+  if (ind.macd.histogram[n] > ind.macd.histogram[n - 1]) score += 5;
+  else score -= 5;
+
+  // MA trend
+  const price = ind.closes[n];
+  if (ind.ma5[n] && price > ind.ma5[n]) score += 5;
+  else if (ind.ma5[n]) score -= 5;
+  if (ind.ma20[n] && price > ind.ma20[n]) score += 10;
+  else if (ind.ma20[n]) score -= 10;
+  if (ind.ma60[n] && price > ind.ma60[n]) score += 10;
+  else if (ind.ma60[n]) score -= 10;
+
+  // AI prediction weight
+  score += (isUp ? 1 : -1) * Math.min(Math.abs(predChange) * 3, 25);
+
+  // Clamp
+  score = Math.max(-100, Math.min(100, score));
+
+  let signal, color;
+  if (score >= 40) { signal = '강력 매수'; color = '#06b6d4'; }
+  else if (score >= 15) { signal = '매수'; color = '#22c55e'; }
+  else if (score > -15) { signal = '중립'; color = '#eab308'; }
+  else if (score > -40) { signal = '매도'; color = '#f97316'; }
+  else { signal = '강력 매도'; color = '#dc2626'; }
+
+  document.getElementById('signalCard').style.display = '';
+  document.getElementById('signalText').textContent = signal;
+  document.getElementById('signalText').style.color = color;
+
+  // Signal bar
+  const bars = document.querySelectorAll('#signalBar div');
+  bars.forEach(b => b.classList.remove('active'));
+  let activeIdx;
+  if (score >= 40) activeIdx = 4;
+  else if (score >= 15) activeIdx = 3;
+  else if (score > -15) activeIdx = 2;
+  else if (score > -40) activeIdx = 1;
+  else activeIdx = 0;
+  bars[activeIdx].classList.add('active');
+}
+
+// ── Window resize ──
+window.addEventListener('resize', () => {
+  if (currentData) {
+    drawChart(currentData.records, predictedPrices);
+  }
+});
+</script>
+</body>
+</html>
