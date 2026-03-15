@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>산지니원정대 - 캠퍼스 RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--bg)',
+        'bg-card': 'var(--bg-card)',
+        'bg-card-hover': 'var(--bg-card-hover)',
+        border: 'var(--border)',
+        purple: 'var(--purple)',
+        'purple-dim': 'var(--purple-dim)',
+        mint: 'var(--mint)',
+        'mint-dim': 'var(--mint-dim)',
+        orange: 'var(--orange)',
+        'orange-dim': 'var(--orange-dim)',
+        txt: 'var(--text)',
+        'txt-dim': 'var(--text-dim)',
+        'txt-muted': 'var(--text-muted)',
+      }
+    }
+  }
+};
+</script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --border: #1e1e24;
+  --border-hover: #2a2a32;
+  --purple: #7c5cff;
+  --purple-dim: rgba(124,92,255,0.15);
+  --purple-glow: rgba(124,92,255,0.3);
+  --mint: #00d4aa;
+  --mint-dim: rgba(0,212,170,0.15);
+  --orange: #ff9f43;
+  --orange-dim: rgba(255,159,67,0.15);
+  --text: #e4e4e7;
+  --text-dim: #71717a;
+  --text-muted: #52525b;
+}
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f2;
+  --border: #e0e0e5;
+  --border-hover: #d0d0d5;
+  --purple-dim: rgba(124,92,255,0.08);
+  --purple-glow: rgba(124,92,255,0.15);
+  --mint-dim: rgba(0,212,170,0.08);
+  --orange-dim: rgba(255,159,67,0.08);
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --text-muted: #999;
+}
+
+body {
+  font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 20px 32px 0;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--purple); }
+
+.theme-toggle {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--purple);
+  background: var(--bg-card); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; transition: all 0.3s; color: var(--text);
+  box-shadow: 0 0 8px var(--purple-dim); flex-shrink: 0;
+  position: fixed; top: 20px; right: 24px; z-index: 1000;
+}
+.theme-toggle:hover { border-color: var(--mint); box-shadow: 0 0 12px var(--purple-glow); }
+
+/* EXP bar animation */
+.exp-bar-fill {
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+.toast-enter { animation: toastIn 0.4s ease-out forwards; }
+.toast-exit { animation: toastOut 0.4s ease-in forwards; }
+
+/* Timeline entry animation */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.timeline-enter { animation: fadeSlideUp 0.5s ease-out forwards; }
+
+/* Quest complete animation */
+.quest-completed {
+  opacity: 0.55;
+  pointer-events: none;
+  position: relative;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Hero glow */
+.hero-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, var(--purple-dim) 0%, transparent 70%);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [exp, setExp] = useState(350);
+  const maxExp = 500;
+  const [level, setLevel] = useState(5);
+  const [streak] = useState(7);
+
+  const [quests, setQuests] = useState([
+    { id: 1, title: '중앙도서관에서 1시간 공부하기', type: '학습', expReward: 30, completed: false },
+    { id: 2, title: '학생회관 식당에서 점심 먹기', type: '생활', expReward: 15, completed: false },
+    { id: 3, title: '캠퍼스 연못 산책하기', type: '탐험', expReward: 20, completed: false },
+  ]);
+
+  const [timeline, setTimeline] = useState([
+    { id: 'init-1', text: '캠퍼스 투어 미션 완료', time: '2시간 전', exp: 25, isNew: false },
+    { id: 'init-2', text: '🏆 3일 연속 달성', time: '어제', exp: null, isNew: false },
+  ]);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeQuest, setActiveQuest] = useState(null);
+  const [modalPhoto, setModalPhoto] = useState('');
+  const [modalMemo, setModalMemo] = useState('');
+  const [modalLocation, setModalLocation] = useState('');
+  const [toast, setToast] = useState(null);
+  const [toastExiting, setToastExiting] = useState(false);
+  const [firstQuestDone, setFirstQuestDone] = useState(false);
+  const toastTimer = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+
+  const openModal = (quest) => {
+    setActiveQuest(quest);
+    setModalPhoto('');
+    setModalMemo('');
+    setModalLocation('');
+    setModalOpen(true);
+  };
+
+  const showToast = (msg) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastExiting(false);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => {
+      setToastExiting(true);
+      setTimeout(() => { setToast(null); setToastExiting(false); }, 400);
+    }, 3000);
+  };
+
+  const saveRecord = () => {
+    if (!activeQuest) return;
+    const quest = activeQuest;
+
+    // Mark quest completed
+    setQuests(prev => prev.map(q => q.id === quest.id ? { ...q, completed: true } : q));
+
+    // Increase EXP
+    setExp(prev => Math.min(prev + quest.expReward, maxExp));
+
+    // Add timeline entry
+    const now = new Date();
+    const timeStr = `${now.getHours()}시 ${now.getMinutes().toString().padStart(2, '0')}분`;
+    const newEntry = {
+      id: 'tl-' + Date.now(),
+      text: `${quest.title} 완료` + (modalMemo ? ` — "${modalMemo}"` : '') + (modalLocation ? ` @ ${modalLocation}` : ''),
+      time: timeStr,
+      exp: quest.expReward,
+      isNew: true,
+    };
+
+    const entries = [newEntry];
+
+    // First quest achievement
+    if (!firstQuestDone) {
+      setFirstQuestDone(true);
+      entries.push({
+        id: 'ach-' + Date.now(),
+        text: '🏆 첫 미션 완료!',
+        time: timeStr,
+        exp: null,
+        isNew: true,
+      });
+      setTimeout(() => showToast('🏆 첫 미션 완료!'), 300);
+    }
+
+    setTimeline(prev => [...entries, ...prev]);
+    setModalOpen(false);
+  };
+
+  const typeColor = (type) => {
+    if (type === '학습') return 'var(--purple)';
+    if (type === '생활') return 'var(--mint)';
+    if (type === '탐험') return 'var(--orange)';
+    return 'var(--text-dim)';
+  };
+
+  const typeBg = (type) => {
+    if (type === '학습') return 'var(--purple-dim)';
+    if (type === '생활') return 'var(--mint-dim)';
+    if (type === '탐험') return 'var(--orange-dim)';
+    return 'var(--bg-card)';
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
+      {/* Toast */}
+      {toast && (
+        <div
+          className={toastExiting ? 'toast-exit' : 'toast-enter'}
+          style={{
+            position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 2000, background: 'linear-gradient(135deg, var(--purple), var(--mint))',
+            color: '#fff', padding: '14px 28px', borderRadius: 12,
+            fontWeight: 600, fontSize: 16, boxShadow: '0 8px 32px rgba(124,92,255,0.4)',
+          }}
+        >
+          {toast}
+        </div>
+      )}
+
+      {/* Back link */}
+      <a href="index.html" className="back-link">← 돌아가기</a>
+
+      {/* Theme toggle */}
+      <button className="theme-toggle" onClick={toggleTheme}>
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+
+      {/* Hero */}
+      <section style={{ position: 'relative', textAlign: 'center', padding: '60px 24px 40px' }}>
+        <div className="hero-glow" />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <span style={{
+            display: 'inline-block', padding: '4px 16px', borderRadius: 100,
+            background: 'var(--orange-dim)', color: 'var(--orange)',
+            fontSize: 13, fontWeight: 600, marginBottom: 16, border: '1px solid rgba(255,159,67,0.25)',
+          }}>
+            기획
+          </span>
+          <h1 style={{
+            fontFamily: "'Space Grotesk', 'Noto Sans KR', sans-serif",
+            fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: 16,
+            background: 'linear-gradient(135deg, var(--purple), var(--mint))',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            산지니원정대
+          </h1>
+          <p style={{
+            color: 'var(--text-dim)', fontSize: 'clamp(14px, 2.5vw, 17px)',
+            maxWidth: 420, margin: '0 auto', lineHeight: 1.8, whiteSpace: 'pre-line',
+          }}>
+            {'캠퍼스 활동을 미션처럼 수행하고\n대학생활을 업적과 타임라인으로 기록하는\n개인용 캠퍼스 RPG 앱'}
+          </p>
+        </div>
+      </section>
+
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 20px 80px' }}>
+
+        {/* Profile Card */}
+        <div style={{
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16,
+          padding: 24, marginBottom: 32,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--purple), var(--mint))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 24, color: '#fff', fontWeight: 700,
+            }}>
+              🧭
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 700, fontSize: 18 }}>모험가_민수</span>
+                <span style={{
+                  padding: '2px 10px', borderRadius: 8,
+                  background: 'var(--purple-dim)', color: 'var(--purple)',
+                  fontSize: 13, fontWeight: 600,
+                }}>
+                  Lv.{level}
+                </span>
+              </div>
+              <div style={{ color: 'var(--text-dim)', fontSize: 14, marginTop: 2 }}>
+                🔥 {streak}일 연속
+              </div>
+            </div>
+          </div>
+          {/* EXP bar */}
+          <div style={{ marginTop: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-dim)', marginBottom: 6 }}>
+              <span>EXP</span>
+              <span>{exp}/{maxExp}</span>
+            </div>
+            <div style={{
+              width: '100%', height: 10, borderRadius: 5,
+              background: 'var(--border)', overflow: 'hidden',
+            }}>
+              <div
+                className="exp-bar-fill"
+                style={{
+                  width: `${(exp / maxExp) * 100}%`, height: '100%', borderRadius: 5,
+                  background: 'linear-gradient(90deg, var(--purple), var(--mint))',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Daily Quests */}
+        <h2 style={{
+          fontWeight: 700, fontSize: 20, marginBottom: 16,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          ⚔️ 오늘의 Daily Quest
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
+          {quests.map(quest => (
+            <div
+              key={quest.id}
+              className={quest.completed ? 'quest-completed' : ''}
+              style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14,
+                padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14,
+                transition: 'opacity 0.4s',
+              }}
+            >
+              {/* Completed checkmark */}
+              {quest.completed && (
+                <div style={{
+                  position: 'absolute', top: 10, right: 14, fontSize: 20, color: 'var(--mint)',
+                }}>
+                  ✅
+                </div>
+              )}
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: typeBg(quest.type),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 13, fontWeight: 600, color: typeColor(quest.type),
+              }}>
+                {quest.type}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, lineHeight: 1.4 }}>
+                  {quest.title}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--mint)', fontWeight: 600 }}>
+                  +{quest.expReward} EXP
+                </div>
+              </div>
+              {!quest.completed && (
+                <button
+                  onClick={() => openModal(quest)}
+                  style={{
+                    padding: '8px 16px', borderRadius: 10, border: 'none',
+                    background: 'linear-gradient(135deg, var(--purple), #6644dd)',
+                    color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                    whiteSpace: 'nowrap', transition: 'transform 0.15s, box-shadow 0.15s',
+                    boxShadow: '0 2px 12px rgba(124,92,255,0.3)',
+                  }}
+                  onMouseEnter={e => { e.target.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={e => { e.target.style.transform = 'scale(1)'; }}
+                >
+                  미션 완료
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Timeline */}
+        <h2 style={{
+          fontWeight: 700, fontSize: 20, marginBottom: 16,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          📜 타임라인
+        </h2>
+
+        <div style={{ position: 'relative', paddingLeft: 24 }}>
+          {/* Vertical line */}
+          <div style={{
+            position: 'absolute', left: 7, top: 6, bottom: 6, width: 2,
+            background: 'var(--border)', borderRadius: 1,
+          }} />
+
+          {timeline.map((entry, i) => (
+            <div
+              key={entry.id}
+              className={entry.isNew ? 'timeline-enter' : ''}
+              style={{
+                position: 'relative', marginBottom: 20, paddingLeft: 20,
+              }}
+            >
+              {/* Dot */}
+              <div style={{
+                position: 'absolute', left: -20, top: 6, width: 12, height: 12,
+                borderRadius: '50%', border: '2px solid var(--border)',
+                background: entry.exp ? 'var(--purple)' : 'var(--orange)',
+              }} />
+
+              <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12,
+                padding: '14px 16px',
+              }}>
+                <div style={{ fontWeight: 500, fontSize: 14, lineHeight: 1.5 }}>
+                  {entry.text}
+                </div>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  marginTop: 6, fontSize: 12, color: 'var(--text-dim)',
+                }}>
+                  <span>{entry.time}</span>
+                  {entry.exp && (
+                    <span style={{
+                      color: 'var(--mint)', fontWeight: 600,
+                      padding: '1px 8px', borderRadius: 6, background: 'var(--mint-dim)',
+                    }}>
+                      +{entry.exp} EXP
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20,
+              padding: 28, width: '100%', maxWidth: 420,
+              boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+            }}
+          >
+            <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>미션 기록</h3>
+            <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 20 }}>
+              {activeQuest?.title}
+            </p>
+
+            {/* Photo */}
+            <label style={{ display: 'block', marginBottom: 16 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 6 }}>
+                📷 사진 첨부
+              </span>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setModalPhoto(e.target.files?.[0]?.name || '')}
+                  style={{
+                    width: '100%', padding: '10px 14px', borderRadius: 10,
+                    border: '1px solid var(--border)', background: 'var(--bg)',
+                    color: 'var(--text)', fontSize: 14,
+                  }}
+                />
+              </div>
+              {modalPhoto && (
+                <span style={{ fontSize: 12, color: 'var(--mint)', marginTop: 4, display: 'block' }}>
+                  선택됨: {modalPhoto}
+                </span>
+              )}
+            </label>
+
+            {/* Memo */}
+            <label style={{ display: 'block', marginBottom: 16 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 6 }}>
+                ✏️ 메모 입력
+              </span>
+              <textarea
+                value={modalMemo}
+                onChange={e => setModalMemo(e.target.value)}
+                placeholder="오늘의 미션은 어땠나요?"
+                rows={3}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: 10,
+                  border: '1px solid var(--border)', background: 'var(--bg)',
+                  color: 'var(--text)', fontSize: 14, resize: 'vertical',
+                  fontFamily: "'Noto Sans KR', sans-serif",
+                }}
+              />
+            </label>
+
+            {/* Location */}
+            <label style={{ display: 'block', marginBottom: 24 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 6 }}>
+                📍 위치 선택
+              </span>
+              <select
+                value={modalLocation}
+                onChange={e => setModalLocation(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: 10,
+                  border: '1px solid var(--border)', background: 'var(--bg)',
+                  color: 'var(--text)', fontSize: 14,
+                  fontFamily: "'Noto Sans KR', sans-serif",
+                }}
+              >
+                <option value="">선택 안함</option>
+                <option value="중앙도서관">중앙도서관</option>
+                <option value="학생회관">학생회관</option>
+                <option value="캠퍼스 연못">캠퍼스 연못</option>
+                <option value="체육관">체육관</option>
+                <option value="공학관">공학관</option>
+              </select>
+            </label>
+
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setModalOpen(false)}
+                style={{
+                  flex: 1, padding: '12px 0', borderRadius: 12,
+                  border: '1px solid var(--border)', background: 'transparent',
+                  color: 'var(--text-dim)', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                  fontFamily: "'Noto Sans KR', sans-serif",
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={saveRecord}
+                style={{
+                  flex: 2, padding: '12px 0', borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg, var(--purple), var(--mint))',
+                  color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(124,92,255,0.35)',
+                  fontFamily: "'Noto Sans KR', sans-serif",
+                }}
+              >
+                기록 저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
