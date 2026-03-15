@@ -336,20 +336,19 @@
     .demo-prompt-btn.used {
       opacity: 0.3; pointer-events: none;
     }
+    .demo-right {
+      display: flex; flex-direction: column;
+    }
     .demo-code {
-      padding: 1.5rem; overflow: auto;
+      padding: 1.2rem; overflow: auto;
       background: rgba(0,0,0,0.4);
+      max-height: 220px;
+      border-bottom: 1px solid var(--border);
     }
     .demo-code pre {
       font-family: 'Space Grotesk', 'Courier New', monospace;
-      font-size: 0.78rem; line-height: 1.7; color: var(--text-muted);
+      font-size: 0.72rem; line-height: 1.6; color: var(--text-muted);
       white-space: pre-wrap; word-break: break-all;
-    }
-    .demo-code .line {
-      opacity: 0; animation: lineIn 0.06s ease forwards;
-    }
-    @keyframes lineIn {
-      to { opacity: 1; }
     }
     .demo-code .kw { color: #c792ea; }
     .demo-code .fn { color: #82aaff; }
@@ -366,6 +365,106 @@
     }
     @keyframes cursorBlink {
       0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+    .demo-live {
+      flex: 1; padding: 1.5rem;
+      background: #1a1a2e;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; min-height: 200px;
+    }
+    .demo-live-label {
+      position: absolute; top: 10px; right: 12px;
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent2); background: rgba(0,212,170,0.1);
+      padding: 0.2rem 0.6rem; border-radius: 100px;
+      border: 1px solid rgba(0,212,170,0.2);
+    }
+    .demo-live-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; text-align: center;
+    }
+    /* live app: todo */
+    .live-todo { width: 100%; max-width: 300px; }
+    .live-todo-input {
+      display: flex; gap: 0.5rem; margin-bottom: 0.8rem;
+    }
+    .live-todo-input input {
+      flex: 1; padding: 0.5rem 0.8rem; border-radius: 8px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.06);
+      color: #fff; font-size: 0.8rem; outline: none;
+    }
+    .live-todo-input input:focus { border-color: var(--accent); }
+    .live-todo-input button {
+      padding: 0.5rem 0.8rem; border-radius: 8px; border: none;
+      background: var(--accent); color: #fff; font-size: 0.8rem;
+      cursor: pointer; font-weight: 600;
+    }
+    .live-todo-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+    .live-todo-list li {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.8rem; border-radius: 8px;
+      background: rgba(255,255,255,0.04); font-size: 0.8rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .live-todo-list li:hover { background: rgba(255,255,255,0.08); }
+    .live-todo-list li.done { text-decoration: line-through; opacity: 0.4; }
+    .live-todo-list li .check {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--accent); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; transition: all 0.2s;
+    }
+    .live-todo-list li.done .check {
+      background: var(--accent); border-color: var(--accent);
+    }
+    .live-todo-list li .del {
+      margin-left: auto; opacity: 0; color: #f07178;
+      cursor: pointer; font-size: 0.75rem; transition: opacity 0.2s;
+    }
+    .live-todo-list li:hover .del { opacity: 1; }
+    /* live app: darkmode */
+    .live-darkmode {
+      display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
+    }
+    .live-dm-preview {
+      width: 200px; height: 120px; border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0.4rem;
+      transition: all 0.5s; font-size: 0.8rem;
+      border: 1px solid var(--border);
+    }
+    .live-dm-preview.dark { background: #0a0a0a; color: #fff; }
+    .live-dm-preview.light { background: #f5f5f5; color: #111; }
+    .live-dm-toggle {
+      width: 56px; height: 28px; border-radius: 100px;
+      background: #333; position: relative; cursor: pointer;
+      border: none; transition: background 0.3s;
+    }
+    .live-dm-toggle.on { background: var(--accent); }
+    .live-dm-toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; transition: transform 0.3s;
+    }
+    .live-dm-toggle.on::after { transform: translateX(28px); }
+    /* live app: timer */
+    .live-timer { text-align: center; }
+    .live-timer-display {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 2.8rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    .live-timer-buttons { display: flex; gap: 0.5rem; justify-content: center; }
+    .live-timer-buttons button {
+      padding: 0.4rem 1rem; border-radius: 100px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06); color: #fff;
+      font-size: 0.75rem; cursor: pointer; transition: all 0.3s;
+    }
+    .live-timer-buttons button:hover { background: rgba(255,255,255,0.12); }
+    .live-timer-buttons button.active {
+      background: var(--accent); border-color: var(--accent);
     }
 
     /* ── ANIMATIONS ── */
@@ -451,8 +550,16 @@
             <button class="demo-prompt-btn" data-idx="2">카운트다운 타이머 만들어줘</button>
           </div>
         </div>
-        <div class="demo-code">
-          <pre id="demoCode"><span class="cm">// 프롬프트를 선택하면 여기에 코드가 생성됩니다</span><span class="cursor-blink"></span></pre>
+        <div class="demo-right">
+          <div class="demo-code">
+            <pre id="demoCode"><span class="cm">// 프롬프트를 선택하면 여기에 코드가 생성됩니다</span><span class="cursor-blink"></span></pre>
+          </div>
+          <div class="demo-live">
+            <span class="demo-live-label">LIVE</span>
+            <div id="demoLive">
+              <p class="demo-live-placeholder">코드가 완성되면 여기서 실행됩니다</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -631,96 +738,148 @@
     // ── DEMO LOGIC ──
     const demos = [
       {
-        reply: "좋아요! 할 일을 추가하고 완료 체크할 수 있는 투두리스트를 만들게요.",
-        code: [
-          { t: 'cm', v: '// Todo List App' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'const' },{ t: '', v: ' input = document.querySelector(' },{ t: 'str', v: "'#todo-input'" },{ t: '', v: ');' },
-          { t: 'kw', v: 'const' },{ t: '', v: ' list = document.querySelector(' },{ t: 'str', v: "'#todo-list'" },{ t: '', v: ');' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'function' },{ t: 'fn', v: ' addTodo' },{ t: '', v: '() {' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' text = input.value.trim();' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'if' },{ t: '', v: ' (!text) ' },{ t: 'kw', v: 'return' },{ t: '', v: ';' },
-          { t: '', v: '' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' li = document.createElement(' },{ t: 'str', v: "'li'" },{ t: '', v: ');' },
-          { t: '', v: '  li.innerHTML = `' },
-          { t: 'tag', v: '    <span>' },{ t: '', v: '${text}' },{ t: 'tag', v: '</span>' },
-          { t: 'tag', v: '    <button' },{ t: 'attr', v: ' onclick' },{ t: '', v: '="this.parentElement.remove()">' },
-          { t: '', v: '      삭제' },
-          { t: 'tag', v: '    </button>' },
-          { t: '', v: '  `;' },
-          { t: '', v: '' },
-          { t: '', v: '  li.addEventListener(' },{ t: 'str', v: "'click'" },{ t: '', v: ', () => {' },
-          { t: '', v: '    li.classList.toggle(' },{ t: 'str', v: "'done'" },{ t: '', v: ');' },
-          { t: '', v: '  });' },
-          { t: '', v: '' },
-          { t: '', v: '  list.appendChild(li);' },
-          { t: '', v: '  input.value = ' },{ t: 'str', v: "''" },{ t: '', v: ';' },
-          { t: '', v: '}' },
-          { t: '', v: '' },
-          { t: 'cm', v: '// ✅ 완성! 할 일 추가 & 완료 체크 & 삭제 기능' },
-        ]
+        reply: "투두리스트 만들게요! 할 일 추가, 완료 체크, 삭제까지 됩니다.",
+        codeText: `<span class="cm">// Todo List App</span>
+<span class="kw">const</span> input = <span class="fn">querySelector</span>(<span class="str">'#input'</span>);
+<span class="kw">const</span> list = <span class="fn">querySelector</span>(<span class="str">'#list'</span>);
+
+<span class="kw">function</span> <span class="fn">addTodo</span>() {
+  <span class="kw">const</span> text = input.value.trim();
+  <span class="kw">if</span> (!text) <span class="kw">return</span>;
+
+  <span class="kw">const</span> li = <span class="fn">createElement</span>(<span class="str">'li'</span>);
+  li.textContent = text;
+  li.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt;
+    li.classList.<span class="fn">toggle</span>(<span class="str">'done'</span>)
+  );
+  list.<span class="fn">appendChild</span>(li);
+  input.value = <span class="str">''</span>;
+}
+<span class="cm">// &#x2705; 완성!</span>`,
+        liveHTML: () => {
+          const el = document.getElementById('demoLive');
+          el.innerHTML = `<div class="live-todo">
+            <div class="live-todo-input">
+              <input type="text" id="liveTodoInput" placeholder="할 일을 입력하세요" />
+              <button id="liveTodoAdd">추가</button>
+            </div>
+            <ul class="live-todo-list" id="liveTodoList"></ul>
+          </div>`;
+          const inp = document.getElementById('liveTodoInput');
+          const addBtn = document.getElementById('liveTodoAdd');
+          const ul = document.getElementById('liveTodoList');
+          function add() {
+            const t = inp.value.trim(); if (!t) return;
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="check"></span><span>${t}</span><span class="del">x</span>`;
+            li.querySelector('.check').addEventListener('click', (e) => { e.stopPropagation(); li.classList.toggle('done'); });
+            li.querySelector('.del').addEventListener('click', (e) => { e.stopPropagation(); li.remove(); });
+            ul.appendChild(li); inp.value = '';
+          }
+          addBtn.addEventListener('click', add);
+          inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+          // pre-fill some items
+          ['바이브코딩 스터디 참석', '프로젝트 아이디어 정리'].forEach(t => { inp.value = t; add(); });
+        }
       },
       {
-        reply: "다크모드 토글이요! CSS 변수를 활용해서 부드럽게 전환되게 만들게요.",
-        code: [
-          { t: 'cm', v: '// Dark Mode Toggle' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'const' },{ t: '', v: ' toggle = document.querySelector(' },{ t: 'str', v: "'#theme-btn'" },{ t: '', v: ');' },
-          { t: 'kw', v: 'const' },{ t: '', v: ' root = document.documentElement;' },
-          { t: 'kw', v: 'let' },{ t: '', v: ' isDark = ' },{ t: 'kw', v: 'true' },{ t: '', v: ';' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'const' },{ t: '', v: ' themes = {' },
-          { t: '', v: '  dark:  { ' },{ t: 'attr', v: 'bg' },{ t: '', v: ': ' },{ t: 'str', v: "'#0a0a0a'" },{ t: '', v: ', ' },{ t: 'attr', v: 'text' },{ t: '', v: ': ' },{ t: 'str', v: "'#ffffff'" },{ t: '', v: ' },' },
-          { t: '', v: '  light: { ' },{ t: 'attr', v: 'bg' },{ t: '', v: ': ' },{ t: 'str', v: "'#ffffff'" },{ t: '', v: ', ' },{ t: 'attr', v: 'text' },{ t: '', v: ': ' },{ t: 'str', v: "'#0a0a0a'" },{ t: '', v: ' },' },
-          { t: '', v: '};' },
-          { t: '', v: '' },
-          { t: '', v: 'toggle.addEventListener(' },{ t: 'str', v: "'click'" },{ t: '', v: ', () => {' },
-          { t: '', v: '  isDark = !isDark;' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' t = isDark ? themes.dark : themes.light;' },
-          { t: '', v: '' },
-          { t: '', v: '  root.style.setProperty(' },{ t: 'str', v: "'--bg'" },{ t: '', v: ', t.bg);' },
-          { t: '', v: '  root.style.setProperty(' },{ t: 'str', v: "'--text'" },{ t: '', v: ', t.text);' },
-          { t: '', v: '' },
-          { t: '', v: '  toggle.textContent = isDark ? ' },{ t: 'str', v: "'🌙'" },{ t: '', v: ' : ' },{ t: 'str', v: "'☀️'" },{ t: '', v: ';' },
-          { t: '', v: '});' },
-          { t: '', v: '' },
-          { t: 'cm', v: '// 🌗 완성! 클릭하면 다크/라이트 부드럽게 전환' },
-        ]
+        reply: "다크모드 토글! CSS 변수로 부드럽게 전환되게 만들게요.",
+        codeText: `<span class="cm">// Dark Mode Toggle</span>
+<span class="kw">let</span> isDark = <span class="kw">true</span>;
+<span class="kw">const</span> themes = {
+  dark:  { <span class="attr">bg</span>: <span class="str">'#0a0a0a'</span>, <span class="attr">text</span>: <span class="str">'#fff'</span> },
+  light: { <span class="attr">bg</span>: <span class="str">'#ffffff'</span>, <span class="attr">text</span>: <span class="str">'#111'</span> },
+};
+
+toggle.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  isDark = !isDark;
+  <span class="kw">const</span> t = isDark ? themes.dark : themes.light;
+  root.style.<span class="fn">setProperty</span>(<span class="str">'--bg'</span>, t.bg);
+  root.style.<span class="fn">setProperty</span>(<span class="str">'--text'</span>, t.text);
+});
+<span class="cm">// &#x1f317; 완성!</span>`,
+        liveHTML: () => {
+          const el = document.getElementById('demoLive');
+          el.innerHTML = `<div class="live-darkmode">
+            <div class="live-dm-preview dark" id="dmPreview">
+              <span style="font-size:1.5rem">🌙</span>
+              <span>Dark Mode</span>
+            </div>
+            <button class="live-dm-toggle" id="dmToggle"></button>
+            <span style="font-size:0.7rem;color:var(--text-muted)">클릭해서 전환해보세요</span>
+          </div>`;
+          let dark = true;
+          const preview = document.getElementById('dmPreview');
+          const toggle = document.getElementById('dmToggle');
+          toggle.addEventListener('click', () => {
+            dark = !dark;
+            toggle.classList.toggle('on');
+            if (dark) {
+              preview.className = 'live-dm-preview dark';
+              preview.innerHTML = '<span style="font-size:1.5rem">🌙</span><span>Dark Mode</span>';
+            } else {
+              preview.className = 'live-dm-preview light';
+              preview.innerHTML = '<span style="font-size:1.5rem">☀️</span><span>Light Mode</span>';
+            }
+          });
+        }
       },
       {
-        reply: "카운트다운 타이머! 시간 설정하고 시작하면 초 단위로 줄어드는 타이머를 만들게요.",
-        code: [
-          { t: 'cm', v: '// Countdown Timer' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'let' },{ t: '', v: ' remaining = ' },{ t: 'num', v: '0' },{ t: '', v: ';' },
-          { t: 'kw', v: 'let' },{ t: '', v: ' timer = ' },{ t: 'kw', v: 'null' },{ t: '', v: ';' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'function' },{ t: 'fn', v: ' startTimer' },{ t: '', v: '(seconds) {' },
-          { t: '', v: '  remaining = seconds;' },
-          { t: '', v: '  updateDisplay();' },
-          { t: '', v: '' },
-          { t: '', v: '  timer = setInterval(() => {' },
-          { t: '', v: '    remaining--;' },
-          { t: '', v: '    updateDisplay();' },
-          { t: '', v: '' },
-          { t: '', v: '    ' },{ t: 'kw', v: 'if' },{ t: '', v: ' (remaining <= ' },{ t: 'num', v: '0' },{ t: '', v: ') {' },
-          { t: '', v: '      clearInterval(timer);' },
-          { t: '', v: '      display.classList.add(' },{ t: 'str', v: "'shake'" },{ t: '', v: ');' },
-          { t: '', v: '      ' },{ t: 'kw', v: 'new' },{ t: '', v: ' Audio(' },{ t: 'str', v: "'alarm.mp3'" },{ t: '', v: ').play();' },
-          { t: '', v: '    }' },
-          { t: '', v: '  }, ' },{ t: 'num', v: '1000' },{ t: '', v: ');' },
-          { t: '', v: '}' },
-          { t: '', v: '' },
-          { t: 'kw', v: 'function' },{ t: 'fn', v: ' updateDisplay' },{ t: '', v: '() {' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' m = Math.floor(remaining / ' },{ t: 'num', v: '60' },{ t: '', v: ');' },
-          { t: '', v: '  ' },{ t: 'kw', v: 'const' },{ t: '', v: ' s = remaining % ' },{ t: 'num', v: '60' },{ t: '', v: ';' },
-          { t: '', v: '  display.textContent =' },
-          { t: '', v: '    `${String(m).padStart(' },{ t: 'num', v: '2' },{ t: '', v: ',' },{ t: 'str', v: "'0'" },{ t: '', v: ')}:${String(s).padStart(' },{ t: 'num', v: '2' },{ t: '', v: ',' },{ t: 'str', v: "'0'" },{ t: '', v: ')}`;' },
-          { t: '', v: '}' },
-          { t: '', v: '' },
-          { t: 'cm', v: '// ⏱️ 완성! 시작/정지/리셋 카운트다운 타이머' },
-        ]
+        reply: "카운트다운 타이머! 시작 버튼 누르면 바로 카운트다운됩니다.",
+        codeText: `<span class="cm">// Countdown Timer</span>
+<span class="kw">let</span> remaining = <span class="num">0</span>;
+<span class="kw">let</span> timer = <span class="kw">null</span>;
+
+<span class="kw">function</span> <span class="fn">startTimer</span>(seconds) {
+  remaining = seconds;
+  timer = <span class="fn">setInterval</span>(() =&gt; {
+    remaining--;
+    <span class="fn">updateDisplay</span>();
+    <span class="kw">if</span> (remaining &lt;= <span class="num">0</span>)
+      <span class="fn">clearInterval</span>(timer);
+  }, <span class="num">1000</span>);
+}
+
+<span class="kw">function</span> <span class="fn">updateDisplay</span>() {
+  <span class="kw">const</span> m = Math.<span class="fn">floor</span>(remaining / <span class="num">60</span>);
+  <span class="kw">const</span> s = remaining % <span class="num">60</span>;
+  display.textContent =
+    \`\${<span class="fn">padStart</span>(m)}:\${<span class="fn">padStart</span>(s)}\`;
+}
+<span class="cm">// &#x23F1;&#xFE0F; 완성!</span>`,
+        liveHTML: () => {
+          const el = document.getElementById('demoLive');
+          el.innerHTML = `<div class="live-timer">
+            <div class="live-timer-display" id="timerDisplay">00:10</div>
+            <div class="live-timer-buttons">
+              <button id="timerStart">시작</button>
+              <button id="timerReset">리셋</button>
+              <button data-t="10">10초</button>
+              <button data-t="30">30초</button>
+              <button data-t="60">1분</button>
+            </div>
+          </div>`;
+          let remaining = 10, timerInterval = null, running = false;
+          const display = document.getElementById('timerDisplay');
+          const startBtn = document.getElementById('timerStart');
+          const resetBtn = document.getElementById('timerReset');
+          function fmt(n) { return String(n).padStart(2,'0'); }
+          function updateDisp() { display.textContent = fmt(Math.floor(remaining/60))+':'+fmt(remaining%60); }
+          startBtn.addEventListener('click', () => {
+            if (running) { clearInterval(timerInterval); running = false; startBtn.textContent = '시작'; startBtn.classList.remove('active'); return; }
+            if (remaining <= 0) return;
+            running = true; startBtn.textContent = '정지'; startBtn.classList.add('active');
+            timerInterval = setInterval(() => {
+              remaining--;
+              updateDisp();
+              if (remaining <= 0) { clearInterval(timerInterval); running = false; startBtn.textContent = '시작'; startBtn.classList.remove('active'); display.style.animation = 'msgIn 0.3s ease'; }
+            }, 1000);
+          });
+          resetBtn.addEventListener('click', () => { clearInterval(timerInterval); running = false; remaining = 10; updateDisp(); startBtn.textContent = '시작'; startBtn.classList.remove('active'); });
+          document.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => {
+            clearInterval(timerInterval); running = false; remaining = parseInt(b.dataset.t); updateDisp(); startBtn.textContent = '시작'; startBtn.classList.remove('active');
+          }));
+        }
       }
     ];
 
@@ -751,67 +910,34 @@
       messagesEl.appendChild(typingMsg);
       messagesEl.scrollTop = messagesEl.scrollHeight;
 
-      await sleep(1200);
-
-      // ai reply
+      await sleep(1000);
       typingMsg.innerHTML = demo.reply;
       messagesEl.scrollTop = messagesEl.scrollHeight;
+      await sleep(500);
 
-      await sleep(600);
-
-      // generate code with typing effect
+      // type code line by line
+      const lines = demo.codeText.split('\n');
       codeEl.innerHTML = '';
-      let currentLine = '';
-
-      for (let i = 0; i < demo.code.length; i++) {
-        const token = demo.code[i];
-        if (token.v === '' && token.t === '') {
-          // empty line
-          codeEl.innerHTML += '\n';
-          await sleep(30);
-          continue;
-        }
-        const chars = token.v;
-        for (let j = 0; j < chars.length; j++) {
-          // remove old cursor
-          const oldCursor = codeEl.querySelector('.cursor-blink');
-          if (oldCursor) oldCursor.remove();
-
-          if (token.t) {
-            const span = document.createElement('span');
-            span.className = token.t;
-            span.textContent = chars[j];
-            codeEl.appendChild(span);
-          } else {
-            codeEl.appendChild(document.createTextNode(chars[j]));
-          }
-
-          // add cursor
-          const cursor = document.createElement('span');
-          cursor.className = 'cursor-blink';
-          codeEl.appendChild(cursor);
-
-          codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
-          await sleep(18);
-        }
-
-        // check if next token is a new line (empty string)
-        if (i + 1 < demo.code.length && demo.code[i+1].v === '' && demo.code[i+1].t === '') {
-          continue; // let the empty line handler add newline
-        }
-        // if next token exists and is on same conceptual line, don't add newline
-        // We add newline after certain tokens to make code readable
-        const next = demo.code[i+1];
-        if (!next || (next.t === '' && next.v === '') ||
-            (token.v.endsWith(';') || token.v.endsWith('{') || token.v.endsWith('}') ||
-             token.v.endsWith('`;') || token.v.endsWith(',') || token.t === 'cm' ||
-             token.v.endsWith('>') || token.v.endsWith('`'))) {
-          if (next && !(next.t === '' && next.v === '')) {
-            codeEl.appendChild(document.createTextNode('\n'));
-          }
-        }
+      for (let i = 0; i < lines.length; i++) {
+        await sleep(60);
+        const oldCursor = codeEl.querySelector('.cursor-blink');
+        if (oldCursor) oldCursor.remove();
+        codeEl.innerHTML += lines[i] + '\n';
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor-blink';
+        codeEl.appendChild(cursor);
+        codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
       }
 
+      // show live app after code is done
+      await sleep(400);
+      const doneMsg = document.createElement('div');
+      doneMsg.className = 'msg msg-ai';
+      doneMsg.innerHTML = '완성! 아래 <b>LIVE</b> 패널에서 직접 사용해보세요 ↓';
+      messagesEl.appendChild(doneMsg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      demo.liveHTML();
       demoRunning = false;
     });
 
