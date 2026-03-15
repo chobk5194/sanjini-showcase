@@ -812,10 +812,9 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
             // ship movement - sluggish in blackhole
             const shipSpeed = inBH ? 0.04 : 0.12;
             shipX += (targetX - shipX) * shipSpeed;
-            // blackhole pull
+            // blackhole pull - ship gets dragged toward blackhole (X only)
             if (inBH) {
-              const pullX = (bhX - shipX) * 0.008;
-              shipX += pullX;
+              shipX += (bhX - shipX) * 0.025;
             }
             shipX = Math.max(20, Math.min(w-20, shipX));
 
