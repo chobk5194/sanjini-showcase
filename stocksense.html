@@ -695,17 +695,12 @@ canvas#stockChart {
     font-size: 13px;
   }
 
-  /* Toast - 모바일: 하단 중앙 */
+  /* Toast - 모바일: 우측 하단 */
   .toast {
-    right: 50%;
+    right: 16px;
     left: auto;
     bottom: 16px;
-    transform: translateX(50%) translateY(100px);
-    max-width: calc(100vw - 32px);
-    width: fit-content;
-  }
-  .toast.show {
-    transform: translateX(50%) translateY(0);
+    max-width: 300px;
   }
 }
 
@@ -1044,7 +1039,6 @@ body > *:not(#starsCanvas):not(.toast) { position: relative; z-index: 1; }
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
 
 <script>
 // ── 테마 토글 ──
@@ -1221,9 +1215,20 @@ let predictedPrices = null;
 
 // ── Toast ──
 function showToast(msg, type = 'info') {
-  const t = document.getElementById('toast');
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  // body 최상위에 재배치 (stacking context 탈출)
+  if (t.parentElement !== document.body) document.body.appendChild(t);
   t.textContent = msg;
-  t.className = 'toast ' + type + ' show';
+  t.className = 'toast ' + type;
+  // force reflow then show
+  void t.offsetWidth;
+  t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 
