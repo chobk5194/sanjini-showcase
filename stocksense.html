@@ -94,6 +94,11 @@ header {
   font-weight: 400;
 }
 
+.search-wrapper {
+  position: relative;
+  width: 400px;
+  max-width: 100%;
+}
 .search-box {
   display: flex;
   align-items: center;
@@ -102,8 +107,7 @@ header {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 8px 16px;
-  width: 360px;
-  max-width: 100%;
+  width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-box:focus-within {
@@ -871,9 +875,15 @@ function highlightMatch(text, query) {
 function updateAutocomplete() {
   const q = tickerInput.value.trim();
   if (!q) { acBox.classList.remove('show'); acResults = []; return; }
-  acResults = uniqueStocks.filter(s =>
-    s.name.toLowerCase().includes(q.toLowerCase()) || s.code.includes(q)
-  ).slice(0, 8);
+  const ql = q.toLowerCase();
+  acResults = uniqueStocks.filter(s => {
+    // 코드 검색은 포함 매칭
+    if (s.code.includes(q)) return true;
+    // 한글 검색은 포함 매칭
+    if (/[가-힣]/.test(q)) return s.name.includes(q);
+    // 영문 검색은 앞글자 매칭 (S → SK하이닉스 O, 삼성전자 X)
+    return s.name.toLowerCase().startsWith(ql);
+  }).slice(0, 8);
   if (acResults.length === 0) { acBox.classList.remove('show'); return; }
   acSelected = -1;
   acBox.innerHTML = acResults.map((s, i) =>
@@ -933,19 +943,36 @@ async function searchStock() {
 
   let records = null;
 
-  // Yahoo Finance API via CORS proxies
-  const proxies = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  ];
+  // 여러 방법으로 실시간 데이터 시도
   const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`;
 
-  for (const makeProxy of proxies) {
+  const attempts = [
+    // 1) corsproxy.io
+    async () => {
+      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`);
+      if (!res.ok) throw new Error('corsproxy fail');
+      return await res.json();
+    },
+    // 2) allorigins (returns wrapped JSON)
+    async () => {
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      if (!res.ok) throw new Error('allorigins fail');
+      const wrapper = await res.json();
+      return JSON.parse(wrapper.contents);
+    },
+    // 3) corsproxy.org
+    async () => {
+      const res = await fetch(`https://corsproxy.org/?${encodeURIComponent(yahooUrl)}`);
+      if (!res.ok) throw new Error('corsproxy.org fail');
+      return await res.json();
+    },
+  ];
+
+  for (const attempt of attempts) {
     try {
-      const res = await fetch(makeProxy(yahooUrl));
-      const json = await res.json();
+      const json = await attempt();
       const result = json.chart?.result?.[0];
-      if (!result) throw new Error('No data');
+      if (!result || !result.timestamp) throw new Error('No data');
       const timestamps = result.timestamp;
       const quote = result.indicators.quote[0];
       records = timestamps.map((t, i) => {
@@ -959,18 +986,20 @@ async function searchStock() {
           volume: quote.volume[i] || 0,
         };
       }).filter(r => r.close > 0);
-      showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
-      break;
+      if (records.length >= 30) {
+        showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
+        break;
+      }
     } catch (err) {
-      console.warn('Yahoo API 시도 실패:', err.message);
+      console.warn('API 시도 실패:', err.message);
+      records = null;
     }
   }
 
-  // Fallback to sample data with realistic price for the stock
+  // Fallback
   if (!records || records.length < 30) {
-    console.warn('API 실패, 샘플 데이터 사용');
     records = generateSampleData(stockCode);
-    showToast('API 제한으로 샘플 데이터를 사용합니다 (실제 가격과 다를 수 있습니다)', 'error');
+    showToast('실시간 데이터를 불러올 수 없어 시뮬레이션 데이터를 사용합니다', 'error');
   }
 
   currentData = { ticker: displayName, records };
