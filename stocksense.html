@@ -1279,89 +1279,99 @@ async function searchStock() {
 
   let records = null;
 
-  // 네이버 금융 API로 실시간 데이터 가져오기
-  const naverChartUrl = `https://api.stock.naver.com/chart/domestic/item/${stockCode}?periodType=day&range=3month`;
-  const naverBasicUrl = `https://m.stock.naver.com/api/stock/${stockCode}/basic`;
-  const stooqUrl = `https://stooq.com/q/d/l/?s=${stockCode}.kr&i=d`;
+  // 타임아웃 fetch 헬퍼
+  function fetchWithTimeout(url, ms = 6000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+  }
 
-  const attempts = [
-    // 1) 네이버 금융 차트 API via allorigins
-    async () => {
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(naverChartUrl)}`);
-      if (!res.ok) throw new Error('allorigins fail');
-      const wrapper = await res.json();
-      const data = JSON.parse(wrapper.contents);
-      if (!data || !data.priceInfos || data.priceInfos.length === 0) throw new Error('No naver chart data');
-      return data.priceInfos.map(p => ({
-        date: p.localDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
-        open: p.openPrice,
-        high: p.highPrice,
-        low: p.lowPrice,
-        close: p.closePrice,
-        volume: p.accumulatedTradingVolume,
-      }));
-    },
-    // 2) 네이버 금융 시세 페이지 크롤링 via allorigins
-    async () => {
-      const siseUrl = `https://fchart.stock.naver.com/siseJson.nhn?symbol=${stockCode}&requestType=1&startTime=20250901&endTime=20260315&timeframe=day`;
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(siseUrl)}`);
-      if (!res.ok) throw new Error('sise fail');
-      const wrapper = await res.json();
-      // 응답이 JS array 형태 텍스트
-      const text = wrapper.contents.trim();
-      const cleaned = text.replace(/'/g, '"').replace(/\s/g, '');
-      const rows = JSON.parse(cleaned);
-      if (!rows || rows.length === 0) throw new Error('No sise data');
-      return rows.map(r => ({
-        date: String(r[0]).trim().replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
-        open: parseInt(r[1]),
-        high: parseInt(r[2]),
-        low: parseInt(r[3]),
-        close: parseInt(r[4]),
-        volume: parseInt(r[5]),
-      })).filter(r => r.close > 0);
-    },
-    // 3) Stooq CSV via allorigins
-    async () => {
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(stooqUrl)}`);
-      if (!res.ok) throw new Error('stooq fail');
-      const wrapper = await res.json();
-      const lines = wrapper.contents.trim().split('\n');
-      if (lines.length < 10) throw new Error('No stooq data');
-      return lines.slice(1).map(line => {
-        const [date, open, high, low, close, vol] = line.split(',');
-        return { date, open: Math.round(+open), high: Math.round(+high), low: Math.round(+low), close: Math.round(+close), volume: parseInt(vol) || 0 };
-      }).filter(r => r.close > 0).sort((a, b) => a.date.localeCompare(b.date));
-    },
-    // 4) Yahoo Finance via allorigins
-    async () => {
-      const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`;
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
-      if (!res.ok) throw new Error('yahoo fail');
-      const wrapper = await res.json();
-      const json = JSON.parse(wrapper.contents);
-      const result = json.chart?.result?.[0];
-      if (!result || !result.timestamp) throw new Error('No yahoo data');
-      return result.timestamp.map((t, i) => {
-        const d = new Date(t * 1000);
-        const q = result.indicators.quote[0];
-        return { date: d.toISOString().slice(0, 10), open: Math.round(q.open[i]||0), high: Math.round(q.high[i]||0), low: Math.round(q.low[i]||0), close: Math.round(q.close[i]||0), volume: q.volume[i]||0 };
-      }).filter(r => r.close > 0);
-    },
+  // 프록시 헬퍼 (여러 프록시 시도)
+  async function proxyFetch(targetUrl) {
+    const proxies = [
+      u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    ];
+    for (const makeUrl of proxies) {
+      try {
+        const res = await fetchWithTimeout(makeUrl(targetUrl), 5000);
+        if (!res.ok) continue;
+        const text = await res.text();
+        // allorigins wraps in {contents: ...}
+        try {
+          const wrapper = JSON.parse(text);
+          if (wrapper.contents) return wrapper.contents;
+        } catch(e) {}
+        return text;
+      } catch(e) { continue; }
+    }
+    throw new Error('All proxies failed');
+  }
+
+  // 데이터 파싱 함수들
+  function parseNaverChart(raw) {
+    const data = JSON.parse(raw);
+    if (!data?.priceInfos?.length) throw new Error('No data');
+    return data.priceInfos.map(p => ({
+      date: p.localDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+      open: p.openPrice, high: p.highPrice, low: p.lowPrice,
+      close: p.closePrice, volume: p.accumulatedTradingVolume,
+    }));
+  }
+  function parseNaverSise(raw) {
+    const cleaned = raw.trim().replace(/'/g, '"').replace(/\s/g, '');
+    const rows = JSON.parse(cleaned);
+    if (!rows?.length) throw new Error('No data');
+    return rows.map(r => ({
+      date: String(r[0]).trim().replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+      open: parseInt(r[1]), high: parseInt(r[2]), low: parseInt(r[3]),
+      close: parseInt(r[4]), volume: parseInt(r[5]),
+    })).filter(r => r.close > 0);
+  }
+  function parseYahoo(raw) {
+    const json = JSON.parse(raw);
+    const result = json.chart?.result?.[0];
+    if (!result?.timestamp) throw new Error('No data');
+    const q = result.indicators.quote[0];
+    return result.timestamp.map((t, i) => ({
+      date: new Date(t * 1000).toISOString().slice(0, 10),
+      open: Math.round(q.open[i]||0), high: Math.round(q.high[i]||0),
+      low: Math.round(q.low[i]||0), close: Math.round(q.close[i]||0),
+      volume: q.volume[i]||0,
+    })).filter(r => r.close > 0);
+  }
+  function parseStooq(raw) {
+    const lines = raw.trim().split('\n');
+    if (lines.length < 10) throw new Error('No data');
+    return lines.slice(1).map(line => {
+      const [date, open, high, low, close, vol] = line.split(',');
+      return { date, open: Math.round(+open), high: Math.round(+high), low: Math.round(+low), close: Math.round(+close), volume: parseInt(vol)||0 };
+    }).filter(r => r.close > 0).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  // 모든 소스 동시 시도 (가장 빠른 성공 사용)
+  const sources = [
+    { url: `https://api.stock.naver.com/chart/domestic/item/${stockCode}?periodType=day&range=3month`, parse: parseNaverChart },
+    { url: `https://fchart.stock.naver.com/siseJson.nhn?symbol=${stockCode}&requestType=1&startTime=20250901&endTime=20260315&timeframe=day`, parse: parseNaverSise },
+    { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=6mo&interval=1d`, parse: parseYahoo },
+    { url: `https://stooq.com/q/d/l/?s=${stockCode}.kr&i=d`, parse: parseStooq },
   ];
 
-  for (let i = 0; i < attempts.length; i++) {
-    try {
-      records = await attempts[i]();
-      if (records && records.length >= 30) {
-        showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
-        break;
-      }
-      records = null;
-    } catch (err) {
-      console.warn(`API 시도 ${i+1} 실패:`, err.message);
-      records = null;
-    }
+  // Promise.any - 하나라도 성공하면 바로 사용
+  try {
+    records = await Promise.any(
+      sources.map(async ({ url, parse }) => {
+        const raw = await proxyFetch(url);
+        const result = parse(raw);
+        if (!result || result.length < 30) throw new Error('Not enough data');
+        return result;
+      })
+    );
+    showToast(`${displayName} 실시간 데이터 로드 완료!`, 'info');
+  } catch (err) {
+    console.warn('모든 API 실패:', err);
+    records = null;
   }
 
   // Fallback
