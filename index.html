@@ -279,7 +279,7 @@
           <div class="demo-prompts" id="demoPrompts">
             <button class="demo-prompt-btn" data-idx="0">마우스 따라다니는 파티클</button>
             <button class="demo-prompt-btn" data-idx="1">중력 물리 시뮬레이션</button>
-            <button class="demo-prompt-btn" data-idx="2">제너레이티브 아트</button>
+            <button class="demo-prompt-btn" data-idx="2">우주 워프 터널</button>
           </div>
         </div>
         <div class="demo-code">
@@ -585,93 +585,110 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
         }
       },
       {
-        reply: "제너레이티브 아트! 클릭할 때마다 새로운 패턴이 생성됩니다.",
-        title: "Generative Art",
-        hint: "클릭하면 새 패턴이 생성됩니다",
-        codeText: `<span class="cm">// Generative Art</span>
-<span class="kw">function</span> <span class="fn">generate</span>() {
-  <span class="kw">const</span> cx = w / <span class="num">2</span>, cy = h / <span class="num">2</span>;
-  <span class="kw">const</span> layers = Math.<span class="fn">floor</span>(Math.<span class="fn">random</span>()*<span class="num">4</span>) + <span class="num">3</span>;
-  <span class="kw">const</span> baseHue = Math.<span class="fn">random</span>() * <span class="num">360</span>;
+        reply: "우주 워프 터널! 별들 사이를 뚫고 날아가는 느낌을 만들게요.",
+        title: "Starfield Warp",
+        hint: "마우스를 움직여 방향을 조종하세요",
+        codeText: `<span class="cm">// Starfield Warp Tunnel</span>
+<span class="kw">const</span> stars = [];
+<span class="kw">const</span> COUNT = <span class="num">400</span>;
+<span class="kw">let</span> cx = w/<span class="num">2</span>, cy = h/<span class="num">2</span>;
 
-  ctx.<span class="fn">fillStyle</span> = <span class="str">'#0d0d1a'</span>;
-  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
-
-  <span class="kw">for</span> (<span class="kw">let</span> l = <span class="num">0</span>; l < layers; l++) {
-    <span class="kw">const</span> points = Math.<span class="fn">floor</span>(Math.<span class="fn">random</span>()*<span class="num">80</span>) + <span class="num">40</span>;
-    <span class="kw">const</span> radius = Math.<span class="fn">random</span>() * <span class="num">150</span> + <span class="num">50</span>;
-    <span class="kw">const</span> hue = (baseHue + l * <span class="num">40</span>) % <span class="num">360</span>;
-
-    ctx.<span class="fn">beginPath</span>();
-    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i <= points; i++) {
-      <span class="kw">const</span> angle = (i / points) * Math.PI * <span class="num">2</span>;
-      <span class="kw">const</span> noise = Math.<span class="fn">sin</span>(angle*<span class="num">5</span>+l) * <span class="num">30</span>;
-      <span class="kw">const</span> r = radius + noise;
-      <span class="kw">const</span> x = cx + Math.<span class="fn">cos</span>(angle) * r;
-      <span class="kw">const</span> y = cy + Math.<span class="fn">sin</span>(angle) * r;
-      i === <span class="num">0</span> ? ctx.<span class="fn">moveTo</span>(x,y) : ctx.<span class="fn">lineTo</span>(x,y);
-    }
-    ctx.<span class="fn">closePath</span>();
-    ctx.<span class="fn">strokeStyle</span> = \`hsla(\${hue},70%,60%,0.6)\`;
-    ctx.<span class="fn">lineWidth</span> = <span class="num">1.5</span>;
-    ctx.<span class="fn">stroke</span>();
-  }
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < COUNT; i++) {
+  stars.<span class="fn">push</span>({
+    x: Math.<span class="fn">random</span>()*w - cx,
+    y: Math.<span class="fn">random</span>()*h - cy,
+    z: Math.<span class="fn">random</span>() * w,
+  });
 }
-<span class="cm">// &#x1F3A8; 완성!</span>`,
+
+canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, (e) => {
+  cx = e.offsetX;
+  cy = e.offsetY;
+});
+
+<span class="kw">function</span> <span class="fn">warp</span>() {
+  ctx.<span class="fn">fillStyle</span> = <span class="str">'rgba(0,0,10,0.2)'</span>;
+  ctx.<span class="fn">fillRect</span>(<span class="num">0</span>,<span class="num">0</span>,w,h);
+  stars.<span class="fn">forEach</span>(s => {
+    s.z -= <span class="num">8</span>;
+    <span class="kw">if</span> (s.z <= <span class="num">0</span>) s.z = w;
+    <span class="kw">const</span> sx = (s.x / s.z) * w + cx;
+    <span class="kw">const</span> sy = (s.y / s.z) * h + cy;
+    <span class="kw">const</span> r = (<span class="num">1</span> - s.z/w) * <span class="num">3</span>;
+    ctx.globalAlpha = <span class="num">1</span> - s.z/w;
+    ctx.<span class="fn">fillStyle</span> = <span class="str">'#fff'</span>;
+    ctx.<span class="fn">beginPath</span>();
+    ctx.<span class="fn">arc</span>(sx, sy, r, <span class="num">0</span>, Math.PI*<span class="num">2</span>);
+    ctx.<span class="fn">fill</span>();
+  });
+  <span class="fn">requestAnimationFrame</span>(warp);
+}
+<span class="cm">// &#x1F680; 완성!</span>`,
         run: (canvas, ctx, w, h) => {
-          function generate() {
-            const cx = w/2, cy = h/2;
-            const baseHue = Math.random()*360;
-            ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0,0,w,h);
-            const layers = Math.floor(Math.random()*5)+3;
-            for (let l = 0; l < layers; l++) {
-              const points = Math.floor(Math.random()*100)+40;
-              const radius = Math.random()*Math.min(w,h)*0.35+40;
-              const hue = (baseHue + l*35) % 360;
-              const freq = Math.floor(Math.random()*8)+2;
-              const amp = Math.random()*50+10;
-              const phase = Math.random()*Math.PI*2;
-              // filled shape
-              ctx.beginPath();
-              for (let i = 0; i <= points; i++) {
-                const angle = (i/points)*Math.PI*2;
-                const noise = Math.sin(angle*freq+phase+l)*amp + Math.cos(angle*freq*0.7+l*2)*amp*0.5;
-                const r = radius + noise;
-                const x = cx + Math.cos(angle)*r;
-                const y = cy + Math.sin(angle)*r;
-                i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-              }
-              ctx.closePath();
-              ctx.fillStyle = `hsla(${hue},70%,60%,0.05)`;
-              ctx.fill();
-              ctx.strokeStyle = `hsla(${hue},70%,60%,0.5)`;
-              ctx.lineWidth = 1.2;
-              ctx.stroke();
-            }
-            // center dots
-            for (let i = 0; i < 50; i++) {
-              const angle = Math.random()*Math.PI*2;
-              const dist = Math.random()*30;
-              ctx.beginPath();
-              ctx.arc(cx+Math.cos(angle)*dist, cy+Math.sin(angle)*dist, Math.random()*2+0.5, 0, Math.PI*2);
-              ctx.fillStyle = `hsla(${baseHue},80%,80%,${Math.random()*0.5+0.2})`;
-              ctx.fill();
-            }
+          const stars = []; const COUNT = 500;
+          let cx = w/2, cy = h/2;
+          for (let i = 0; i < COUNT; i++) {
+            stars.push({ x: (Math.random()-0.5)*w*2, y: (Math.random()-0.5)*h*2, z: Math.random()*w, pz: 0 });
           }
-          generate();
-          canvas.addEventListener('click', generate);
-          canvas.addEventListener('touchstart', generate);
+          canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            cx = (e.clientX - rect.left) * (w / rect.width);
+            cy = (e.clientY - rect.top) * (h / rect.height);
+          });
+          canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect(); const t = e.touches[0];
+            cx = (t.clientX - rect.left) * (w / rect.width);
+            cy = (t.clientY - rect.top) * (h / rect.height);
+          }, { passive: false });
+          ctx.fillStyle = '#00000a'; ctx.fillRect(0,0,w,h);
+          function warp() {
+            ctx.fillStyle = 'rgba(0,0,10,0.15)'; ctx.fillRect(0,0,w,h);
+            stars.forEach(s => {
+              s.pz = s.z;
+              s.z -= 10;
+              if (s.z <= 0) { s.x = (Math.random()-0.5)*w*2; s.y = (Math.random()-0.5)*h*2; s.z = w; s.pz = w; }
+              const sx = (s.x / s.z) * (w*0.5) + cx;
+              const sy = (s.y / s.z) * (h*0.5) + cy;
+              const px = (s.x / s.pz) * (w*0.5) + cx;
+              const py = (s.y / s.pz) * (h*0.5) + cy;
+              const brightness = 1 - s.z / w;
+              const r = brightness * 2.5;
+              // trail line
+              ctx.strokeStyle = `rgba(180,160,255,${brightness*0.4})`;
+              ctx.lineWidth = r * 0.5;
+              ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy); ctx.stroke();
+              // star dot
+              ctx.globalAlpha = brightness;
+              ctx.fillStyle = `hsl(${220 + brightness*60},80%,${60+brightness*30}%)`;
+              ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(warp);
+          }
+          warp();
         }
       }
     ];
 
     // ── DEMO LOGIC ──
-    let demoRunning = false, currentAnim = null;
+    let demoRunning = false;
     const messagesEl = document.getElementById('demoMessages');
     const codeEl = document.getElementById('demoCode');
     const liveWrap = document.getElementById('demoLiveWrap');
-    const liveCanvas = document.getElementById('liveCanvas');
-    const liveCtx = liveCanvas.getContext('2d');
+    let liveCanvas = document.getElementById('liveCanvas');
+    let liveCtx = liveCanvas.getContext('2d');
+
+    function resetCanvas() {
+      // replace canvas to kill all old event listeners & animations
+      const container = document.getElementById('demoLiveCanvas');
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = 'liveCanvas';
+      liveCanvas.replaceWith(newCanvas);
+      liveCanvas = newCanvas;
+      liveCtx = liveCanvas.getContext('2d');
+      resizeCanvas();
+    }
 
     function resizeCanvas() {
       const container = document.getElementById('demoLiveCanvas');
@@ -726,11 +743,11 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'click'</span>
 
       await sleep(300);
 
-      // show live panel
+      // show live panel (reset previous)
+      resetCanvas();
       document.getElementById('liveTitle').textContent = demo.title;
       document.getElementById('liveHint').textContent = demo.hint;
       liveWrap.classList.add('active');
-      resizeCanvas();
       const w = liveCanvas.width / window.devicePixelRatio;
       const h = liveCanvas.height / window.devicePixelRatio;
       demo.run(liveCanvas, liveCtx, w, h);
