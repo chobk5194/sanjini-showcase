@@ -65,11 +65,12 @@
       padding: 8rem 2rem 6rem; position: relative; overflow: hidden;
       background: #050505;
     }
-    .hero-canvas {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    #starsCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 0;
     }
-    .hero > *:not(.hero-canvas) { position: relative; z-index: 1; }
+    body > *:not(#starsCanvas) { position: relative; z-index: 1; }
+    .hero { background: transparent; }
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
       font-size: 0.8rem; color: var(--text-muted); margin-bottom: 2.5rem;
@@ -308,16 +309,8 @@
     [data-theme="light"] .demo-code { background: #f4f4f8; }
     [data-theme="light"] .demo-live-canvas { background: #0d0d1a; }
     [data-theme="light"] .tag { background: rgba(0,0,0,0.05); color: var(--text-muted); border-color: rgba(0,0,0,0.1); }
-    [data-theme="light"] .hero { background: #030014; color: #fff; }
-    [data-theme="light"] .hero .hero-eyebrow { color: rgba(255,255,255,0.45); }
-    [data-theme="light"] .hero .hero-eyebrow::before { background: rgba(255,255,255,0.45); }
-    [data-theme="light"] .hero h1 { color: #fff; }
-    [data-theme="light"] .hero h1 .thin { color: rgba(255,255,255,0.45); }
-    [data-theme="light"] .hero p { color: rgba(255,255,255,0.5); }
-    [data-theme="light"] .hero-cta { background: #fff; color: #000; }
-    [data-theme="light"] .hero-scroll { color: rgba(255,255,255,0.4); }
-    [data-theme="light"] .hero-scroll-line { background: rgba(255,255,255,0.1); }
-    [data-theme="light"] .hero-scroll-line::after { background: rgba(255,255,255,0.6); }
+    [data-theme="light"] #starsCanvas { opacity: 0.3; }
+    [data-theme="light"] .hero-cta { background: #1a1a1a; color: #fff; }
 
     /* HAMBURGER */
     .nav-toggle {
@@ -428,8 +421,8 @@
     </div>
   </nav>
 
+  <canvas id="starsCanvas"></canvas>
   <section class="hero">
-    <canvas class="hero-canvas" id="heroCanvas"></canvas>
     <span class="hero-eyebrow fade-up">2026 1st Cohort</span>
     <h1 class="fade-up">Make What<br><span class="thin">You Imagine</span></h1>
     <p class="fade-up">AI와 함께 아이디어를 현실로 만드는 바이브코딩 스터디 1기의 프로젝트 쇼케이스.</p>
@@ -1205,12 +1198,11 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
     window.addEventListener('resize', () => {
       if (liveWrap.classList.contains('active')) resizeCanvas();
     });
-    // ── HERO SPACE BACKGROUND ──
+    // ── STARS BACKGROUND (full page) ──
     (function() {
-      const c = document.getElementById('heroCanvas');
+      const c = document.getElementById('starsCanvas');
       const ctx = c.getContext('2d');
       let w, h;
-      let mx = 0.5, my = 0.5; // normalized mouse pos
 
       function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1221,40 +1213,26 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
       resize();
       window.addEventListener('resize', resize);
 
-      // mouse parallax
-      document.querySelector('.hero').addEventListener('mousemove', (e) => {
-        const rect = c.getBoundingClientRect();
-        mx = (e.clientX - rect.left) / rect.width;
-        my = (e.clientY - rect.top) / rect.height;
-      });
-
-      // 3-layer stars for depth
       const layers = [
-        { count: 400, speed: 0.15, maxR: 0.8, parallax: 8 },   // far
-        { count: 150, speed: 0.3, maxR: 1.5, parallax: 20 },   // mid
-        { count: 50, speed: 0.5, maxR: 2.5, parallax: 40 },    // close
+        { count: 500, maxR: 1.0 },   // far — small dim
+        { count: 200, maxR: 2.0 },   // mid
+        { count: 80, maxR: 3.5 },    // close — big bright
       ];
       const allStars = [];
-      // star color presets (realistic)
       const starColors = [
-        [200, 220, 255], // blue-white
-        [255, 240, 230], // warm white
-        [255, 210, 180], // orange tint
-        [180, 200, 255], // blue
-        [255, 255, 240], // pure white
+        [200, 220, 255], [255, 240, 230], [255, 210, 180],
+        [180, 200, 255], [255, 255, 255],
       ];
       layers.forEach(layer => {
         for (let i = 0; i < layer.count; i++) {
           const col = starColors[Math.floor(Math.random() * starColors.length)];
           allStars.push({
-            x: Math.random() * 2 - 0.5, // -0.5 to 1.5 for parallax room
-            y: Math.random() * 2 - 0.5,
-            r: Math.random() * layer.maxR + 0.2,
+            x: Math.random(), y: Math.random(),
+            r: Math.random() * layer.maxR + 0.3,
             twinklePhase: Math.random() * Math.PI * 2,
-            twinkleSpeed: 0.008 + Math.random() * 0.015,
-            parallax: layer.parallax,
+            twinkleSpeed: 0.01 + Math.random() * 0.02,
             color: col,
-            brightness: 0.5 + Math.random() * 0.5,
+            brightness: 0.6 + Math.random() * 0.4,
           });
         }
       });
@@ -1262,37 +1240,32 @@ canvas.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</s
       let t = 0;
       function draw() {
         t++;
-        ctx.fillStyle = '#050505';
-        ctx.fillRect(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
 
-        // stars with parallax
         allStars.forEach(s => {
-          const px = (mx - 0.5) * s.parallax;
-          const py = (my - 0.5) * s.parallax;
-          const sx = s.x * w + px;
-          const sy = s.y * h + py;
-          if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) return;
-
+          const sx = s.x * w;
+          const sy = s.y * h;
           const twinkle = Math.sin(t * s.twinkleSpeed + s.twinklePhase);
-          const alpha = s.brightness * (0.6 + twinkle * 0.4);
-          if (alpha <= 0) return;
+          const alpha = s.brightness * (0.5 + twinkle * 0.5);
+          if (alpha <= 0.05) return;
 
           const [cr, cg, cb] = s.color;
+
+          // glow for larger stars
+          if (s.r > 1.5) {
+            const gl = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 5);
+            gl.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.25})`);
+            gl.addColorStop(1, 'transparent');
+            ctx.fillStyle = gl;
+            ctx.beginPath();
+            ctx.arc(sx, sy, s.r * 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
           ctx.beginPath();
           ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
           ctx.fill();
-
-          // glow for bright/large stars
-          if (s.r > 1.5) {
-            const gl = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 4);
-            gl.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.15})`);
-            gl.addColorStop(1, 'transparent');
-            ctx.fillStyle = gl;
-            ctx.beginPath();
-            ctx.arc(sx, sy, s.r * 4, 0, Math.PI * 2);
-            ctx.fill();
-          }
         });
 
         requestAnimationFrame(draw);
