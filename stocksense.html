@@ -1229,17 +1229,30 @@ function showToast(msg, type = 'info') {
   if (!t) {
     t = document.createElement('div');
     t.id = 'toast';
-    t.className = 'toast';
     document.body.appendChild(t);
   }
-  // body 최상위에 재배치 (stacking context 탈출)
   if (t.parentElement !== document.body) document.body.appendChild(t);
   t.textContent = msg;
+  const isMobile = window.innerWidth <= 768;
+  // 인라인 스타일로 강제 (stacking context 우회)
+  t.style.cssText = `
+    position:fixed; bottom:${isMobile?16:24}px; z-index:99999;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 20px; font-size:13px; color:var(--text);
+    max-width:${isMobile?'calc(100vw - 32px)':'360px'};
+    transition:all 0.3s ease; opacity:0;
+    ${isMobile ? 'left:50%; right:auto; transform:translateX(-50%) translateY(100px);'
+               : 'right:24px; left:auto; transform:translateY(100px);'}
+    border-color:${type==='error'?'var(--red)':'var(--purple)'};
+  `;
   t.className = 'toast ' + type;
-  // force reflow then show
   void t.offsetWidth;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  t.style.opacity = '1';
+  t.style.transform = isMobile ? 'translateX(-50%) translateY(0)' : 'translateY(0)';
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = isMobile ? 'translateX(-50%) translateY(100px)' : 'translateY(100px)';
+  }, 3500);
 }
 
 // ── Autocomplete ──
