@@ -831,7 +831,7 @@ canvas#stockChart {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 0;
 }
-body > *:not(#starsCanvas) { position: relative; z-index: 1; }
+body > *:not(#starsCanvas):not(.toast) { position: relative; z-index: 1; }
 [data-theme="light"] #starsCanvas { opacity: 0.15; }
 </style>
 </head>
