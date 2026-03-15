@@ -118,10 +118,8 @@ header {
 .theme-toggle:hover { border-color: var(--mint); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
 .search-wrapper {
-  position: relative;
   width: 400px;
   max-width: 100%;
-  z-index: 9999;
 }
 .search-box {
   display: flex;
@@ -169,17 +167,14 @@ header {
 
 .search-wrapper { position: relative; }
 .autocomplete {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0; right: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
   max-height: 280px;
   overflow-y: auto;
-  z-index: 9999;
   display: none;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  margin-top: 4px;
 }
 .autocomplete.show { display: block; }
 .ac-item {
@@ -553,11 +548,9 @@ canvas#stockChart {
     width: 100%;
   }
 
-  /* Autocomplete full width on mobile */
+  /* Autocomplete on mobile */
   .autocomplete {
-    left: 0;
-    right: 0;
-    max-height: 240px;
+    max-height: 50vh;
   }
 
   /* Back link */
