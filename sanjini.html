@@ -138,15 +138,16 @@
     .spark.two{right:58px;bottom:114px;animation-delay:-.7s}
     .character-stage.celebrate .spark.one{left:calc(50% - 114px);right:auto;top:86px}
     .character-stage.celebrate .spark.two{left:calc(50% + 86px);right:auto;bottom:88px}
-    .dialogue-actions{position:absolute;left:16px;bottom:18px;z-index:3;display:grid;gap:10px;width:min(calc(100% - 32px),206px)}
+    .dialogue-actions{position:absolute;left:50%;bottom:18px;z-index:3;display:flex;justify-content:center;width:min(calc(100% - 28px),188px);transform:translateX(-50%)}
+    .dialogue-actions .btn{min-height:44px;padding:10px 12px;font-size:14px}
     .guide-tap,.celebration-panel,.celebration-footer{position:relative;z-index:1}
-    .guide-tap{width:100%;margin-top:34px}
-    .tutorial .character-stage{min-height:428px}
-    .tutorial .bubble{top:0;left:8px;width:min(100%,260px);padding:18px 20px 20px}
+    .guide-tap{width:100%;margin-top:24px}
+    .tutorial .character-stage{min-height:420px}
+    .tutorial .bubble{top:-10px;left:8px;width:min(100%,260px);padding:18px 20px 20px}
     .tutorial .bubble p{font-size:18px;line-height:1.52}
-    .tutorial .character{right:12px;bottom:38px;width:min(100%,230px)}
-    .tutorial .spark.one{right:24px;top:122px}
-    .tutorial .spark.two{right:72px;bottom:170px}
+    .tutorial .character{left:50%;right:auto;bottom:54px;width:min(100%,224px);transform:translateX(-50%);animation:bobCenter 4.2s ease-in-out infinite}
+    .tutorial .spark.one{left:calc(50% + 76px);right:auto;top:116px}
+    .tutorial .spark.two{left:calc(50% - 92px);right:auto;bottom:158px}
     .dialogue-chip{display:inline-flex;justify-content:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:12px;font-weight:900;box-shadow:0 12px 20px rgba(24,58,102,.12)}
     .sheet{width:100%;padding:14px;border-radius:26px 26px 22px 22px;background:rgba(255,255,255,.98);border:1px solid rgba(255,255,255,.8);box-shadow:0 -16px 30px rgba(24,58,102,.18)}
     .sheet-handle{width:48px;height:5px;margin:0 auto 12px;border-radius:999px;background:#d5edf9}
@@ -238,20 +239,20 @@
       #app{padding:10px 10px 12px}
       .hero{min-height:236px}
       .tutorial{padding:14px 12px 14px}
-      .guide-tap{margin-top:18px}
-      .tutorial .character-stage{min-height:388px}
+      .guide-tap{margin-top:10px}
+      .tutorial .character-stage{min-height:380px}
       .bubble{width:min(100%,218px)}
-      .tutorial .bubble{left:6px;width:min(100%,246px);padding:16px 18px 18px}
+      .tutorial .bubble{top:-8px;left:50%;transform:translateX(-50%);width:min(100%,246px);padding:16px 18px 18px}
       .tutorial .bubble p{font-size:16px;line-height:1.5}
       .bubble.celebrate{width:min(100%,226px);padding:14px 16px 15px}
       .bubble.celebrate p{font-size:14px}
       .character{width:min(100%,196px)}
-      .tutorial .character{right:4px;bottom:28px;width:min(100%,210px)}
+      .tutorial .character{left:50%;right:auto;bottom:42px;width:min(100%,204px);transform:translateX(-50%);animation:bobCenter 4.2s ease-in-out infinite}
       .character.celebrate{width:min(100%,196px)}
       .character-stage.celebrate{min-height:286px}
-      .tutorial .spark.one{right:14px;top:104px}
-      .tutorial .spark.two{right:60px;bottom:142px}
-      .dialogue-actions{left:12px;bottom:14px;width:min(calc(100% - 24px),194px)}
+      .tutorial .spark.one{left:calc(50% + 66px);right:auto;top:102px}
+      .tutorial .spark.two{left:calc(50% - 78px);right:auto;bottom:134px}
+      .dialogue-actions{left:50%;bottom:14px;width:min(calc(100% - 24px),168px);transform:translateX(-50%)}
       .character-stage.celebrate .spark.one{left:calc(50% - 98px);top:76px}
       .character-stage.celebrate .spark.two{left:calc(50% + 70px);bottom:80px}
       .quest-sheet-wrap{padding:8px 8px 6px}
@@ -452,7 +453,7 @@
     }
 
     function renderTutorial() {
-      return `<div class="overlay tutorial"><div class="dim"></div><div class="guide-tap" data-action="tutorial-next">${renderGuideStage({ label: "산지니 가이드", text: escapeHtml(state.visibleDialogue), typing: state.isTyping, mode: "tutorial" })}</div><div class="dialogue-actions"><div class="dialogue-chip">대화 ${state.activeDialogueIndex + 1} / ${tutorialDialogues.length}</div><button class="btn primary" type="button" data-action="tutorial-next">${state.activeDialogueIndex === tutorialDialogues.length - 1 ? "퀘스트 시작" : "다음"}</button></div></div>`;
+      return `<div class="overlay tutorial"><div class="dim"></div><div class="guide-tap" data-action="tutorial-next">${renderGuideStage({ label: "산지니 가이드", text: escapeHtml(state.visibleDialogue), typing: state.isTyping, mode: "tutorial" })}</div><div class="dialogue-actions"><button class="btn primary" type="button" data-action="tutorial-next">${state.activeDialogueIndex === tutorialDialogues.length - 1 ? "퀘스트 시작" : "다음"}</button></div></div>`;
     }
 
     function renderQuestOverlay() {
@@ -844,6 +845,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
