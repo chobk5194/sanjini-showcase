@@ -81,9 +81,9 @@
     .marker.is-complete .marker-core::before{animation:none;opacity:0}
     .marker.is-disabled{pointer-events:none;opacity:.45}
     .check{position:absolute;right:-2px;top:-2px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffd75f;color:#183a66;font-size:11px;font-weight:900;border:1px solid #fff}
-    .timeline,.memory-grid{display:grid;gap:12px}
+    .timeline,.memory-grid,.achievement-grid{display:grid;gap:12px}
     .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .timeline-item,.memory-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
+    .timeline-item,.memory-card,.achievement-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .timeline-item small{display:block;color:rgba(43,103,179,.72);font-size:11px;font-weight:900;margin-bottom:6px}
     .timeline-item strong{display:block;color:#183a66;font-size:15px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.56;font-weight:700;word-break:keep-all;text-wrap:pretty}
@@ -100,6 +100,16 @@
     .memory-photo img{width:100%;height:100%;display:block;object-fit:cover}
     .memory-note{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.78);color:#183a66;font-size:12.5px;line-height:1.56;font-weight:800;word-break:keep-all;text-wrap:pretty}
     .record-note{margin-top:10px;padding:10px 12px;border-radius:16px;background:#eef9ff;color:#183a66;font-size:11.5px;line-height:1.54;font-weight:800;word-break:keep-all;text-wrap:pretty}
+    .achievement-grid{margin-top:14px}
+    .achievement-card{background:linear-gradient(180deg,rgba(255,248,221,.96),rgba(255,255,255,.96));border-color:rgba(255,223,133,.52)}
+    .achievement-card.is-locked{background:rgba(255,255,255,.76);border-style:dashed;border-color:#cfe7fb;opacity:.72}
+    .achievement-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .achievement-badge,.achievement-state{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em}
+    .achievement-badge{background:#fff7df;color:#183a66}
+    .achievement-state{background:#ebf7ff;color:#2f6fbc}
+    .achievement-state.done{background:#183a66;color:#fff}
+    .achievement-card h3{margin-top:14px;color:#183a66;font-size:15px;line-height:1.18;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .achievement-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.54;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .tabbar{padding:8px;border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 40px rgba(24,58,102,.16);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
     .tab{border:none;border-radius:18px;padding:10px 8px;background:transparent;color:rgba(43,103,179,.78);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .18s ease,color .18s ease,transform .18s ease}
     .tab:hover{transform:translateY(-1px)}
@@ -314,7 +324,7 @@
     const tabMeta = {
       home: { label: "홈", chip: "오늘", title: "오늘 홈" },
       map: { label: "지도", chip: "미션", title: "탐험 지도" },
-      record: { label: "기록", chip: "로그", title: "활동 기록" },
+      record: { label: "기록", chip: "업적", title: "업적 보드" },
       memory: { label: "추억", chip: "보관", title: "추억 보관" }
     };
     const quests = [
@@ -362,6 +372,60 @@
 
     function getQuestMemory(id) {
       return state.questMemories[id] || null;
+    }
+
+    function getAchievements() {
+      const hasMemory = Object.values(state.questMemories).some((memory) => memory && (memory.note || memory.photoData));
+      return [
+        {
+          id: "first-quest",
+          name: "부산대 새내기",
+          badge: "시작",
+          unlocked: state.completedQuestIds.length >= 1,
+          copy: "처음 퀘스트를 달성했어요!",
+          hint: "첫 퀘스트를 완료하면 열려."
+        },
+        {
+          id: "library-achievement",
+          name: "조용한 개척자",
+          badge: "학업",
+          unlocked: state.completedQuestIds.includes("library-explore"),
+          copy: "도서관 탐험을 완료했어요!",
+          hint: "도서관 퀘스트를 완료하면 열려."
+        },
+        {
+          id: "student-center-achievement",
+          name: "학생회관 미식가",
+          badge: "휴식",
+          unlocked: state.completedQuestIds.includes("student-center-lunch"),
+          copy: "학생회관 점심 퀘스트를 달성했어요!",
+          hint: "학생회관 퀘스트를 완료하면 열려."
+        },
+        {
+          id: "geumjeongsan-achievement",
+          name: "금정산 발도장",
+          badge: "탐험",
+          unlocked: state.completedQuestIds.includes("geumjeongsan-walk"),
+          copy: "금정산 산책을 끝냈어요!",
+          hint: "금정산 퀘스트를 완료하면 열려."
+        },
+        {
+          id: "memory-achievement",
+          name: "추억 수집가",
+          badge: "기록",
+          unlocked: hasMemory,
+          copy: "사진이나 메모로 첫 추억을 남겼어요!",
+          hint: "사진이나 메모를 한 번 남기면 열려."
+        },
+        {
+          id: "all-clear-achievement",
+          name: "오늘의 정복자",
+          badge: "완료",
+          unlocked: state.completedQuestIds.length === quests.length,
+          copy: "오늘 미션 3개를 전부 완료했어요!",
+          hint: "오늘 미션 3개를 모두 완료하면 열려."
+        }
+      ];
     }
 
     function clearTyping() {
@@ -436,8 +500,8 @@
     }
 
     function renderRecord() {
-      const items = state.completedQuestIds.map((id) => questById(id)).filter(Boolean);
-      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션 누적 XP.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">오늘 기록</div><div class="title">활동 로그</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><div class="timeline" style="margin-top:14px;">${items.length ? items.map((quest, index) => { const memory = getQuestMemory(quest.id); return `<article class="timeline-item"><small>기록 ${index + 1}</small><strong>${escapeHtml(quest.title)}</strong><p>${escapeHtml(quest.locationLabel)} 미션 완료 · XP +${quest.xpReward}를 획득했다.</p>${memory && memory.note ? `<div class="record-note">메모: ${escapeHtml(memory.note)}</div>` : ""}${memory && memory.photoData ? '<div class="record-note">사진 추억도 함께 남겼어.</div>' : ""}</article>`; }).join("") : '<div class="empty">아직 로그가 비어 있어. 지도에서 첫 미션을 끝내면 여기부터 채워져.</div>'}</div></section></div>`;
+      const achievements = getAchievements();
+      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션 누적 XP.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => `<article class="achievement-card ${achievement.unlocked ? '' : 'is-locked'}"><div class="achievement-top"><div class="achievement-badge">${achievement.badge}</div><div class="achievement-state ${achievement.unlocked ? 'done' : ''}">${achievement.unlocked ? '획득' : '잠금'}</div></div><h3>${achievement.name}</h3><p>${achievement.unlocked ? achievement.copy : achievement.hint}</p></article>`).join("")}</div></section></div>`;
     }
 
     function renderMemory() {
@@ -845,6 +909,7 @@
   </script>
 </body>
 </html>
+
 
 
 
