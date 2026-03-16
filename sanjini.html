@@ -670,7 +670,7 @@
       ];
       const isFinalStep = payload.currentStepIndex === payload.steps.length - 1 && !(step === "xp" && payload.isXpAnimating);
       const buttonLabel = isFinalStep ? "지도 화면으로 돌아가기" : "다음";
-      return `<div class="overlay celebration"><div class="dim"></div><div class="celebration-shell"><div class="confetti-zone">${pieces.map((piece) => `<span class="confetti" style="left:${piece.left};background:${piece.color};animation-delay:${piece.delay};"></span>`).join("")}</div><div class="celebration-panel" data-action="celebration-next">${renderCelebrationCard(payload, step)}</div><div class="celebration-footer">${step === "xp" && payload.isXpAnimating ? `<div class="hint" data-action="celebration-next">한 번 더 누르면 경험치가 즉시 채워져.</div>` : ""}<button class="btn ${isFinalStep ? "secondary" : "primary"}" type="button" data-action="celebration-next">${buttonLabel}</button></div></div></div>`;
+      return `<div class="overlay celebration"><div class="dim"></div><div class="celebration-shell"><div class="confetti-zone">${pieces.map((piece) => `<span class="confetti" style="left:${piece.left};background:${piece.color};animation-delay:${piece.delay};"></span>`).join("")}</div><div class="celebration-panel" data-action="celebration-next">${renderCelebrationCard(payload, step)}</div><div class="celebration-footer"><button class="btn ${isFinalStep ? "secondary" : "primary"}" type="button" data-action="celebration-next">${buttonLabel}</button></div></div></div>`;
     }
 
     function renderOverlay() {
