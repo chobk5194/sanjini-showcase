@@ -36,6 +36,8 @@
     .meta-group{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .meta-chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.84);color:#2f6fbc;font-size:12px;font-weight:900}
     #app{position:relative;z-index:2;height:calc(100% - 88px);padding:12px 14px 14px}
+    .frame-inner.is-splash .shell-top{opacity:0;transform:translateY(-16px);pointer-events:none}
+    .frame-inner.is-splash #app{height:100%;padding:0}
     .layout{height:100%;display:flex;flex-direction:column;gap:12px}
     .screen{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:28px;border:1px solid rgba(255,255,255,.64);background:rgba(255,255,255,.14)}
     .scroll{height:100%;overflow-y:auto;padding:12px 12px 18px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}
@@ -52,6 +54,19 @@
     .hero-label{display:inline-flex;width:fit-content;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.14em}
     .hero-title{margin-top:6px;font-family:"Do Hyeon",sans-serif;font-size:38px;line-height:.96;letter-spacing:-.04em}
     .hero-copy{margin-top:10px;max-width:228px;color:rgba(255,255,255,.9);font-size:13px;line-height:1.56;font-weight:700;word-break:keep-all;text-wrap:pretty}
+    .hero.hero-plain{background:linear-gradient(180deg,#183a66,#2c5fa4 52%,#77d3ff)}
+    .hero.hero-plain::before{content:"";position:absolute;right:-24px;top:-22px;width:148px;height:148px;border-radius:50%;background:rgba(255,255,255,.14);filter:blur(2px)}
+    .hero.hero-plain::after{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(10,26,56,.18) 42%,rgba(10,26,56,.46))}
+    .hero.hero-plain .hero-copy{max-width:210px}
+    .hero-stat{display:inline-flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:20px;background:rgba(255,255,255,.14);backdrop-filter:blur(10px)}
+    .hero-stat small{color:rgba(255,255,255,.72);font-size:10px;font-weight:900;letter-spacing:.16em}
+    .hero-stat strong{color:#fff;font-size:22px;font-weight:900}
+    .splash-screen{position:relative;width:100%;height:100%;padding:0;border:none;background:#10274a;cursor:pointer;overflow:hidden}
+    .splash-screen img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top;transform:scale(1.03)}
+    .splash-screen::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,20,42,.12),rgba(8,20,42,.28) 42%,rgba(8,20,42,.86))}
+    .splash-copy{position:absolute;left:22px;right:22px;bottom:28px;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+    .splash-hint{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:999px;background:rgba(255,255,255,.92);color:#183a66;font-size:14px;font-weight:900;box-shadow:0 16px 28px rgba(8,20,42,.22)}
+    .splash-note{color:rgba(255,255,255,.78);font-size:11.5px;line-height:1.45;font-weight:800;letter-spacing:.08em}
     .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .mini-card{padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .mini-card small{display:block;color:rgba(43,103,179,.7);font-size:11px;font-weight:900;letter-spacing:.16em;margin-bottom:8px}
@@ -355,6 +370,7 @@
       { id: "geumjeongsan-walk", title: "금정산 산책", description: "금정산 쪽으로 걸으며 바깥 공기를 느껴 보자.", locationLabel: "금정산", category: "탐험", xpReward: 40, memoryTitle: "금정산 산책길", memoryDescription: "바깥 공기를 담은 탐험 기록.", top: "26%", left: "72%" }
     ];
     const state = {
+      showSplash: true,
       currentTab: "home",
       overlay: null,
       achievementFilter: "all",
@@ -378,6 +394,7 @@
     const frameTitle = document.getElementById("frameTitle");
     const frameLevel = document.getElementById("frameLevel");
     const frameStreak = document.getElementById("frameStreak");
+    const frameInner = document.querySelector(".frame-inner");
 
     let typingTimer = null;
     let toastTimer = null;
@@ -521,15 +538,22 @@
     }
 
     function renderTabs() {
+      if (state.showSplash) {
+        return "";
+      }
       const disabled = state.overlay !== null;
       return `<nav class="tabbar">${Object.entries(tabMeta).map(([id, tab]) => `<button class="tab ${state.currentTab === id ? "active" : ""}" type="button" data-action="tab" data-tab="${id}" ${disabled ? "disabled" : ""}><span class="tab-chip">${tab.chip}</span><span class="tab-label">${tab.label}</span></button>`).join("")}</nav>`;
+    }
+
+    function renderSplash() {
+      return `<button class="splash-screen" type="button" data-action="start-app"><img src="sanjini-poster.png" alt="산지니 원정대 포스터" /><div class="splash-copy"><div class="splash-hint">터치해서 시작</div><div class="splash-note">포스터 화면을 닫고 홈으로 이동</div></div></button>`;
     }
 
     function renderHome() {
       const completeCount = state.completedQuestIds.length;
       const featured = quests.find((quest) => !state.completedQuestIds.includes(quest.id)) || quests[quests.length - 1];
       const progress = Math.max(xpIntoLevel(state.xpTotal), 6);
-      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 기록</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">오늘 퀘스트와 성취.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>진행 중.</p></article><article class="mini-card"><small>스트릭</small><strong>${state.streakCount}일</strong><p>오늘 첫 완료.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP</p></section><section class="card feature"><small>추천 퀘스트</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">장소: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
+      return `<div class="scroll"><section class="hero hero-plain"><div class="hero-body"><div><div class="hero-label">오늘의 캠퍼스</div><div class="hero-title">오늘의 원정</div><p class="hero-copy">가볍게 탐험을 시작해 보자.</p></div><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;"><div class="hero-stat"><small>남은 미션</small><strong>${quests.length - completeCount}개</strong></div><div style="max-width:178px;width:100%;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>진행 중.</p></article><article class="mini-card"><small>스트릭</small><strong>${state.streakCount}일</strong><p>오늘 첫 완료.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP</p></section><section class="card feature"><small>추천 퀘스트</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">장소: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
     }
 
     function renderMarkers(locked) {
@@ -664,6 +688,9 @@
     }
 
     function renderCurrent() {
+      if (state.showSplash) {
+        return renderSplash();
+      }
       if (state.currentTab === "home") {
         return renderHome();
       }
@@ -678,6 +705,7 @@
 
     function render() {
       setFrameMeta();
+      frameInner.classList.toggle("is-splash", state.showSplash);
       app.innerHTML = `<div class="layout"><div class="screen">${renderToast()}${renderCurrent()}${renderOverlay()}</div>${renderTabs()}</div>`;
       bind();
     }
@@ -738,6 +766,14 @@
         return;
       }
       state.achievementFilter = nextFilter;
+      render();
+    }
+
+    function startApp() {
+      if (!state.showSplash) {
+        return;
+      }
+      state.showSplash = false;
       render();
     }
 
@@ -934,6 +970,10 @@
     }
 
     function bind() {
+      const splashButton = app.querySelector('[data-action="start-app"]');
+      if (splashButton) {
+        splashButton.onclick = startApp;
+      }
       app.querySelectorAll('[data-action="tab"]').forEach((button) => {
         button.onclick = () => changeTab(button.dataset.tab);
       });
