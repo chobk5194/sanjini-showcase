@@ -82,13 +82,14 @@
     .marker.is-disabled{pointer-events:none;opacity:.45}
     .check{position:absolute;right:-2px;top:-2px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffd75f;color:#183a66;font-size:11px;font-weight:900;border:1px solid #fff}
     .timeline,.memory-grid,.achievement-grid{display:grid;gap:12px}
-    .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .memory-grid{grid-template-columns:minmax(0,1fr);gap:14px}
     .timeline-item,.memory-card,.achievement-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .timeline-item small{display:block;color:rgba(43,103,179,.72);font-size:11px;font-weight:900;margin-bottom:6px}
     .timeline-item strong{display:block;color:#183a66;font-size:15px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.56;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .memory-card::before{content:"";position:absolute;inset:0 0 auto;height:86px;background:linear-gradient(180deg,rgba(78,182,255,.2),transparent)}
     .memory-card>*{position:relative}
+    .memory-card{padding:18px}
     .memory-card.is-locked{opacity:.62;background:rgba(255,255,255,.72)}
     .memory-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .memory-badge,.memory-state{padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900}
