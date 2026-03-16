@@ -18,11 +18,11 @@
     .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}
     .eyebrow::before{content:"";width:30px;height:1px;background:currentColor}
     .copy h1{margin-top:18px;font-family:"Do Hyeon",sans-serif;font-size:clamp(3rem,5vw,4.8rem);line-height:.92;letter-spacing:-.04em}
-    .copy p{margin-top:18px;color:rgba(247,251,255,.78);font-size:15px;line-height:1.9;font-weight:700}
+    .copy p{margin-top:18px;color:rgba(247,251,255,.78);font-size:14px;line-height:1.72;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .copy-grid{display:grid;gap:12px;margin-top:22px}
     .copy-card{padding:18px;border-radius:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
     .copy-card strong{display:block;font-size:14px;margin-bottom:6px}
-    .copy-card span{display:block;color:rgba(247,251,255,.74);font-size:13px;line-height:1.75;font-weight:700}
+    .copy-card span{display:block;color:rgba(247,251,255,.74);font-size:12.5px;line-height:1.62;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .copy-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}
     .metric{padding:16px 14px;border-radius:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);text-align:center}
     .metric small{display:block;font-size:11px;letter-spacing:.14em;color:rgba(247,251,255,.72);margin-bottom:8px;font-weight:900}
@@ -43,20 +43,20 @@
     .card{border-radius:28px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .panel{padding:18px}
     .tag{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:#ebf7ff;color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.12em}
-    .title{margin-top:12px;color:#183a66;font-size:22px;line-height:1.1;font-weight:900}
-    .copy-text{margin-top:10px;color:rgba(43,103,179,.84);font-size:14px;line-height:1.75;font-weight:700}
+    .title{margin-top:12px;color:#183a66;font-size:20px;line-height:1.05;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .copy-text{margin-top:10px;color:rgba(43,103,179,.84);font-size:13px;line-height:1.58;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .hero{position:relative;min-height:258px;border-radius:30px;overflow:hidden;box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .hero img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,22,48,.08),rgba(8,22,48,.18) 38%,rgba(8,22,48,.72))}
     .hero-body{position:absolute;inset:0;z-index:1;padding:18px;display:flex;flex-direction:column;justify-content:space-between}
     .hero-label{display:inline-flex;width:fit-content;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:#2f6fbc;font-size:11px;font-weight:900;letter-spacing:.14em}
     .hero-title{margin-top:6px;font-family:"Do Hyeon",sans-serif;font-size:38px;line-height:.96;letter-spacing:-.04em}
-    .hero-copy{margin-top:10px;max-width:240px;color:rgba(255,255,255,.9);font-size:14px;line-height:1.7;font-weight:700}
+    .hero-copy{margin-top:10px;max-width:228px;color:rgba(255,255,255,.9);font-size:13px;line-height:1.56;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .mini-card{padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.78);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .mini-card small{display:block;color:rgba(43,103,179,.7);font-size:11px;font-weight:900;letter-spacing:.16em;margin-bottom:8px}
     .mini-card strong{color:#183a66;font-size:26px;font-weight:900}
-    .mini-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.7;font-weight:700}
+    .mini-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.54;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .progress-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .pill-stat{padding:10px 12px;border-radius:20px;background:#ebf7ff;color:#2f6fbc;font-size:12px;font-weight:900;min-width:88px;text-align:right}
     .pill-stat strong{display:block;color:#183a66;font-size:18px;margin-top:4px}
@@ -64,8 +64,8 @@
     .xp-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#4bb6ff,#ffd75f);transition:width .24s ease}
     .feature{padding:18px;background:linear-gradient(180deg,#173862,#1f4a7e);color:#fff}
     .feature small{display:block;color:#a9dbff;font-size:11px;letter-spacing:.16em;font-weight:900;margin-bottom:10px}
-    .feature h3{font-size:22px;line-height:1.15;font-weight:900}
-    .feature p{margin-top:10px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.86);font-weight:700}
+    .feature h3{font-size:20px;line-height:1.08;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .feature p{margin-top:10px;font-size:13px;line-height:1.58;color:rgba(255,255,255,.86);font-weight:700;word-break:keep-all;text-wrap:pretty}
     .feature .loc{display:inline-flex;margin-top:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:900}
     .map-shell{height:100%;padding:0}
     .map-stage{position:relative;aspect-ratio:9/14;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.72);background:linear-gradient(180deg,#d6efff,#f6fdff)}
@@ -85,8 +85,8 @@
     .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     .timeline-item,.memory-card{position:relative;padding:16px;border-radius:24px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.76);box-shadow:0 20px 40px rgba(24,58,102,.16)}
     .timeline-item small{display:block;color:rgba(43,103,179,.72);font-size:11px;font-weight:900;margin-bottom:6px}
-    .timeline-item strong{display:block;color:#183a66;font-size:16px;font-weight:900}
-    .timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.72;font-weight:700}
+    .timeline-item strong{display:block;color:#183a66;font-size:15px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .timeline-item p,.memory-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.56;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .memory-card::before{content:"";position:absolute;inset:0 0 auto;height:86px;background:linear-gradient(180deg,rgba(78,182,255,.2),transparent)}
     .memory-card>*{position:relative}
     .memory-card.is-locked{opacity:.62;background:rgba(255,255,255,.72)}
@@ -95,11 +95,11 @@
     .memory-badge{background:#ebf7ff;color:#2f6fbc}
     .memory-state{background:rgba(255,255,255,.86);color:#2f6fbc}
     .memory-state.done{background:rgba(255,215,95,.9);color:#183a66}
-    .memory-card h3{margin-top:14px;color:#183a66;font-size:16px;line-height:1.3;font-weight:900}
+    .memory-card h3{margin-top:14px;color:#183a66;font-size:15px;line-height:1.2;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .memory-photo{margin-top:14px;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:#dcebfb;box-shadow:0 14px 26px rgba(24,58,102,.12)}
     .memory-photo img{width:100%;height:100%;display:block;object-fit:cover}
-    .memory-note{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.78);color:#183a66;font-size:13px;line-height:1.7;font-weight:800}
-    .record-note{margin-top:10px;padding:10px 12px;border-radius:16px;background:#eef9ff;color:#183a66;font-size:12px;line-height:1.68;font-weight:800}
+    .memory-note{margin-top:12px;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.78);color:#183a66;font-size:12.5px;line-height:1.56;font-weight:800;word-break:keep-all;text-wrap:pretty}
+    .record-note{margin-top:10px;padding:10px 12px;border-radius:16px;background:#eef9ff;color:#183a66;font-size:11.5px;line-height:1.54;font-weight:800;word-break:keep-all;text-wrap:pretty}
     .tabbar{padding:8px;border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 40px rgba(24,58,102,.16);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
     .tab{border:none;border-radius:18px;padding:10px 8px;background:transparent;color:rgba(43,103,179,.78);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .18s ease,color .18s ease,transform .18s ease}
     .tab:hover{transform:translateY(-1px)}
@@ -153,8 +153,8 @@
     .sheet-handle{width:48px;height:5px;margin:0 auto 12px;border-radius:999px;background:#d5edf9}
     .sheet-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
     .sheet-chip{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:999px;background:#fff7df;color:#183a66;font-size:11px;font-weight:900;letter-spacing:.08em}
-    .sheet h3{margin-top:10px;color:#183a66;font-size:23px;line-height:1.14;font-weight:900}
-    .sheet-copy{margin-top:8px;color:rgba(43,103,179,.84);font-size:13px;line-height:1.64;font-weight:700}
+    .sheet h3{margin-top:10px;color:#183a66;font-size:21px;line-height:1.08;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sheet-copy{margin-top:8px;color:rgba(43,103,179,.84);font-size:12.5px;line-height:1.52;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .sheet-meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
     .sheet-meta-card{padding:10px 12px;border-radius:16px;background:#fff7df;color:#183a66}
     .sheet-meta-card small{display:block;color:rgba(43,103,179,.72);font-size:10px;letter-spacing:.12em;font-weight:900}
@@ -166,7 +166,7 @@
     .capture-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .capture-head h4{color:#183a66;font-size:15px;font-weight:900}
     .capture-pill{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;background:#fff;color:#2f6fbc;font-size:10px;font-weight:900;letter-spacing:.08em}
-    .capture-copy{margin-top:6px;color:rgba(43,103,179,.82);font-size:12px;line-height:1.58;font-weight:700}
+    .capture-copy{margin-top:6px;color:rgba(43,103,179,.82);font-size:11.5px;line-height:1.48;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .capture-grid{display:grid;gap:12px;margin-top:14px}
     .capture-grid.compact{grid-template-columns:108px minmax(0,1fr);gap:8px;margin-top:10px;align-items:stretch}
     .upload-label{display:flex;align-items:center;justify-content:center;min-height:132px;padding:14px;border-radius:22px;border:1.5px dashed #9bcdf6;background:rgba(255,255,255,.86);cursor:pointer;text-align:center;color:#2f6fbc;font-size:13px;line-height:1.65;font-weight:900}
@@ -182,7 +182,7 @@
     .memo-field{width:100%;min-height:108px;padding:14px 16px;border-radius:20px;border:1px solid #cfe7fb;background:rgba(255,255,255,.94);color:#183a66;font:inherit;font-size:14px;line-height:1.7;resize:none}
     .memo-field.compact{min-height:96px;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.58}
     .memo-field::placeholder{color:rgba(43,103,179,.5)}
-    .helper-note{margin-top:8px;color:rgba(43,103,179,.76);font-size:11px;font-weight:800}
+    .helper-note{margin-top:8px;color:rgba(43,103,179,.76);font-size:10.5px;line-height:1.45;font-weight:800;word-break:keep-all;text-wrap:pretty}
     .celebration-shell{position:relative;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px}
     .celebration-panel{position:relative}
     .confetti-zone{position:absolute;inset:0 0 auto;height:112px;overflow:hidden;pointer-events:none}
@@ -197,15 +197,15 @@
     .celebration-art img{position:relative;z-index:1;width:100%;display:block;filter:drop-shadow(0 16px 22px rgba(24,58,102,.14))}
     .celebration-copy{min-width:0}
     .celebration-bubble{padding:10px 12px;border-radius:18px;background:#eef9ff;color:#183a66;font-size:13px;line-height:1.5;font-weight:900}
-    .celebration-title{margin-top:10px;color:#183a66;font-size:20px;line-height:1.16;font-weight:900}
-    .celebration-text{margin-top:6px;color:rgba(43,103,179,.82);font-size:13px;line-height:1.58;font-weight:700}
+    .celebration-title{margin-top:10px;color:#183a66;font-size:18px;line-height:1.08;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .celebration-text{margin-top:6px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.48;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .celebration-box{margin-top:10px;padding:12px;border-radius:18px;background:#eef9ff}
     .celebration-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
     .celebration-cell{padding:10px 12px;border-radius:16px;background:#fff;box-shadow:0 10px 18px rgba(24,58,102,.08)}
     .celebration-cell small{display:block;color:rgba(43,103,179,.7);font-size:10px;letter-spacing:.12em;font-weight:900}
     .celebration-cell strong{display:block;margin-top:4px;color:#183a66;font-size:22px;font-weight:900}
-    .celebration-note{margin-top:8px;color:rgba(43,103,179,.82);font-size:12px;line-height:1.55;font-weight:700}
-    .celebration-pill-note{margin-top:8px;padding:10px 12px;border-radius:16px;background:#183a66;color:#fff;font-size:12px;line-height:1.5;font-weight:900}
+    .celebration-note{margin-top:8px;color:rgba(43,103,179,.82);font-size:11.5px;line-height:1.45;font-weight:700;word-break:keep-all;text-wrap:pretty}
+    .celebration-pill-note{margin-top:8px;padding:10px 12px;border-radius:16px;background:#183a66;color:#fff;font-size:11.5px;line-height:1.42;font-weight:900;word-break:keep-all;text-wrap:pretty}
     .celebration-strip{margin-top:10px;padding:12px;border-radius:18px;background:linear-gradient(180deg,#fff7df,#fff0b8);border:1px solid rgba(255,255,255,.76)}
     .celebration-strip.dark{background:linear-gradient(180deg,#183a66,#24538d);border:none;color:#fff}
     .celebration-strip small{display:block;font-size:10px;letter-spacing:.12em;font-weight:900;color:rgba(43,103,179,.72)}
@@ -215,7 +215,7 @@
     .celebration-footer{display:grid;gap:8px}
     .celebration-footer .btn{min-height:44px;padding:10px 12px;font-size:14px}
     .hint{display:flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:999px;background:rgba(255,255,255,.14);font-size:12px;font-weight:900;color:rgba(255,255,255,.84)}
-    .empty{padding:18px;border-radius:24px;background:rgba(255,255,255,.82);border:1px dashed #c5e6fb;color:rgba(43,103,179,.82);font-size:14px;line-height:1.78;font-weight:700}
+    .empty{padding:18px;border-radius:24px;background:rgba(255,255,255,.82);border:1px dashed #c5e6fb;color:rgba(43,103,179,.82);font-size:13px;line-height:1.58;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:20;padding:12px 16px;border-radius:999px;background:rgba(13,25,48,.9);color:#fff;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 16px 28px rgba(9,18,35,.24);animation:toastIn .22s ease}
     @keyframes markerPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.75);opacity:0}}
     @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -277,11 +277,11 @@
     <section class="copy">
       <div class="eyebrow">App Style Showcase</div>
       <h1>산지니 원정대</h1>
-      <p>설명형 데모가 아니라 실제 앱을 옮겨놓은 듯한 정적 쇼케이스로 구성했다. 고정 폰 비율 안에서 홈, 지도, 기록, 추억 탭이 전환되고 첫 지도 진입에는 튜토리얼, 모든 퀘스트 완료에는 단계형 XP 축하 오버레이가 뜬다.</p>
+      <p>설명형 데모보다 앱 감각에 집중했다. 고정 폰 프레임 안에서 홈, 지도, 기록, 추억이 전환되고 첫 지도 진입에는 튜토리얼, 완료 뒤에는 보상 오버레이가 이어진다.</p>
       <div class="copy-grid">
-        <div class="copy-card"><strong>고정 폰 비율</strong><span>화면이 바뀌어도 프레임 높이는 유지되고 내부 스크린과 오버레이만 전환된다.</span></div>
-        <div class="copy-card"><strong>홈 · 지도 · 기록 · 추억</strong><span>하단 탭 구조로 앱 정보구조를 그대로 드러내고 지도 탭은 첫 진입에만 튜토리얼을 보여준다.</span></div>
-        <div class="copy-card"><strong>단계형 보상 흐름</strong><span>퀘스트 완료 후 미션 성공, 경험치, 연속 기록, 전체 완료 축하를 한 단계씩 넘기며 확인한다.</span></div>
+        <div class="copy-card"><strong>고정 폰 비율</strong><span>화면이 바뀌어도 프레임 높이는 유지되고 내부 화면만 바뀐다.</span></div>
+        <div class="copy-card"><strong>홈 · 지도 · 기록 · 추억</strong><span>하단 탭 구조를 유지하고 지도 첫 진입 때만 튜토리얼이 열린다.</span></div>
+        <div class="copy-card"><strong>단계형 보상 흐름</strong><span>퀘스트 완료 후 미션 성공, 경험치, 스트릭, 올클리어 축하를 한 단계씩 넘기며 확인한다.</span></div>
       </div>
       <div class="copy-metrics">
         <div class="metric"><small>탭</small><strong>4</strong></div>
@@ -312,15 +312,15 @@
       "오늘의 퀘스트를 확인해볼까?"
     ];
     const tabMeta = {
-      home: { label: "홈", chip: "오늘", title: "오늘의 홈" },
+      home: { label: "홈", chip: "오늘", title: "오늘 홈" },
       map: { label: "지도", chip: "미션", title: "탐험 지도" },
       record: { label: "기록", chip: "로그", title: "활동 기록" },
-      memory: { label: "추억", chip: "보관", title: "추억 보관함" }
+      memory: { label: "추억", chip: "보관", title: "추억 보관" }
     };
     const quests = [
-      { id: "library-explore", title: "도서관 탐험", description: "오늘 도서관에 가서 공부 인증을 남기고 조용한 집중 시간을 완성해 보자.", locationLabel: "도서관", category: "학업", xpReward: 40, memoryTitle: "조용한 오후의 도서관", memoryDescription: "책 냄새와 함께 오늘의 집중 시간을 기록했다.", top: "37%", left: "32%" },
-      { id: "student-center-lunch", title: "학생회관 점심 미션", description: "학생회관에서 오늘의 메뉴를 먹고 잠깐 쉬어 가며 캠퍼스 리듬을 채워 보자.", locationLabel: "학생회관", category: "휴식", xpReward: 40, memoryTitle: "학생회관에서 보낸 점심", memoryDescription: "바쁜 하루 속에서도 캠퍼스의 여유를 챙긴 한 장면.", top: "66%", left: "51%" },
-      { id: "geumjeongsan-walk", title: "금정산 산책", description: "금정산 쪽으로 걸어가며 캠퍼스 바깥 풍경과 공기를 천천히 느껴 보자.", locationLabel: "금정산", category: "탐험", xpReward: 40, memoryTitle: "금정산으로 이어지는 길", memoryDescription: "캠퍼스의 끝에서 새로운 풍경을 발견한 탐험 기록.", top: "26%", left: "72%" }
+      { id: "library-explore", title: "도서관 탐험", description: "도서관에서 공부 인증을 남기고 조용히 집중해 보자.", locationLabel: "도서관", category: "학업", xpReward: 40, memoryTitle: "도서관 오후", memoryDescription: "조용한 집중 시간을 남긴 기록.", top: "37%", left: "32%" },
+      { id: "student-center-lunch", title: "학생회관 점심", description: "학생회관에서 점심을 먹고 잠깐 쉬어 가자.", locationLabel: "학생회관", category: "휴식", xpReward: 40, memoryTitle: "학생회관 점심", memoryDescription: "점심과 휴식을 남긴 기록.", top: "66%", left: "51%" },
+      { id: "geumjeongsan-walk", title: "금정산 산책", description: "금정산 쪽으로 걸으며 바깥 공기를 느껴 보자.", locationLabel: "금정산", category: "탐험", xpReward: 40, memoryTitle: "금정산 산책길", memoryDescription: "바깥 공기를 담은 탐험 기록.", top: "26%", left: "72%" }
     ];
     const state = {
       currentTab: "home",
@@ -420,7 +420,7 @@
       const completeCount = state.completedQuestIds.length;
       const featured = quests.find((quest) => !state.completedQuestIds.includes(quest.id)) || quests[quests.length - 1];
       const progress = Math.max(xpIntoLevel(state.xpTotal), 6);
-      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 캠퍼스 RPG</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">캠퍼스 활동을 미션처럼 기록하고 오늘의 탐험을 작은 성취로 쌓아 가는 앱.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>오늘의 캠퍼스 미션을 한 칸씩 채우는 중.</p></article><article class="mini-card"><small>연속 기록</small><strong>${state.streakCount}일</strong><p>매일의 캠퍼스 활동이 개인용 RPG 로그처럼 이어진다.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP 남았어.</p></section><section class="card feature"><small>오늘의 추천 미션</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">위치: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
+      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 기록</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">캠퍼스 활동을 미션처럼 기록하고 오늘의 성취를 쌓는 앱.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>오늘 미션을 하나씩 채우는 중.</p></article><article class="mini-card"><small>스트릭</small><strong>${state.streakCount}일</strong><p>매일의 활동이 작은 로그로 남아.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP 남았어.</p></section><section class="card feature"><small>추천 퀘스트</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">장소: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
     }
 
     function renderMarkers(locked) {
@@ -437,14 +437,14 @@
 
     function renderRecord() {
       const items = state.completedQuestIds.map((id) => questById(id)).filter(Boolean);
-      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 캠퍼스 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션에 획득한 누적 경험치.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">기록 타임라인</div><div class="title">오늘의 활동 로그</div></div><div class="pill-stat">연속 기록<strong>${state.streakCount}일</strong></div></div><div class="timeline" style="margin-top:14px;">${items.length ? items.map((quest, index) => { const memory = getQuestMemory(quest.id); return `<article class="timeline-item"><small>완료 기록 ${index + 1}</small><strong>${escapeHtml(quest.title)}</strong><p>${escapeHtml(quest.locationLabel)}에서 활동을 완료했고 XP +${quest.xpReward}를 획득했다.</p>${memory && memory.note ? `<div class="record-note">메모: ${escapeHtml(memory.note)}</div>` : ""}${memory && memory.photoData ? '<div class="record-note">사진 추억도 함께 남겼어.</div>' : ""}</article>`; }).join("") : '<div class="empty">아직 오늘의 로그가 비어 있어. 지도 탭으로 이동해 첫 번째 미션을 완료하면 기록이 타임라인처럼 쌓이기 시작한다.</div>'}</div></section></div>`;
+      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션 누적 XP.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">오늘 기록</div><div class="title">활동 로그</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><div class="timeline" style="margin-top:14px;">${items.length ? items.map((quest, index) => { const memory = getQuestMemory(quest.id); return `<article class="timeline-item"><small>기록 ${index + 1}</small><strong>${escapeHtml(quest.title)}</strong><p>${escapeHtml(quest.locationLabel)} 미션 완료 · XP +${quest.xpReward}를 획득했다.</p>${memory && memory.note ? `<div class="record-note">메모: ${escapeHtml(memory.note)}</div>` : ""}${memory && memory.photoData ? '<div class="record-note">사진 추억도 함께 남겼어.</div>' : ""}</article>`; }).join("") : '<div class="empty">아직 로그가 비어 있어. 지도에서 첫 미션을 끝내면 여기부터 채워져.</div>'}</div></section></div>`;
     }
 
     function renderMemory() {
-      return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관함</div><div class="title">캠퍼스 스크랩</div><p class="copy-text">완료한 미션은 사진과 한 줄 메모가 담긴 추억 카드로 남고 아직 가지 못한 장소는 잠긴 상태로 기다린다.</p></section><section class="memory-grid">${quests.map((quest) => {
+      return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관</div><div class="title">캠퍼스 추억</div><p class="copy-text">완료한 미션은 사진과 메모 카드로 남고, 미완료 장소는 잠겨 있어.</p></section><section class="memory-grid">${quests.map((quest) => {
         const done = state.completedQuestIds.includes(quest.id);
         const memory = getQuestMemory(quest.id);
-        return `<article class="memory-card ${done ? "" : "is-locked"}"><div class="memory-top"><div class="memory-badge">${escapeHtml(quest.locationLabel)}</div><div class="memory-state ${done ? "done" : ""}">${done ? "보관 완료" : "잠금"}</div></div><h3>${escapeHtml(quest.memoryTitle)}</h3>${done && memory && memory.photoData ? `<div class="memory-photo"><img src="${memory.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 사진" /></div>` : ""}<p>${done ? escapeHtml(quest.memoryDescription) : "아직 이 장소의 추억은 비어 있어. 오늘의 미션을 완료하면 이 카드가 열릴 거야."}</p>${done && memory && memory.note ? `<div class="memory-note">${escapeHtml(memory.note)}</div>` : done ? '<div class="memory-note">메모 없이도 오늘의 발자국은 추억으로 남아 있어.</div>' : ""}</article>`;
+        return `<article class="memory-card ${done ? "" : "is-locked"}"><div class="memory-top"><div class="memory-badge">${escapeHtml(quest.locationLabel)}</div><div class="memory-state ${done ? "done" : ""}">${done ? "보관 완료" : "잠금"}</div></div><h3>${escapeHtml(quest.memoryTitle)}</h3>${done && memory && memory.photoData ? `<div class="memory-photo"><img src="${memory.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 사진" /></div>` : ""}<p>${done ? escapeHtml(quest.memoryDescription) : "아직 비어 있는 추억이야. 오늘 미션을 끝내면 열려."}</p>${done && memory && memory.note ? `<div class="memory-note">${escapeHtml(memory.note)}</div>` : done ? '<div class="memory-note">메모 없이도 오늘 기록은 남아 있어.</div>' : ""}</article>`;
       }).join("")}</section></div>`;
     }
 
@@ -464,8 +464,8 @@
       const draft = getQuestDraft(quest.id);
       const photoTile = draft.photoData
         ? `<label class="upload-tile has-photo"><img src="${draft.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 미리보기" /><span class="upload-chip">다른 사진</span><span class="upload-badge">${escapeHtml(draft.photoName || "사진 선택 완료")}</span><input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`
-        : `<label class="upload-tile">사진 업로드하기<br />짧은 순간도 추억 카드에 남겨보자.<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`;
-      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="sheet-meta-grid"><div class="sheet-meta-card"><small>오늘의 위치</small><strong>${escapeHtml(quest.locationLabel)}</strong></div><div class="sheet-meta-card"><small>완료 보상</small><strong>+${quest.xpReward} XP</strong></div></div><div class="capture-box"><div class="capture-head"><h4>오늘의 추억</h4><span class="capture-pill">선택 저장</span></div><p class="capture-copy">사진이나 메모를 남기면 기록 탭과 추억 카드에 같이 남아.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">사진과 메모는 현재 브라우저 세션에서만 유지돼.</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
+        : `<label class="upload-tile">사진 올리기<br />짧은 순간도 남겨 보자.<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`;
+      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="sheet-meta-grid"><div class="sheet-meta-card"><small>위치</small><strong>${escapeHtml(quest.locationLabel)}</strong></div><div class="sheet-meta-card"><small>보상</small><strong>+${quest.xpReward} XP</strong></div></div><div class="capture-box"><div class="capture-head"><h4>추억 기록</h4><span class="capture-pill">선택 저장</span></div><p class="capture-copy">사진이나 메모를 남기면 기록과 추억 카드에 같이 저장돼.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">사진과 메모는 현재 세션에만 남아.</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
     }
 
     function renderCelebrationCard(payload, step) {
@@ -475,13 +475,13 @@
       }
       const bubbleText =
         step === "mission" ? "와! 퀘스트를 완료했어!" :
-        step === "xp" ? "경험치가 쌓이고 있어!" :
-        step === "streak" ? "오늘도 기록 성공!" :
-        "오늘의 미션 전부 성공!";
+        step === "xp" ? "XP가 오르고 있어!" :
+        step === "streak" ? "스트릭 달성!" :
+        "오늘 미션 완료!";
       const badgeLabel =
-        step === "xp" ? "경험치 보상" :
-        step === "streak" ? "연속 기록" :
-        step === "allClear" ? "전체 완료" :
+        step === "xp" ? "XP 보상" :
+        step === "streak" ? "스트릭" :
+        step === "allClear" ? "올클리어" :
         "미션 성공";
       const chipLabel = step === "allClear" ? "3개 완료" : escapeHtml(quest.locationLabel);
       let detail = `<h4 class="celebration-title">${escapeHtml(quest.title)}</h4><p class="celebration-text">${escapeHtml(quest.locationLabel)} 미션 완료. 산지니가 오늘의 탐험을 칭찬하고 있어.</p>`;
@@ -493,10 +493,10 @@
         detail = `<h4 class="celebration-title">+${payload.xpEarned} XP</h4><div class="celebration-box"><div class="celebration-grid"><div class="celebration-cell"><small>획득 XP</small><strong>+${payload.xpEarned}</strong></div><div class="celebration-cell"><small>현재 레벨</small><strong>${level}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="celebration-note">누적 XP ${state.animatedXp} · 다음 레벨까지 ${100 - xpIntoLevel(state.animatedXp)} XP</p>${leveledUp ? `<div class="celebration-pill-note">레벨 업! 이제 레벨 ${finalLevel} 탐험가야.</div>` : ""}</div>`;
       }
       if (step === "streak") {
-        detail = `<h4 class="celebration-title">오늘도 기록 성공!</h4><div class="celebration-strip"><small>연속 기록 보상</small><strong>첫 완료 성공. 연속 ${payload.streakCountAfter}일 달성</strong></div>`;
+        detail = `<h4 class="celebration-title">스트릭 달성!</h4><div class="celebration-strip"><small>스트릭 보상</small><strong>첫 완료 보상 · 연속 ${payload.streakCountAfter}일</strong></div>`;
       }
       if (step === "allClear") {
-        detail = `<h4 class="celebration-title">오늘의 미션 전부 성공!</h4><div class="celebration-strip dark"><small>오늘의 미션 전부 성공</small><strong>세 개의 캠퍼스 미션을 모두 완료했어.</strong></div><p class="celebration-text">오늘 하루의 활동이 기록과 추억 탭에 모두 남았어.</p>`;
+        detail = `<h4 class="celebration-title">오늘 미션 완료!</h4><div class="celebration-strip dark"><small>오늘의 미션 전부 성공</small><strong>세 미션을 모두 완료했어.</strong></div><p class="celebration-text">오늘 기록과 추억 카드가 모두 채워졌어.</p>`;
       }
       return `<section class="card celebration-card"><div class="celebration-top"><div class="celebration-badge">${badgeLabel}</div><div class="celebration-chip">${chipLabel}</div></div><div class="celebration-main"><div class="celebration-art"><img src="main_character.png" alt="산지니 캐릭터" /></div><div class="celebration-copy"><div class="celebration-bubble">${bubbleText}</div>${detail}</div></div></section>`;
     }
@@ -518,7 +518,7 @@
       ];
       const isFinalStep = payload.currentStepIndex === payload.steps.length - 1 && !(step === "xp" && payload.isXpAnimating);
       const buttonLabel = isFinalStep ? "지도 화면으로 돌아가기" : "다음";
-      const hintText = step === "xp" && payload.isXpAnimating ? "한 번 더 누르면 경험치가 즉시 채워져." : "한 번 터치해서 다음 화면으로 넘어가기";
+      const hintText = step === "xp" && payload.isXpAnimating ? "한 번 더 누르면 경험치가 즉시 채워져." : "한 번 눌러 다음으로 이동";
       return `<div class="overlay celebration"><div class="dim"></div><div class="celebration-shell"><div class="confetti-zone">${pieces.map((piece) => `<span class="confetti" style="left:${piece.left};background:${piece.color};animation-delay:${piece.delay};"></span>`).join("")}</div><div class="celebration-panel" data-action="celebration-next">${renderCelebrationCard(payload, step)}</div><div class="celebration-footer"><div class="hint" data-action="celebration-next">${hintText}</div><button class="btn ${isFinalStep ? "secondary" : "primary"}" type="button" data-action="celebration-next">${buttonLabel}</button></div></div></div>`;
     }
 
@@ -845,6 +845,7 @@
   </script>
 </body>
 </html>
+
 
 
 
