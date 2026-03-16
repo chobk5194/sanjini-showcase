@@ -499,10 +499,10 @@
       return `<div class="map-shell"><section class="map-stage full"><img src="campus-map.png" alt="캠퍼스 지도" />${renderMarkers(state.overlay === "tutorial")}</section></div>`;
     }
 
-    function renderRecord() {
-      const achievements = getAchievements();
-      return `<div class="scroll"><section class="mini-grid"><article class="mini-card"><small>완료</small><strong>${state.completedQuestIds.length}</strong><p>오늘 완료한 미션 수.</p></article><article class="mini-card"><small>XP</small><strong>${state.xpTotal}</strong><p>이번 세션 누적 XP.</p></article></section><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => `<article class="achievement-card ${achievement.unlocked ? '' : 'is-locked'}"><div class="achievement-top"><div class="achievement-badge">${achievement.badge}</div><div class="achievement-state ${achievement.unlocked ? 'done' : ''}">${achievement.unlocked ? '획득' : '잠금'}</div></div><h3>${achievement.name}</h3><p>${achievement.unlocked ? achievement.copy : achievement.hint}</p></article>`).join("")}</div></section></div>`;
-    }
+function renderRecord() {
+  const achievements = getAchievements();
+  return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => `<article class="achievement-card ${achievement.unlocked ? '' : 'is-locked'}"><div class="achievement-top"><div class="achievement-badge">${achievement.badge}</div><div class="achievement-state ${achievement.unlocked ? 'done' : ''}">${achievement.unlocked ? '획득' : '잠금'}</div></div><h3>${achievement.name}</h3><p>${achievement.unlocked ? achievement.copy : achievement.hint}</p></article>`).join("")}</div></section></div>`;
+}
 
     function renderMemory() {
       return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관</div><div class="title">캠퍼스 추억</div><p class="copy-text">완료한 미션은 사진과 메모 카드로 남고, 미완료 장소는 잠겨 있어.</p></section><section class="memory-grid">${quests.map((quest) => {
