@@ -113,6 +113,10 @@
     .achievement-state.done{background:#183a66;color:#fff}
     .achievement-card h3{margin-top:14px;color:#183a66;font-size:15px;line-height:1.18;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .achievement-card p{margin-top:8px;color:rgba(43,103,179,.82);font-size:12.5px;line-height:1.54;font-weight:700;word-break:keep-all;text-wrap:pretty}
+    .achievement-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+    .achievement-filter{border:none;min-height:40px;padding:10px 8px;border-radius:16px;background:rgba(238,249,255,.92);color:#2f6fbc;font-family:inherit;font-size:11.5px;font-weight:900;letter-spacing:-.02em;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+    .achievement-filter:hover{transform:translateY(-1px)}
+    .achievement-filter.active{background:#183a66;color:#fff;box-shadow:0 12px 22px rgba(24,58,102,.18)}
     .tabbar{padding:8px;border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 40px rgba(24,58,102,.16);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
     .tab{border:none;border-radius:18px;padding:10px 8px;background:transparent;color:rgba(43,103,179,.78);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .18s ease,color .18s ease,transform .18s ease}
     .tab:hover{transform:translateY(-1px)}
@@ -338,6 +342,7 @@
     const state = {
       currentTab: "home",
       overlay: null,
+      achievementFilter: "all",
       selectedQuestId: null,
       activeDialogueIndex: 0,
       xpTotal: 0,
@@ -526,13 +531,26 @@
 
     function renderRecord() {
       const achievements = getAchievements();
-      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => {
+      const visibleAchievements = achievements.filter((achievement) => {
+        if (state.achievementFilter === "done") {
+          return achievement.unlocked;
+        }
+        if (state.achievementFilter === "locked") {
+          return !achievement.unlocked;
+        }
+        return true;
+      });
+      const emptyCopy =
+        state.achievementFilter === "done" ? "아직 달성한 업적이 없어. 첫 퀘스트부터 시작해 보자." :
+        state.achievementFilter === "locked" ? "남은 업적이 없어. 지금은 전부 달성한 상태야." :
+        "표시할 업적이 아직 없어.";
+      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-filters"><button class="achievement-filter ${state.achievementFilter === "done" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="done">달성 업적</button><button class="achievement-filter ${state.achievementFilter === "locked" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="locked">미달성 업적</button><button class="achievement-filter ${state.achievementFilter === "all" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="all">전체보기</button></div>${visibleAchievements.length ? `<div class="achievement-grid">${visibleAchievements.map((achievement) => {
         const isSecretLocked = achievement.hidden && !achievement.unlocked;
         const badge = isSecretLocked ? "??" : achievement.badge;
         const name = isSecretLocked ? "숨겨진 업적" : achievement.name;
         const copy = isSecretLocked ? "특별한 플레이를 하면 정체가 드러나." : achievement.unlocked ? achievement.copy : achievement.hint;
         return `<article class="achievement-card ${achievement.unlocked ? "" : "is-locked"} ${achievement.hidden ? "is-secret" : ""}"><div class="achievement-top"><div class="achievement-badge">${badge}</div><div class="achievement-state ${achievement.unlocked ? "done" : ""}">${achievement.unlocked ? "획득" : "잠금"}</div></div><h3>${name}</h3><p>${copy}</p></article>`;
-      }).join("")}</div></section></div>`;
+      }).join("")}</div>` : `<div class="empty">${emptyCopy}</div>`}</section></div>`;
     }
 
     function renderMemory() {
@@ -697,6 +715,14 @@
       }
       state.currentTab = nextTab;
       state.selectedQuestId = null;
+      render();
+    }
+
+    function setAchievementFilter(nextFilter) {
+      if (!nextFilter || state.achievementFilter === nextFilter) {
+        return;
+      }
+      state.achievementFilter = nextFilter;
       render();
     }
 
@@ -902,6 +928,9 @@
       }
       app.querySelectorAll('[data-action="quest"]').forEach((button) => {
         button.onclick = () => selectQuest(button.dataset.id);
+      });
+      app.querySelectorAll('[data-action="achievement-filter"]').forEach((button) => {
+        button.onclick = () => setAchievementFilter(button.dataset.filter);
       });
       app.querySelectorAll('[data-action="tutorial-next"]').forEach((element) => {
         element.onclick = (event) => {
