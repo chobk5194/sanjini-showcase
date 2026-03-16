@@ -103,9 +103,12 @@
     .achievement-grid{margin-top:14px}
     .achievement-card{background:linear-gradient(180deg,rgba(255,248,221,.96),rgba(255,255,255,.96));border-color:rgba(255,223,133,.52)}
     .achievement-card.is-locked{background:rgba(255,255,255,.76);border-style:dashed;border-color:#cfe7fb;opacity:.72}
+    .achievement-card.is-secret.is-locked{background:linear-gradient(180deg,rgba(238,245,255,.94),rgba(255,255,255,.86));border-color:rgba(47,111,188,.18)}
+    .achievement-card.is-secret.is-locked::after{content:"?";position:absolute;right:16px;bottom:8px;color:rgba(24,58,102,.08);font-size:42px;line-height:1;font-weight:900}
     .achievement-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .achievement-badge,.achievement-state{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em}
     .achievement-badge{background:#fff7df;color:#183a66}
+    .achievement-card.is-secret.is-locked .achievement-badge{background:rgba(24,58,102,.08);color:#456b9c}
     .achievement-state{background:#ebf7ff;color:#2f6fbc}
     .achievement-state.done{background:#183a66;color:#fff}
     .achievement-card h3{margin-top:14px;color:#183a66;font-size:15px;line-height:1.18;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -375,7 +378,11 @@
     }
 
     function getAchievements() {
-      const hasMemory = Object.values(state.questMemories).some((memory) => memory && (memory.note || memory.photoData));
+      const memories = Object.values(state.questMemories).filter(Boolean);
+      const savedMemories = memories.filter((memory) => (memory.note && memory.note.trim()) || memory.photoData);
+      const hasMemory = savedMemories.length > 0;
+      const hasPhotoAndNote = memories.some((memory) => memory.photoData && memory.note && memory.note.trim());
+      const allMemoriesSaved = state.completedQuestIds.length === quests.length && savedMemories.length === quests.length;
       return [
         {
           id: "first-quest",
@@ -418,12 +425,30 @@
           hint: "사진이나 메모를 한 번 남기면 열려."
         },
         {
+          id: "detail-achievement",
+          name: "기록 덕후",
+          badge: "디테일",
+          hidden: true,
+          unlocked: hasPhotoAndNote,
+          copy: "사진과 메모를 함께 남긴 첫 기록이에요!",
+          hint: "특별한 방식으로 기록하면 정체가 드러나."
+        },
+        {
           id: "all-clear-achievement",
           name: "오늘의 정복자",
           badge: "완료",
           unlocked: state.completedQuestIds.length === quests.length,
           copy: "오늘 미션 3개를 전부 완료했어요!",
           hint: "오늘 미션 3개를 모두 완료하면 열려."
+        },
+        {
+          id: "archive-achievement",
+          name: "캠퍼스 아카이비스트",
+          badge: "완벽",
+          hidden: true,
+          unlocked: allMemoriesSaved,
+          copy: "모든 미션에 추억 기록을 남겼어요!",
+          hint: "꼼꼼하게 탐험을 마무리하면 열릴지도 몰라."
         }
       ];
     }
@@ -499,10 +524,16 @@
       return `<div class="map-shell"><section class="map-stage full"><img src="campus-map.png" alt="캠퍼스 지도" />${renderMarkers(state.overlay === "tutorial")}</section></div>`;
     }
 
-function renderRecord() {
-  const achievements = getAchievements();
-  return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => `<article class="achievement-card ${achievement.unlocked ? '' : 'is-locked'}"><div class="achievement-top"><div class="achievement-badge">${achievement.badge}</div><div class="achievement-state ${achievement.unlocked ? 'done' : ''}">${achievement.unlocked ? '획득' : '잠금'}</div></div><h3>${achievement.name}</h3><p>${achievement.unlocked ? achievement.copy : achievement.hint}</p></article>`).join("")}</div></section></div>`;
-}
+    function renderRecord() {
+      const achievements = getAchievements();
+      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-grid">${achievements.map((achievement) => {
+        const isSecretLocked = achievement.hidden && !achievement.unlocked;
+        const badge = isSecretLocked ? "??" : achievement.badge;
+        const name = isSecretLocked ? "숨겨진 업적" : achievement.name;
+        const copy = isSecretLocked ? "특별한 플레이를 하면 정체가 드러나." : achievement.unlocked ? achievement.copy : achievement.hint;
+        return `<article class="achievement-card ${achievement.unlocked ? "" : "is-locked"} ${achievement.hidden ? "is-secret" : ""}"><div class="achievement-top"><div class="achievement-badge">${badge}</div><div class="achievement-state ${achievement.unlocked ? "done" : ""}">${achievement.unlocked ? "획득" : "잠금"}</div></div><h3>${name}</h3><p>${copy}</p></article>`;
+      }).join("")}</div></section></div>`;
+    }
 
     function renderMemory() {
       return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관</div><div class="title">캠퍼스 추억</div><p class="copy-text">완료한 미션은 사진과 메모 카드로 남고, 미완료 장소는 잠겨 있어.</p></section><section class="memory-grid">${quests.map((quest) => {
