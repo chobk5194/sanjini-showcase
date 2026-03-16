@@ -287,6 +287,14 @@
       .celebration-text,.celebration-note,.celebration-pill-note{font-size:12px}
       .celebration-cell strong{font-size:20px}
     }
+    .sub-window{margin-top:18px;padding:16px;border-radius:24px;background:rgba(13,25,48,.08);border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.24)}
+    .sub-window-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .sub-window-head strong{color:#183a66;font-size:13px;font-weight:900;letter-spacing:.08em}
+    .sub-window-chip{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.72);color:#2f6fbc;font-size:10px;font-weight:900;letter-spacing:.1em}
+    .sub-window-list{display:grid;gap:10px;margin-top:14px}
+    .sub-window-item{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.72)}
+    .sub-window-item strong{display:block;color:#183a66;font-size:13px;font-weight:900}
+    .sub-window-item span{display:block;margin-top:4px;color:rgba(43,103,179,.82);font-size:12px;line-height:1.5;font-weight:700}
   </style>
 </head>
 <body>
@@ -295,11 +303,17 @@
     <section class="copy">
       <div class="eyebrow">App Style Showcase</div>
       <h1>산지니 원정대</h1>
-      <p>설명형 데모보다 앱 감각에 집중했다. 고정 폰 프레임 안에서 홈, 지도, 기록, 추억이 전환되고 첫 지도 진입에는 튜토리얼, 완료 뒤에는 보상 오버레이가 이어진다.</p>
-      <div class="copy-grid">
-        <div class="copy-card"><strong>고정 폰 비율</strong><span>화면이 바뀌어도 프레임 높이는 유지되고 내부 화면만 바뀐다.</span></div>
-        <div class="copy-card"><strong>홈 · 지도 · 기록 · 추억</strong><span>하단 탭 구조를 유지하고 지도 첫 진입 때만 튜토리얼이 열린다.</span></div>
-        <div class="copy-card"><strong>단계형 보상 흐름</strong><span>퀘스트 완료 후 미션 성공, 경험치, 스트릭, 올클리어 축하를 한 단계씩 넘기며 확인한다.</span></div>
+      <p>캠퍼스 RPG 기록 앱 프로토타입.</p>
+      <div class="sub-window">
+        <div class="sub-window-head">
+          <strong>서브 윈도우</strong>
+          <span class="sub-window-chip">Flow</span>
+        </div>
+        <div class="sub-window-list">
+          <div class="sub-window-item"><strong>미션</strong><span>지도에서 퀘스트를 열고 진행한다.</span></div>
+          <div class="sub-window-item"><strong>보상</strong><span>완료하면 XP와 업적이 반영된다.</span></div>
+          <div class="sub-window-item"><strong>보관</strong><span>사진과 메모는 추억 카드에 쌓인다.</span></div>
+        </div>
       </div>
       <div class="copy-metrics">
         <div class="metric"><small>탭</small><strong>4</strong></div>
@@ -515,7 +529,7 @@
       const completeCount = state.completedQuestIds.length;
       const featured = quests.find((quest) => !state.completedQuestIds.includes(quest.id)) || quests[quests.length - 1];
       const progress = Math.max(xpIntoLevel(state.xpTotal), 6);
-      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 기록</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">캠퍼스 활동을 미션처럼 기록하고 오늘의 성취를 쌓는 앱.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>오늘 미션을 하나씩 채우는 중.</p></article><article class="mini-card"><small>스트릭</small><strong>${state.streakCount}일</strong><p>매일의 활동이 작은 로그로 남아.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP 남았어.</p></section><section class="card feature"><small>추천 퀘스트</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">장소: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
+      return `<div class="scroll"><section class="hero"><img src="sanjini-poster.png" alt="산지니 원정대 홈 배경" /><div class="hero-body"><div class="hero-label">오늘의 기록</div><div><div class="hero-title">산지니 원정대</div><p class="hero-copy">오늘 퀘스트와 성취.</p><div style="margin-top:14px;max-width:178px;"><button class="btn primary" type="button" data-action="open-map">오늘의 미션 열기</button></div></div></div></section><section class="mini-grid"><article class="mini-card"><small>미션 진행도</small><strong>${completeCount} / ${quests.length}</strong><p>진행 중.</p></article><article class="mini-card"><small>스트릭</small><strong>${state.streakCount}일</strong><p>오늘 첫 완료.</p></article></section><section class="card panel"><div class="progress-head"><div><div class="tag">레벨과 성장</div><div class="title">레벨 ${getLevel(state.xpTotal)}</div></div><div class="pill-stat">누적 XP<strong>${state.xpTotal}</strong></div></div><div class="xp-track"><div class="xp-fill" style="width:${progress}%"></div></div><p class="copy-text">다음 레벨까지 ${100 - xpIntoLevel(state.xpTotal)} XP</p></section><section class="card feature"><small>추천 퀘스트</small><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description)}</p><div class="loc">장소: ${escapeHtml(featured.locationLabel)}</div></section></div>`;
     }
 
     function renderMarkers(locked) {
@@ -545,7 +559,7 @@
         state.achievementFilter === "done" ? "아직 달성한 업적이 없어. 첫 퀘스트부터 시작해 보자." :
         state.achievementFilter === "locked" ? "남은 업적이 없어. 지금은 전부 달성한 상태야." :
         "표시할 업적이 아직 없어.";
-      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">퀘스트와 추억이 쌓일수록 새 업적이 열린다.</p><div class="achievement-filters"><button class="achievement-filter ${state.achievementFilter === "done" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="done">달성 업적</button><button class="achievement-filter ${state.achievementFilter === "locked" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="locked">미달성 업적</button><button class="achievement-filter ${state.achievementFilter === "all" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="all">전체보기</button></div>${visibleAchievements.length ? `<div class="achievement-grid">${visibleAchievements.map((achievement) => {
+      return `<div class="scroll"><section class="card panel"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div><div class="tag">업적 보드</div><div class="title">오늘의 업적</div></div><div class="pill-stat">스트릭<strong>${state.streakCount}일</strong></div></div><p class="copy-text">업적 보관함.</p><div class="achievement-filters"><button class="achievement-filter ${state.achievementFilter === "done" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="done">달성 업적</button><button class="achievement-filter ${state.achievementFilter === "locked" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="locked">미달성 업적</button><button class="achievement-filter ${state.achievementFilter === "all" ? "active" : ""}" type="button" data-action="achievement-filter" data-filter="all">전체보기</button></div>${visibleAchievements.length ? `<div class="achievement-grid">${visibleAchievements.map((achievement) => {
         const isSecretLocked = achievement.hidden && !achievement.unlocked;
         const badge = isSecretLocked ? "??" : achievement.badge;
         const name = isSecretLocked ? "숨겨진 업적" : achievement.name;
@@ -555,7 +569,7 @@
     }
 
     function renderMemory() {
-      return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관</div><div class="title">캠퍼스 추억</div><p class="copy-text">완료한 미션은 사진과 메모 카드로 남고, 미완료 장소는 잠겨 있어.</p></section><section class="memory-grid">${quests.map((quest) => {
+      return `<div class="scroll"><section class="card panel"><div class="tag">추억 보관</div><div class="title">캠퍼스 추억</div><p class="copy-text">사진과 메모 보관함.</p></section><section class="memory-grid">${quests.map((quest) => {
         const done = state.completedQuestIds.includes(quest.id);
         const memory = getQuestMemory(quest.id);
         return `<article class="memory-card ${done ? "" : "is-locked"}"><div class="memory-top"><div class="memory-badge">${escapeHtml(quest.locationLabel)}</div><div class="memory-state ${done ? "done" : ""}">${done ? "보관 완료" : "잠금"}</div></div><h3>${escapeHtml(quest.memoryTitle)}</h3>${done && memory && memory.photoData ? `<div class="memory-photo"><img src="${memory.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 사진" /></div>` : ""}<p>${done ? escapeHtml(quest.memoryDescription) : "아직 비어 있는 추억이야. 오늘 미션을 끝내면 열려."}</p>${done && memory && memory.note ? `<div class="memory-note">${escapeHtml(memory.note)}</div>` : done ? '<div class="memory-note">메모 없이도 오늘 기록은 남아 있어.</div>' : ""}</article>`;
@@ -579,7 +593,7 @@
       const photoTile = draft.photoData
         ? `<label class="upload-tile has-photo"><img src="${draft.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 미리보기" /><span class="upload-chip">다른 사진</span><span class="upload-badge">${escapeHtml(draft.photoName || "사진 선택 완료")}</span><input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`
         : `<label class="upload-tile">사진 올리기<br />짧은 순간도 남겨 보자.<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`;
-      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="sheet-meta-grid"><div class="sheet-meta-card"><small>위치</small><strong>${escapeHtml(quest.locationLabel)}</strong></div><div class="sheet-meta-card"><small>보상</small><strong>+${quest.xpReward} XP</strong></div></div><div class="capture-box"><div class="capture-head"><h4>추억 기록</h4><span class="capture-pill">선택 저장</span></div><p class="capture-copy">사진이나 메모를 남기면 기록과 추억 카드에 같이 저장돼.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">사진과 메모는 현재 세션에만 남아.</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
+      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="sheet-meta-grid"><div class="sheet-meta-card"><small>위치</small><strong>${escapeHtml(quest.locationLabel)}</strong></div><div class="sheet-meta-card"><small>보상</small><strong>+${quest.xpReward} XP</strong></div></div><div class="capture-box"><div class="capture-head"><h4>추억 기록</h4><span class="capture-pill">선택 저장</span></div><p class="capture-copy">사진이나 메모 저장.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">세션 저장</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
     }
 
     function renderCelebrationCard(payload, step) {
