@@ -188,17 +188,12 @@
     .sheet-chip{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:999px;background:#fff7df;color:#183a66;font-size:11px;font-weight:900;letter-spacing:.08em}
     .sheet h3{margin-top:10px;color:#183a66;font-size:21px;line-height:1.08;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sheet-copy{margin-top:8px;color:rgba(43,103,179,.84);font-size:12.5px;line-height:1.52;font-weight:700;word-break:keep-all;text-wrap:pretty}
-    .sheet-meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
-    .sheet-meta-card{padding:10px 12px;border-radius:16px;background:#fff7df;color:#183a66}
-    .sheet-meta-card small{display:block;color:rgba(43,103,179,.72);font-size:10px;letter-spacing:.12em;font-weight:900}
-    .sheet-meta-card strong{display:block;margin-top:4px;font-size:14px;font-weight:900}
     .stack{display:grid;gap:10px;margin-top:18px}
     .stack.compact{grid-template-columns:minmax(0,1fr) 88px;gap:8px;margin-top:12px}
     .stack.compact .btn{min-height:44px;padding:10px 12px;font-size:14px}
     .capture-box{margin-top:12px;padding:12px;border-radius:18px;background:#eef9ff;border:1px solid #d7efff}
     .capture-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .capture-head h4{color:#183a66;font-size:15px;font-weight:900}
-    .capture-pill{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;background:#fff;color:#2f6fbc;font-size:10px;font-weight:900;letter-spacing:.08em}
     .capture-copy{margin-top:6px;color:rgba(43,103,179,.82);font-size:11.5px;line-height:1.48;font-weight:700;word-break:keep-all;text-wrap:pretty}
     .capture-grid{display:grid;gap:12px;margin-top:14px}
     .capture-grid.compact{grid-template-columns:108px minmax(0,1fr);gap:8px;margin-top:10px;align-items:stretch}
@@ -617,7 +612,7 @@
       const photoTile = draft.photoData
         ? `<label class="upload-tile has-photo"><img src="${draft.photoData}" alt="${escapeHtml(quest.locationLabel)} 추억 미리보기" /><span class="upload-chip">다른 사진</span><span class="upload-badge">${escapeHtml(draft.photoName || "사진 선택 완료")}</span><input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`
         : `<label class="upload-tile">사진 올리기<br />짧은 순간도 남겨 보자.<input type="file" accept="image/*" data-action="memory-photo" data-id="${quest.id}" /></label>`;
-      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="sheet-meta-grid"><div class="sheet-meta-card"><small>위치</small><strong>${escapeHtml(quest.locationLabel)}</strong></div><div class="sheet-meta-card"><small>보상</small><strong>+${quest.xpReward} XP</strong></div></div><div class="capture-box"><div class="capture-head"><h4>추억 기록</h4><span class="capture-pill">선택 저장</span></div><p class="capture-copy">사진이나 메모 저장.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">세션 저장</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
+      return `<div class="overlay quest-sheet-wrap"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="tag">${escapeHtml(quest.locationLabel)}</div><div class="sheet-chip">+${quest.xpReward} XP</div></div><h3>${escapeHtml(quest.title)}</h3><p class="sheet-copy">${escapeHtml(quest.description)}</p><div class="capture-box"><div class="capture-head"><h4>추억 기록</h4></div><p class="capture-copy">사진이나 메모 저장.</p><div class="capture-grid compact">${photoTile}<textarea class="memo-field compact" data-action="memory-note" data-id="${quest.id}" placeholder="예: 학생회관에서 친구랑 점심 먹고 잠깐 쉬었다.">${escapeHtml(draft.note)}</textarea></div><div class="helper-note">세션 저장</div></div><div class="stack compact"><button class="btn primary" type="button" data-action="complete">퀘스트 완료</button><button class="btn secondary" type="button" data-action="close">닫기</button></div></div></div>`;
     }
 
     function renderCelebrationCard(payload, step) {
@@ -636,7 +631,7 @@
         step === "allClear" ? "올클리어" :
         "미션 성공";
       const chipLabel = step === "allClear" ? "3개 완료" : escapeHtml(quest.locationLabel);
-      let detail = `<h4 class="celebration-title">${escapeHtml(quest.title)}</h4><p class="celebration-text">${escapeHtml(quest.locationLabel)} 미션 완료. 산지니가 오늘의 탐험을 칭찬하고 있어.</p>`;
+      let detail = `<h4 class="celebration-title">${escapeHtml(quest.title)}</h4><p class="celebration-text">산지니가 오늘의 탐험을 칭찬하고 있어.</p>`;
       if (step === "xp") {
         const level = getLevel(state.animatedXp);
         const finalLevel = getLevel(payload.nextXp);
